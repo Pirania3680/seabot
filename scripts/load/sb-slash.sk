@@ -225,6 +225,8 @@ on load:
 
     set {system::cmd-reg-o::archiwum} to newSlash("archiwum", "Otrzymaj link do naszego prywatnego archwium SeaBlocka.")
 
+    set {system::cmd-reg-o::drzwi} to newSlash("drzwi", "XDDD")
+
     set {system::cmd-reg-o::parkowanie} to newSlash("przywróć-parkowanie", "Przywraca całą historię kanału dotyczącego parkowania.")
     add required channel option named "kanał" with description "Podaj kanał który będzie służył do nowego parkowania." to options of {system::cmd-reg-o::parkowanie}
     enable command {system::cmd-reg-o::parkowanie} for administrator

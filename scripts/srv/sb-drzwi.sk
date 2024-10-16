@@ -1,0 +1,4 @@
+on slash command:
+    event-string is "nick"
+
+    reply with "Jak nazywają się drzwi od pomiego?%nl%***POMIDOOR***"
