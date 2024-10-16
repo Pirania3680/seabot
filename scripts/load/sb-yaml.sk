@@ -1,0 +1,9 @@
+on load:
+    load yaml "plugins/Skript/bot-config.yml" as "config"
+    load yaml "plugins/Skript/bot-economy.yml" as "eco"
+    
+    if yaml value "console_prefix" from "config" is set:
+        set {system::prefix} to "%yaml value "console_prefix" from "config"%"
+    else:
+        set {system::prefix} to ""
+    console("&aZaładowano pliki konfiguracyjne (bot-config.yml, bot-economy.yml)")

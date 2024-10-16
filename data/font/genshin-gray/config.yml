@@ -1,0 +1,12 @@
+height: 221
+line: 175
+space: 40
+
+offset-y:
+  '1': 5
+  '2': -2
+  '6': 3
+  '9': 3
+  'slash': 5
+
+offset-x:

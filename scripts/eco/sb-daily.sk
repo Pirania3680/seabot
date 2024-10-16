@@ -1,0 +1,146 @@
+options:
+    file_daily: plugins/Skript/data/gacha/daily/main.png
+    file_claim: plugins/Skript/data/gacha/daily/button-claim.png
+    file_claimed: plugins/Skript/data/gacha/daily/button-claimed.png
+
+on load:
+    load yaml "plugins/Skript/data/gacha/daily.yml" as "daily"
+
+on slash command:
+    event-string is "daily"
+
+    defer the interaction and wait
+
+    set {_id} to discord id of event-user
+
+    dailyAdd({_id}, 1)
+
+    # if {eco::%{_id}%::daily-date} is {_date::1}:
+    #     reply with hidden styleDeny("Odebrałeś już swoje dzisiejsze daily.")
+    #     stop
+    
+    set {eco::%{_id}%::daily-date} to {_date::1}
+    gachaCurrency("+", {_id}, "primo", {_reward})
+
+    create a new message and store it in {_msg}:
+        add embedDaily() to the embeds of the message
+        add imageDaily({_id}, dailyCheck({_id})) to the attachments of the message
+        add rowDaily({_id}) to rows of the message
+
+    reply with {_msg}
+
+on button click:
+    if discord id of event-button starts with "daily-claim::":
+        defer the interaction
+
+        set {_parse::*} to discord id of event-button parsed as "daily-claim::%string%"
+        set {_id} to discord id of event-user
+
+        if {_parse::1} is not {_id}:
+            reply with hidden styleDeny("Ten przycisk nie należy do twojej interakcji.")
+            stop
+        
+        loop dailyCheck({_id}):
+            add 1 to {_loop}
+            if loop-value is 1:
+                set {_reward} to yaml value "daily_reward_%{_loop}%" from "daily"
+                add {_reward} to {_all}
+
+                gachaCurrency("+", {_id}, "primo", {_reward})
+
+                set {eco::%{_id}%::daily::%{_loop}%} to 2
+        
+        create a new message and store it in {_msg}:
+            add embedDaily() to the embeds of the message
+            add imageDaily({_id}, dailyCheck({_id})) to the attachments of the message
+            add rowDaily({_id}) to rows of the message
+
+        edit event-message to show {_msg}
+
+every 1 minute:
+    if "%now%" contains "00:00":
+        loop {cache::*}:
+            delete {eco::%loop-index%::daily::*}
+            delete {eco::%loop-index%::daily-progress::*}
+
+    
+
+function embedDaily() :: embedbuilder:
+    make embed:
+        set title of embed to "Status twoich dziennych zadań:"
+        set image of embed to "attachment://image1.png"
+    return last embed
+
+function rowDaily(id: string) :: row:
+    make new component row and store it in {_row}:
+        add new secondary button with id "daily-claim::%{_id}%" named "🎁 Odbierz nagrody" to components of the row builder
+    return {_row}
+
+function imageDaily(id: string, list: numbers) :: image:
+    set {_height} to 60
+
+    set {_image} to new image with size 1678, 771 #1748, 862
+    draw image from file "{@file_daily}" on {_image} at 0, 0
+
+    set {_button::1} to "{@file_claim}"
+    set {_button::2} to "{@file_claimed}"
+
+    loop {_list::*}:
+        set {_loop} to loop-index parsed as number
+
+        if loop-value is 0:
+            set {_progress} to {eco::%{_id}%::daily-progress::%{_loop}%}
+            set {_max} to yaml value "daily_required_%{_loop}%" from "daily"
+            set {_stabilize} to 12
+
+            set {_adding} to fontGenerate("genshin", 38, 3, "%{_progress} ? 0%/%{_max} ? 0%")
+        
+        else:
+            set {_adding} to image from file "%{_button::%loop-value%}%"
+            set {_stabilize} to 0
+        
+        set {_width} to width of {_adding}
+        set {_line} to ceil(1408 + ((214 - {_width}) / 2))
+        draw {_adding} on {_image} at {_line}, ({_height} + {_stabilize})
+
+        add 198 to {_height}
+    
+    return {_image}
+
+
+
+function dailyCheck(id: string) :: numbers:
+    loop 4 times:
+        add ({eco::%{_id}%::daily::%loop-number%} ? 0) to {_return::*}
+    return {_return::*}
+
+function dailyAdd(id: string, type: number):
+    if {eco::%{_id}%::daily::%{_type}%} is not 1 or 2:
+        add 1 to {eco::%{_id}%::daily-progress::%{_type}%}
+        if {eco::%{_id}%::daily-progress::%{_type}%} >= yaml value "daily_required_%{_type}%" from "daily":
+            set {eco::%{_id}%::daily::%{_type}%} to 1
+
+            ecoEvent({_id}, "daily", {_type})
+            loop dailyCheck({_id}):
+                if loop-value is not 1 or 2:
+                    stop
+            ecoEvent({_id}, "daily-all", 0)
+
+# EVENTY WYWOŁAWCZE
+
+# Daily #0 - blessing (cokolwiek)
+# trochę wyżej
+
+# Daily #1 - wyślij 10 wiadomości
+on message receive:
+    dailyAdd(discord id of event-user, 2)
+
+# Daily #2 - wbij na kanał głosowy
+on member voice channel join:
+    dailyAdd(discord id of event-user, 3)
+
+# Daily #3 - wykonaj pracę
+# w skrypcie sb-work.sk
+
+# Daily # 4
+# nieznane

@@ -1,0 +1,33 @@
+on slash command:
+    event-string is "nick"
+
+    set {_nick} to argument "nick" as string
+
+    discord id of event-guild is "%yaml value "server" from "config"%"
+
+    if {_nick} contain " ":
+        reply with hidden styleDeny("Twój nick nie może zawierać spacji.")
+        stop
+    
+    if {_nick} contain "|":
+        reply with hidden styleDeny("Twój nick zawiera niedozwolony znak (`|`).")
+        stop
+    
+    if length of "Gracz | %{_nick}%" > 32:
+        reply with hidden styleDeny("Twój nick przekacza limit długości Discorda. Wybierz inny.")
+        stop
+    
+    set {_bad::*} to yaml list "bad_words" from "config"
+    loop {_bad::*}:
+        if {_nick} contain loop-value:
+            reply with hidden styleDeny("Twój nick posiada obraźliwe słowa. Wybierz inny.")
+            stop
+    
+    defer the interaction and wait
+    
+    set {_current} to nickname of event-member
+    set {_parse::*} to {_current} parsed as "%string% \| %string%"
+
+    set nickname of event-member to "%{_parse::1}% | %{_nick}%"
+
+    reply with styleReady("Twój nick został zmieniony na **%{_nick}%**.")

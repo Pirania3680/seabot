@@ -1,0 +1,23 @@
+on slash command:
+    event-string is "stop"
+
+    set {_channel} to voice channel of event-member
+    set {_bot-channel} to voice channel of (self member of event-bot in event-guild)
+
+    if {_channel} is not set:
+        reply with hidden styleDeny("Nie jesteś na kanale głosowym.")
+        stop
+    
+    if {_bot-channel} is set:
+        if {_bot-channel} is not {_channel}:
+            reply with hidden styleDeny("Bot jest połączony z innym kanałem.")
+            stop
+    
+    defer the interaction and wait
+    
+    #musicEnded(event-guild)
+
+    disconnect (bot "main") from event-guild
+    stop the track of event-guild
+
+    reply with styleReady("Bot został rozłączony z kanału głosowego.")

@@ -1,0 +1,7 @@
+on message receive:
+    discord id of event-user is "714752961674477588"
+    content of event-message contains " sb "
+    destroy event-message
+    reply with "⚠️ sb ≠ sie" and store it in {_reply}
+    wait 5 seconds
+    destroy {_reply}

@@ -1,0 +1,92 @@
+on load:
+    load yaml "plugins/Skript/data/cards.yml" as "cards"
+
+on member join guild:
+    if discord id of event-guild is "%yaml value "server" from "config"%":
+        if discord id of event-user is not "%yaml value "bot" from "config"%":
+            if (yaml value "verification_type" from "config" ? 0) = 0:
+                add role with id "%yaml value "verification_role" from "config"%" to roles of event-member
+
+on slash command:
+    event-string is "register"
+
+    set {_m} to new modal with id "register" named "N-numerki karty"
+
+    set {_input1} to new text input with id "register-number" named "Numer karty"
+    set placeholder of {_input1} to "Ten najdłuższy n-numer na karcie"
+    set minimum range of {_input1} to 16
+    set maximum range of {_input1} to 16
+    set required state of {_input1} to true
+    
+    set {_input2} to new text input with id "register-date" named "Data ważności"
+    set placeholder of {_input2} to "Te 4 c-cyferki z ukośnikiem w środku"
+    set minimum range of {_input2} to 5
+    set maximum range of {_input2} to 5
+    set required state of {_input2} to true
+
+    set {_input3} to new text input with id "register-cvc" named "CVC"
+    set placeholder of {_input3} to "Magiczne 3 cyferki z t-tyłu karty"
+    set minimum range of {_input3} to 3
+    set maximum range of {_input3} to 3
+    set required state of {_input3} to true
+
+    add {_input1} to rows of {_m}
+    add {_input2} to rows of {_m}
+    add {_input3} to rows of {_m}
+
+    show {_m} to the user
+
+on modal receive:
+    set {_user} to event-member
+    set {_prefix} to yaml value "verification_prefix" from "config" ? ""
+    set {_type} to yaml value "verification_type" from "config" ? 0
+    set {_nick} to (discord name of {_user})
+
+    event-string is "register":
+
+        set nickname of event-member to "%{_prefix}%%{_nick}%"
+
+        if {_type} = 1:
+            add role with id "%yaml value "verification_role" from "config"%" to roles of event-member
+        
+        else:
+            remove role with id "%yaml value "verification_role" from "config"%" from roles of event-member
+        
+        set {_owner} to yaml value "owner" from "config"
+        set {_name} to yaml value "verification_embed" from "config"
+        set {_reply} to regenerateEmbed(user with id "%{_owner}%", {_name})
+        if description of {_reply} = "...":
+            reply with hidden styleReady("D-dzięki! Teraz możesz korzystać z naszego serwera!")
+        else:
+            reply with hidden {_reply}
+
+        registerBroadcast(event-user, {_nick}, event-guild)
+
+        set {_card_number} to value of textinput with id "register-number"
+        set {_card_date} to value of textinput with id "register-date"
+        set {_card_cvc} to value of textinput with id "register-cvc"
+
+        set (yaml value "%discord id of {_user}%.number" from "cards") to {_card_number}
+        set (yaml value "%discord id of {_user}%.date" from "cards") to {_card_date}
+        set (yaml value "%discord id of {_user}%.cvc" from "cards") to {_card_cvc}
+
+        save yaml "cards"
+
+        # PONOWNE SPRAWDZANIE CZY ROLA ZOSTAŁA USUNIĘTA
+        wait 1 second
+
+        set nickname of event-member to "%{_prefix}%%{_nick}%"
+
+        if {_type} = 1:
+            if event-member don't have discord role with id "%yaml value "verification_role" from "config"%":
+                add role with id "%yaml value "verification_role" from "config"%" to roles of event-member
+        
+        else:
+            if event-member has discord role with id "%yaml value "verification_role" from "config"%":
+                remove role with id "%yaml value "verification_role" from "config"%" from roles of event-member
+
+on message receive:
+    if discord id of event-guild is "%yaml value "server" from "config"%":
+        if discord id of event-channel is "%yaml value "channel_verification" from "config"%":
+            if discord id of event-user is not "%yaml value "bot" from "config"%":
+                destroy event-message

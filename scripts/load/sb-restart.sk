@@ -1,0 +1,51 @@
+command /r [<text>]:
+    trigger:
+        set {_now} to now
+        console("&bRestartowanie %yaml value "name" from "config"%a...")
+        
+        loop all scripts:
+            reload script loop-value
+
+        set {_time} to difference between {_now} and now
+        console("&bZakończono restartowanie (%{_time}%)")
+
+on slash command:
+    event-string is "restart"
+        
+    if discord id of event-user is not "%yaml value "owner" from "config"%":
+        reply with hidden styleDeny("Tylko właściciel bota może użyć tej komendy.")
+        stop
+    
+    defer the interaction and wait
+
+    set {_module} to argument "moduł" as string ? "all"
+    
+    set {_now} to now
+    set {_e1} to yaml value "emoji_loading" from "config"
+    
+    if {_module} is "all":
+        set {_g} to guild with id "%yaml value "server" from "config"%"
+        reply with "<a:%getEmoji({_e1})%> Restartowanie wszystkich modułów..." and store it in {_reply}
+        execute console command "r"
+        set {_time} to difference between {_now} and now
+        edit {_reply} to show styleReady("**Gotowe!** (%{_time}%)")
+        stop
+    
+    set {_all::*} to all scripts
+    loop {_all::*}:
+        if {_module} is loop-value:
+            set {_g} to guild with id "%yaml value "server" from "config"%"
+            reply with "<a:%getEmoji({_e1})%> Restartowanie modułu %{_module}%..." and store it in {_reply}
+            execute console command "sk reload %{_module}%"
+            set {_time} to difference between {_now} and now
+            edit {_reply} to show styleReady("**Gotowe!** (%{_time}%)")
+            stop
+    
+    reply with styleError("Nie znaleziono podanego modułu.`%nl%`Wykryte moduły: %{_all::*}%")
+
+on slash completion:
+    event-string is "restart"
+    discord id of event-user is "%yaml value "owner" from "config"%"
+    set {_arg} to argument "moduł" as string
+    
+    return slashComplete(all scripts, {_arg})

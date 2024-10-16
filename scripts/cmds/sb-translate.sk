@@ -1,0 +1,34 @@
+on slash command:
+    event-string is "tłumacz"
+
+    defer interaction and wait
+    
+    delete {system::temp::translate-json::*}
+    
+    send a request to "https://api.popcat.xyz/translate?to=%url safe argument "język" as string%&text=%url safe argument "tekst" as string%"
+    map json body of last http response to {system::temp::translate-json::*}
+    
+    if {system::temp::translate-json::translated} is not set:
+        reply with styleDeny("Wystąpił niezidentyfikowany problem podczas tłumaczenia.")
+        stop
+    
+    if argument "język" as string is "en":
+        set {_new} to "gb"
+    if argument "język" as string is "japanese":
+        set {_new} to "jp"
+    set {_emote} to emote "flag_%{_new} ? argument "język" as string%"
+    
+    make embed:
+        set title of embed to "%{_emote} ? ""% Tłumaczenie"
+        set description of embed to "%argument "tekst" as string%%nl%%nl%↓ ↓ ↓%nl%%nl%%{system::temp::translate-json::translated}%"
+    reply with last embed
+
+on slash completion:
+    event-string is "tłumacz"
+    
+    add new choice named "pl" with value "pl" to {_list::*}
+    add new choice named "en" with value "en" to {_list::*}
+    add new choice named "de" with value "de" to {_list::*}
+    add new choice named "jp" with value "japanese" to {_list::*}
+    
+    return {_list::*}

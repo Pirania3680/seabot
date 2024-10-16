@@ -1,0 +1,21 @@
+on message receive:
+    content of event-message is "seabot-beta-send"
+    
+    make embed:
+        set title of embed to "🪲 Co należy wiedzieć?"
+        set description of embed to "Gdy serwer będzie już posiadał większość funkcji, i w ocenie Project Managerów będzie mógł pracować w produkcji w obecnym stanie, zostaną zaplanowane Beta-Testy z conajmniej tygodniowym wyprzedzeniem. Beta-Testy są wykonywane na tymczasowym serwerze w celu wyłapania niedziałających funkcji, błędów (zarówno działania, jak i w samym tekście). Błędy będą na bieżąco naprawiane, a po zakończeniu Beta-Testów cały tymczasowy serwer zostanie usunięty. Oto kilka z mile widzianych od Beta-Testerów cech:%nl%- Gra na serwerze w okresie Beta-Testów przynajmniej godzinę dziennie.%nl%- Podstawowa świadomość działania funkcji serwera%nl%- Doświadczenie w oszukiwaniu, znajdowaniu błędów i ich wykorzystywaniu%nl%- Możliwość komunikacji przez Discord%nl%%nl%Osoby biorące udział w Beta-Testach będą mogły liczyć z naszej strony na:%nl%- Wynagrodzenie pieniężne dla najbardziej zaangażowanych osób%nl%- Ranga na Discordzie oraz bonusy w oficjalnym wydaniu SeaBlocka%nl%- Twój skin i jeśli zechcesz - Discord znajdzie się na spawnie oficjalnego SeaBlocka"
+    
+    post last embed to event-channel
+
+    make embed:
+        set title of embed to "🪲 Aplikacja do Beta-Testów"
+        set description of embed to "Nawet jeśli <##1239375325033398374> ukazany jest jako niegotowy, to i tak już teraz możesz zaaplikować do Beta-Testów serwera SeaBlock.eu. Aby rozpocząć, kliknij poniższy przycisk.%nl%Uwaga! Przyjęcie na Beta-Testy będzie zależeć od ilości zgłoszeń i odpowiedzi podanych w ankiecie."
+
+    make new component row and store it in {_row}:
+        add new link button with url "https://www.pirania.fun/cloud/index.php/apps/forms/embed/94sn8EEwDz557MDXC8pecJbj" named "Aplikuj" with emote "📃" to components of the row builder
+    
+    create a new message and store it in {_msg}:
+        add last embed to the embeds of the message
+        add {_row} to rows of the message
+
+    post {_msg} to event-channel

@@ -1,0 +1,129 @@
+on slash command:
+    event-string is "historia"
+
+    defer the interaction and wait
+
+    set {_id} to discord id of event-user
+
+    set {_banner} to argument "banner" as string
+    set {_banner} to gachaBannerFromName({_banner})
+    set {_gacha} to yaml value "economy_banners.%{_banner}%.id" from "eco"
+
+    set {_objects::*} to embedHistory(1, event-guild, {_id}, {_gacha})
+    
+    create a new message and store it in {_msg}:
+        add {_objects::1} to the embeds of the message
+        add rowHistoryButtons(1, {_objects::2}, {_id}, {_gacha}) to rows of the message
+
+    reply with {_msg}
+
+on button click:
+    if discord id of event-button starts with "history::":
+        defer the interaction
+
+        set {_id} to discord id of event-user
+
+        set {_parse::*} to discord id of event-button parsed as "history::%string%::%number%::%string%"
+
+        if {_parse::1} is not {_id}:
+            reply with hidden styleDeny("To nie jest twoja interakcja.")
+            stop
+
+        set {_objects::*} to embedHistory({_parse::2}, event-guild, {_id}, {_parse::3})
+
+        create a new message and store it in {_msg}:
+            add {_objects::1} to the embeds of the message
+            add rowHistoryButtons({_parse::2}, {_objects::2}, {_id}, {_parse::3}) to rows of the message
+        edit event-message to show {_msg}
+
+on slash completion:
+    event-string is "historia"
+
+    loop gachaGetAllBanners():
+        set {_name} to yaml value "economy_banners.%loop-value%.name" from "eco"
+        add new choice named {_name} with value {_name} to {_list::*}
+    
+    return {_list::*}
+
+function rowHistoryButtons(page: number, last: boolean, uid: string, gacha: string) :: row:
+    set {_r1} to yaml value "emoji_icon_wish_next" from "config"
+    set {_r2} to yaml value "emoji_icon_wish_previous" from "config"
+
+    make new component row and store it in {_row}:
+        if ({_page} - 1) > 0:
+            add new secondary button with id "history::%{_uid}%::%{_page} - 1%::%{_gacha}%" named "" with emoji getEmoji({_r2}) to components of the row builder
+        else:
+            add new disabled secondary button with id "history::%{_uid}%::%{_page} - 1%::%{_gacha}%" named "" with emoji getEmoji({_r2}) to components of the row builder
+        if {_last} is not true:
+            add new secondary button with id "history::%{_uid}%::%{_page} + 1%::%{_gacha}%" named "" with emoji getEmoji({_r1}) to components of the row builder
+        else:
+            add new disabled secondary button with id "history::%{_uid}%::%{_page} + 1%::%{_gacha}%" named "" with emoji getEmoji({_r1}) to components of the row builder
+    return {_row}
+
+function embedHistory(page: number, g: guild, id: string, gacha: string) :: objects:
+
+    set {_topi::*} to gachaGetHistory({_id}, {_gacha})
+
+    set {_section} to round(({_page} - 1) * 10)
+    set {_section} to (size of {_topi::*}) - {_section}
+
+    make embed:
+        set title of embed to "Historia wishy (strona %{_page}%)"
+        # set thumbnail of embed to "{@link_icon_level}"
+
+        if {_topi::%{_section}%} is not set:
+            add field named "" with value "Historia jest pusta. Zacznij wishować!" to fields of embed
+            set {_empty} to true
+        
+        if {_topi::%{_section} - 10%} is not set:
+            set {_last} to true
+
+        set {_desc} to ""
+
+        loop 10 times:
+            set {_loop} to {_section} - loop-number + 1
+
+            if {_topi::%{_loop}%} is set:
+
+                set {_desc} to "%{_desc}%%nl%%{_topi::%{_loop}%}%"
+        
+        set description of embed to {_desc}
+
+        embedStart({_g})
+        embedEnd()
+
+    return (last embed) and {_last}
+
+
+
+function gachaGetHistory(id: string, gacha: string) :: strings:
+
+    set {_all::*} to all yaml nodes from "history"
+    loop {_all::*}:
+        loop-value contain "%{_id}%.%{_gacha}%"
+        loop-value don't contain ".item" or ".pity" or ".rarity"
+        loop-value is not "%{_id}%.%{_gacha}%"
+        loop-value is not {_last}
+        
+        set {_last} to loop-value
+
+        set {_item} to yaml value "%loop-value%.item" from "history"
+        set {_pity} to yaml value "%loop-value%.pity" from "history"
+        set {_rarity} to yaml value "%loop-value%.rarity" from "history"
+
+        set {_parse::*} to loop-value parsed as "%string%.%string%.%string%"
+        if {_parse::3} contain "-":
+            set {_parse2::*} to {_parse::3} parsed as "%string%-%string%"
+            set {_unix} to {_parse2::1}
+        else:
+            set {_unix} to {_parse::3}
+        
+        set {_name} to gachaGetValue({_item}, "name")
+
+        set {_string} to "%{_rarity}%⭐ `|` <t:%{_unix}%:f> `|` %{_name}%" if {_rarity} is 3
+        set {_string} to "__%{_rarity}%__⭐ `|` <t:%{_unix}%:f> `|` __%{_name}% (%{_pity}%)__" if {_rarity} is 4
+        set {_string} to "__**%{_rarity}%**__⭐ `|` <t:%{_unix}%:f> `|` __**%{_name}% (%{_pity}%)**__" if {_rarity} is 5
+
+        add {_string} to {_return::*}
+    
+    return {_return::*}

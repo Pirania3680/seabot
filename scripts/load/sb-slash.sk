@@ -1,0 +1,250 @@
+function newSlash(n: string, d: string) :: object:
+    set {_nslash} to new slash command named "%{_n}%" with desc {_d}
+    return {_nslash}
+
+on load:
+    wait 1 second
+
+    delete {system::cmd-reg-g::*}
+    delete {system::cmd-reg-s::*}
+    delete {system::cmd-reg-o::*}
+
+    # G = Globally (serwery i DM)
+    # S = Servers (tylko serwery)
+    # O = SeaBlock.eu (tylko)
+
+    # SYSTEMOWE
+    set {system::cmd-reg-g::shutdown} to newSlash("shutdown", "Tylko dla właściciela. Wyłącza bota.")
+    enable command {system::cmd-reg-g::shutdown} for administrator
+
+    set {system::cmd-reg-g::restart} to newSlash("restart", "Tylko dla właściciela. Restartuje moduły.")
+    add auto complete string option named "moduł" with description "Który moduł należy zresetować?" to options of {system::cmd-reg-g::restart}
+    enable command {system::cmd-reg-g::restart} for administrator
+
+    set {system::cmd-reg-s::eco-reset} to newSlash("eco-reset", "Zresetuj konto i postęp ekonomii wybranego użytkownika.")
+    add required user option named "użytkownik" with description "Wybierz któremu użytkownikowi należy zresetować konto" to options of {system::cmd-reg-s::eco-reset}
+    enable command {system::cmd-reg-s::eco-reset} for administrator
+
+    
+    # PODSTAWOWE
+    set {system::cmd-reg-g::pomoc} to newSlash("pomoc", "Wyświetl pomoc bota.")
+    add auto complete string option named "komenda" with description "Do której komendy potrzebujesz pomocy?" to options of {system::cmd-reg-g::pomoc}
+
+    set {system::cmd-reg-g::wersja} to newSlash("wersja", "Wyświetl zmiany w wersjach bota.")
+
+    set {system::cmd-reg-s::register} to newSlash("register", "Komenda służąca do rejestracji użytkownika.")
+    # add required string option named "nick" with description "Nick, który będzie widoczny na naszym serwerze Discord" to options of {system::cmd-reg-s::register}
+
+    set {system::cmd-reg-g::losuj} to newSlash("losuj", "Pozwól botowi wylosować liczbę.")
+    add number option named "max" with description "Opcjonalne: podaj maksymalną liczbę do wylosowania" to options of {system::cmd-reg-g::losuj}
+    add number option named "min" with description "Opcjonalne: podaj minimalną liczbę do wylosowania" to options of {system::cmd-reg-g::losuj}
+
+    set {system::cmd-reg-g::avatar} to newSlash("avatar", "Wyślij profilowe danego użytkownika.")
+    add required user option named "użytkownik" with description "Od kogo profilowe wysłać?" to options of {system::cmd-reg-g::avatar}
+
+    set {system::cmd-reg-g::sugestia} to newSlash("sugestia", "Wyślij sugestię na temat serwera lub bota do właściciela.")
+
+    set {system::cmd-reg-g::pies} to newSlash("pies", "Wysyła losowe zdjęcie psa.")
+    
+    set {system::cmd-reg-g::kot} to newSlash("kot", "Wysyła losowe zdjęcie kota.")
+    
+    set {system::cmd-reg-g::auto} to newSlash("auto", "Wysyła losowe zdjęcie samochodu.")
+
+    set {system::cmd-reg-g::anime} to newSlash("anime", "Wysyła losowe zdjęcie anime dziefczynki.")
+
+    set {system::cmd-reg-g::hentai} to newSlash("hentai", "Wysyła losowe zdjęcie hentai dziefczynki.")
+
+    set {system::cmd-reg-g::tłumacz} to newSlash("tłumacz", "Przetłumacz podany tekst na podany język.")
+    add required auto complete string option named "język" with description "Na jaki język należy tłumaczyć?" to options of {system::cmd-reg-g::tłumacz}
+    add required string option named "tekst" with description "Co trzeba przetłumaczyć?" to options of {system::cmd-reg-g::tłumacz}
+
+    set {system::cmd-reg-g::tekst} to newSlash("tekst", "Sprawdź tekst podanej piosenki.")
+    add required string option named "piosenka" with description "Jakiego utworu potrzebujesz tekst?" to options of {system::cmd-reg-g::tekst}
+
+
+    # ADMINISTRACYJNE
+    set {system::cmd-reg-s::clear} to newSlash("clear", "Usuń podaną ilość wiadomości z danego kanału.")
+    add required number option named "ilość" with description "Ile wiadomości należy usunąć?" to options of {system::cmd-reg-s::clear}
+    enable command {system::cmd-reg-s::clear} for message manage
+
+    set {system::cmd-reg-s::warn} to newSlash("warn", "Nadaj ostrzeżenie dla podanego użytkownika.")
+    add required user option named "użytkownik" with description "Jakiego użytkownika należy ukarać?" to options of {system::cmd-reg-s::warn}
+    add required string option named "powód" with description "Podaj powód ukarania." to options of {system::cmd-reg-s::warn}
+    enable command {system::cmd-reg-s::warn} for message manage
+    
+    set {system::cmd-reg-s::mute} to newSlash("mute", "Wycisz danego użytkownika na określony czas.")
+    add required user option named "użytkownik" with description "Jakiego użytkownika należy wyciszyć?" to options of {system::cmd-reg-s::mute}
+    add required string option named "czas" with description "Na ile czasu? Dozwolone wartości: 1s, 1m, 1h, 1d (1 może być dowolną liczbą)" to options of {system::cmd-reg-s::mute}
+    add required string option named "powód" with description "Podaj powód wyciszenia." to options of {system::cmd-reg-s::mute}
+    enable command {system::cmd-reg-s::mute} for moderate members
+
+    set {system::cmd-reg-s::unmute} to newSlash("unmute", "Odcisz danego użytkownika.")
+    add required auto complete string option named "użytkownik" with description "Jakiego użytkownika należy odciszyć?" to options of {system::cmd-reg-s::unmute}
+    enable command {system::cmd-reg-s::unmute} for moderate members
+    
+    set {system::cmd-reg-s::kick} to newSlash("kick", "Wyrzuć z serwera podanego użytkownika. Będzie on mógł wrócić w każdej chwili (jeśli ma zaproszenie).")
+    add required user option named "użytkownik" with description "Jakiego użytkownika należy wyrzucić?" to options of {system::cmd-reg-s::kick}
+    add required string option named "powód" with description "Podaj powód wyrzucenia." to options of {system::cmd-reg-s::kick}
+    enable command {system::cmd-reg-s::kick} for kick members
+
+    set {system::cmd-reg-s::ban} to newSlash("ban", "Zbanuj danego użytkownika na zawsze lub na podany czas.")
+    add required user option named "użytkownik" with description "Jakiego użytkownika należy zbanować?" to options of {system::cmd-reg-s::ban}
+    add required string option named "czas" with description "Na ile czasu? Wartości: 1s, 1m, 1h, 1d (1 może być dowolną liczbą). Jeśli na zawsze, wpisz *" to options of {system::cmd-reg-s::ban}
+    add required string option named "powód" with description "Podaj powód bana." to options of {system::cmd-reg-s::ban}
+    add integer option named "wiadomości" with description "Jeśli chcesz usunąć wiadomości użytkownika, wpisz tutaj z ilu ostatnich dni." to options of {system::cmd-reg-s::ban}
+    enable command {system::cmd-reg-s::ban} for ban members
+
+    set {system::cmd-reg-s::unban} to newSlash("unban", "Odbanuj danego użytkownika.")
+    add required auto complete string option named "użytkownik" with description "Jakiego użytkownika należy odbanować?" to options of {system::cmd-reg-s::unban}
+    enable command {system::cmd-reg-s::unban} for ban members
+
+    set {system::cmd-reg-s::wyślij} to newSlash("wyślij", "Spraw, by bot wysłał podaną przez Ciebie wiadomość")
+    add string option named "wiadomość" with description "Normalny tekst w wiadomości. Jeśli chcesz zrobić enter, wpisz %%nl%%." to options of {system::cmd-reg-s::wyślij}
+    add auto complete string option named "embed" with description "Jeśli wiadomość ma zawierać zapisany embed, wpisz jego nazwę tutaj." to options of {system::cmd-reg-s::wyślij}
+    enable command {system::cmd-reg-s::wyślij} for message manage
+    
+    set {system::cmd-reg-g::embed} to newSlash("embed", "Generator embedów. Aby otworzyć nowy edytor wyślij tą komende bez żadnych opcji.")
+    add required auto complete string option named "czynność" with description "Wybierz, co chcesz zrobić z embedem." to options of {system::cmd-reg-g::embed}
+    add auto complete string option named "nazwa" with description "Jeśli czynność wymaga nazwy embeda, podaj ją tutaj." to options of {system::cmd-reg-g::embed}
+    enable command {system::cmd-reg-g::embed} for message manage
+    
+    set {system::cmd-reg-g::embed-edit} to newSlash("embed-edit", "Edytuj otwarty generator embedów dodając jego różne elementy.")
+    add string option named "tytuł" with description "Użyj by ustawić tytuł embedu. Aby zrobić enter wpisz %%nl%%. Aby usunąć ten element, wpisz -del." to options of {system::cmd-reg-g::embed-edit}
+    add string option named "opis" with description "Użyj by ustawić opis embedu. Aby zrobić enter wpisz %%nl%%. Aby usunąć ten element, wpisz -del." to options of {system::cmd-reg-g::embed-edit}
+    add string option named "autor" with description "Użyj by ustawić autora embedu. Aby zrobić enter wpisz %%nl%%. Aby usunąć ten element, wpisz -del." to options of {system::cmd-reg-g::embed-edit}
+    add string option named "autor-avatar" with description "Użyj by ustawić avatara autora embedu. Musisz podać url obrazu. Aby usunąć, wpisz -del." to options of {system::cmd-reg-g::embed-edit}
+    add string option named "stopka" with description "Użyj by ustawić stopkę embedu. Aby zrobić enter wpisz %%nl%%. Aby usunąć ten element, wpisz -del." to options of {system::cmd-reg-g::embed-edit}
+    add string option named "stopka-avatar" with description "Użyj by ustawić avatar obok stopki w embedzie. Musisz podać url obrazu. Aby usunąć, wpisz -del." to options of {system::cmd-reg-g::embed-edit}
+    add string option named "zdjęcie" with description "Użyj by ustawić zdjęcie na dole embedu. Musisz podać url obrazu. Aby usunąć, wpisz -del." to options of {system::cmd-reg-g::embed-edit}
+    add string option named "miniaturka" with description "Użyj by ustawić zdjęcie w prawym górym rogu embedu. Musisz podać url obrazu. Aby usunąć, wpisz -del." to options of {system::cmd-reg-g::embed-edit}
+    add string option named "kolor" with description "Użyj by zmienić kolor embedu. Musisz podać kolor w formacie HEX. Aby usunąć, wpisz -del." to options of {system::cmd-reg-g::embed-edit}
+    enable command {system::cmd-reg-g::embed-edit} for message manage
+
+    set {system::cmd-reg-s::autorole} to newSlash("autorole", "Zarządaj autorolami, czyli funkcją nadającą użytkownikom role po kliknięciu danej reakcji.")
+    add required auto complete string option named "czynność" with description "Wybierz, co chcesz dokonać z autorolami." to options of {system::cmd-reg-s::autorole}
+    add role option named "rola" with description "Jeśli tworzysz nową autorolę, wpisz tutaj jaką rolę ma nadawać." to options of {system::cmd-reg-s::autorole}
+    enable command {system::cmd-reg-s::autorole} for manage channel and manage roles
+
+    set {system::cmd-reg-s::slowmode} to newSlash("slowmode", "Ustaw tryb powolny na danym kanale na podaną ilość sekund.")
+    add required number option named "sekundy" with description "Ile sekund ma mieć tryb powolny?" to options of {system::cmd-reg-s::slowmode}
+    add channel option named "kanał" with description "Na jakim kanale należy ustawić?" to options of {system::cmd-reg-s::slowmode}
+    enable command {system::cmd-reg-s::slowmode} for manage channel
+
+    set {system::cmd-reg-g::reakcja} to newSlash("reakcja", "Zareaguj na poprzednią wiadomość na kanale za pomocą wybranych emotek.")
+    add required string option named "reakcje" with description "Wpisz tu wszystkie emotki jakimi chcesz zareagować. Jeśli nie masz nitro możesz wpisać `:emotka:`" to options of {system::cmd-reg-g::reakcja}
+    enable command {system::cmd-reg-g::reakcja} for message manage
+
+
+    # LEVEL
+    set {system::cmd-reg-s::level} to newSlash("level", "Zobacz swój aktualny poziom i postęp do następnej.")
+    add user option named "użytkownik" with description "Jeśli chcesz zobaczyć postęp kogoś innego podaj tutaj użytkownika" to options of {system::cmd-reg-s::level}
+
+    set {system::cmd-reg-s::topka} to newSlash("topka", "Zobacz kto zebrał najwięcej expa oraz kto prowadzi w ekonomii.")
+
+    
+    # EKONOMIA
+    set {system::cmd-reg-g::ekonomia} to newSlash("ekonomia", "Wyjaśnienie oraz działanie mechanik ekonomii.")
+
+    set {system::cmd-reg-g::odbierz} to newSlash("odbierz", "Jeśli posiadasz kod do ekonomii, to tutaj możesz go zrealizować")
+    add required string option named "kod" with description "Podaj swój kod z nagrodami" to options of {system::cmd-reg-g::odbierz}
+
+    set {system::cmd-reg-g::banner} to newSlash("banner", "Zobacz, jakie są aktualnie aktywne bannery w ekonomii.")
+    # add auto complete string option named "rodzaj" with description "Który banner chcesz otworzyc? Możesz wybrać później przyciskiem." to options of {system::cmd-reg-g::banner}
+
+    set {system::cmd-reg-g::konto} to newSlash("konto", "Pokazuje stan twojego konta oraz posiadane przez Ciebie postacie.")
+    add user option named "użytkownik" with description "Możesz podać, którego użytkownika chcesz podejrzeć konto." to options of {system::cmd-reg-g::konto}
+
+    set {system::cmd-reg-g::wish} to newSlash("wish", "Wishuj na podanym bannerze aby trafić postacie!")
+    add required auto complete string option named "banner" with description "Wybierz na jakim bannerze chcesz wishować" to options of {system::cmd-reg-g::wish}
+    add auto complete string option named "ilość" with description "Wybierz, czy chcesz puścić 1 czy 10 wishy na raz" to options of {system::cmd-reg-g::wish}
+
+    set {system::cmd-reg-g::praca} to newSlash("praca", "Wykonuj pracę, aby zarobić primogemy.")
+
+    set {system::cmd-reg-g::daily} to newSlash("daily", "Otrzymaj nagrodę za codzienne używanie ekonomii.")
+
+    set {system::cmd-reg-g::kasyno} to newSlash("kasyno", "Spróbuj swojego szczęścia w szybkim wygraniu lub przegraniu primogemów")
+    add required integer option named "obstawienie" with description "Wybierz, ile primogemów chcesz zaryzykować" to options of {system::cmd-reg-g::kasyno}
+
+    set {system::cmd-reg-g::okradnij} to newSlash("okradnij", "Okrada danego użytkownika. Możesz zostać złapany i zapłacić karę.")
+    add required user option named "użytkownik" with description "Wybierz, którego użytkownika chcesz spróbować okraść" to options of {system::cmd-reg-g::okradnij}
+    add auto complete string option named "metoda" with description "Metoda kradnięcia, możesz zyskać więcej ale będzie na to znacznie mniejsza szansa." to options of {system::cmd-reg-g::okradnij}
+
+    set {system::cmd-reg-g::przelej} to newSlash("przelej", "Przelej podaną kwotę primogemów danemu użytkownikowi.")
+    add required user option named "użytkownik" with description "Wybierz, któremu użytkownikowi chcesz przelać primogemy" to options of {system::cmd-reg-g::przelej}
+    add required integer option named "ilość" with description "Podaj kwotę do przelania." to options of {system::cmd-reg-g::przelej}
+
+    set {system::cmd-reg-g::kup} to newSlash("kup", "Wymień primogemy na wishe aby je zabezpieczyć.")
+    add integer option named "ilość" with description "Podaj, ile wishy chcesz otrzymać. Jeśli nie podasz, zostaną wymienione wszystkie." to options of {system::cmd-reg-g::kup}
+
+    set {system::cmd-reg-g::pity} to newSlash("pity", "Sprawdź stan wishowania na wszystkich bannerach.")
+
+    set {system::cmd-reg-g::osiągnięcia} to newSlash("osiągnięcia", "Wyświetl zdobyte osiągnięcia")
+    add user option named "użytkownik" with description "Wybierz którego użytkownika chcesz zobaczyć osiągnięcia" to options of {system::cmd-reg-g::osiągnięcia}
+
+    set {system::cmd-reg-g::historia} to newSlash("historia", "Wyświetl historię dropów z wishy.")
+    add required auto complete string option named "banner" with description "Podaj banner, z którego chcesz zobaczyć historię." to options of {system::cmd-reg-g::historia}
+
+    set {system::cmd-reg-g::zgadnij} to newSlash("zgadnij", "Spróbuj zgadnąć, z jakiej wersji pochodzi aktualny banner.")
+    add required auto complete string option named "wersja" with description "Wpisz wersję, z której według Ciebie pochodzi aktualny banner." to options of {system::cmd-reg-g::zgadnij}
+
+
+    # MUZYKA
+    set {system::cmd-reg-s::zagraj} to newSlash("zagraj", "Zagraj podaną muzykę z youtube na kanale głosowym.")
+    add required string option named "wyszukiwanie" with description "Podaj nazwę utworu/filmiku, który chcesz odtworzyć" to options of {system::cmd-reg-s::zagraj}
+    add boolean option named "pomieszaj" with description "Wybierz, jeśli chcesz by podana przez Ciebie playlista została pomieszana" to options of {system::cmd-reg-s::zagraj}
+    add attachment option named "plik" with description "Możesz wgrać plik muzyczny w formacie mp3, aby zagrać swoją muzykę." to options of {system::cmd-reg-s::zagraj}
+
+    set {system::cmd-reg-s::pomiń} to newSlash("pomiń", "Pomiń aktualnie grany utwór.")
+
+    set {system::cmd-reg-s::pauza} to newSlash("pauza", "Wstrzymaj lub wznów aktaulnie grany utwór.")
+
+    set {system::cmd-reg-s::stop} to newSlash("stop", "Przestań grać muzykę na kanale głosowym.")
+
+    set {system::cmd-reg-s::kolejka} to newSlash("kolejka", "Wyśiwetl kolejkę granej muzyki.")
+
+    set {system::cmd-reg-s::zapętl} to newSlash("zapętl", "Włącz zapętlanie muzyki - słuchanie jednego utworu w kółko")
+
+
+    # OSU
+    set {system::cmd-reg-g::osu} to newSlash("osu", "Znajdź i wyświetl informację o podanym użytkowniku w osu.")
+    add required string option named "użytkownik" with description "Podaj nazwę użytkownika w osu" to options of {system::cmd-reg-g::osu}
+    add auto complete string option named "tryb" with description "Podaj, który tryb gry osu ma zostać wyświetlony" to options of {system::cmd-reg-g::osu}
+
+    set {system::cmd-reg-g::osu-top} to newSlash("osu-top", "Znajdź i wyświetl najlepsze zagrania podanego użytkownika w osu.")
+    add required string option named "użytkownik" with description "Podaj nazwę użytkownika w osu" to options of {system::cmd-reg-g::osu-top}
+    add auto complete string option named "tryb" with description "Podaj, który tryb gry osu ma zostać wyświetlony" to options of {system::cmd-reg-g::osu-top}
+
+    set {system::cmd-reg-g::osu-last} to newSlash("osu-last", "Znajdź i wyświetl ostatnie zagrania podanego użytkownika w osu.")
+    add required string option named "użytkownik" with description "Podaj nazwę użytkownika w osu" to options of {system::cmd-reg-g::osu-last}
+    add auto complete string option named "tryb" with description "Podaj, który tryb gry osu ma zostać wyświetlony" to options of {system::cmd-reg-g::osu-last}
+
+
+    # CUSTOMOWE - SEABOT
+    set {system::cmd-reg-o::nick} to newSlash("nick", "Tą komendą możesz zmienić swój nick na naszym serwerze.")
+    add required string option named "nick" with description "Nowy nick, który będzie widoczny na naszym serwerze Discord" to options of {system::cmd-reg-o::nick}
+
+    set {system::cmd-reg-o::archiwum} to newSlash("archiwum", "Otrzymaj link do naszego prywatnego archwium SeaBlocka.")
+
+    set {system::cmd-reg-o::parkowanie} to newSlash("przywróć-parkowanie", "Przywraca całą historię kanału dotyczącego parkowania.")
+    add required channel option named "kanał" with description "Podaj kanał który będzie służył do nowego parkowania." to options of {system::cmd-reg-o::parkowanie}
+    enable command {system::cmd-reg-o::parkowanie} for administrator
+
+
+    # CUSTOMOWE - GRIBOT
+    # set {system::cmd-reg-s::usun-kolor} to newSlash("usuń-kolor", "Usuń swój kolor, aby móc wybrać nowy!")
+
+
+
+    while "main" is not loaded on discord:
+        wait 1 second
+
+
+    register command {system::cmd-reg-g::*} globally in (bot "main")
+    loop guilds of bot named "main":
+        
+        if discord id of loop-value is "%yaml value "server" from "config"%":
+            register command {system::cmd-reg-s::*} and {system::cmd-reg-o::*} locally in loop-value
+        else:
+            register command {system::cmd-reg-s::*} locally in loop-value
+    
+    console("&aKomendy zostały poprawnie zarejestrowane.")

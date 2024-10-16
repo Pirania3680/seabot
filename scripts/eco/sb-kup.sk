@@ -1,0 +1,41 @@
+on slash command:
+    event-string is "kup"
+
+    set {_id} to discord id of event-user
+    set {_amount} to argument "ilość" as integer
+    set {_cost} to yaml value "wish_cost" from "config"
+    set {_has} to gachaCurrency("?", {_id}, "primo", 0)
+
+    set {_e1} to yaml value "emoji_primogem" from "config"
+    set {_e2} to yaml value "emoji_wish" from "config"
+
+    if gachaCurrency("?", {_id}, "primo", 0) < 0:
+        reply with hidden styleDeny("Posiadasz dług. Nie możesz wykonać żadncyh wydatków, dopóki nie uregulujesz należności.")
+        stop
+    
+    defer the interaction and wait
+
+    if {_amount} is not set:
+        set {_convert} to floor({_has} / {_cost})
+        set {_need} to {_convert} * {_cost}
+
+        if {_convert} > 0:
+            gachaCurrency("-", {_id}, "primo", {_need})
+            gachaCurrency("+", {_id}, "wish", {_convert})
+            reply with styleReady("Wymieniono `%{_need}%` <:%getEmoji({_e1})%> na `%{_convert}%` <:%getEmoji({_e2})%>.")
+
+            ecoEvent({_id}, "buy", {_convert})
+        else:
+            reply with styleDeny("Nie posiadasz `%{_cost}%` <:%getEmoji({_e1})%> na wymianę.")
+    
+    else:
+        set {_need} to {_amount} * {_cost}
+
+        if {_has} >= {_need}:
+            gachaCurrency("-", {_id}, "primo", {_need})
+            gachaCurrency("+", {_id}, "wish", {_amount})
+            reply with styleReady("Wymieniono `%{_need}%` <:%getEmoji({_e1})%> na `%{_amount}%` <:%getEmoji({_e2})%>.")
+
+            ecoEvent({_id}, "buy", {_amount})
+        else:
+            reply with styleDeny("Nie posiadasz `%{_need}%` <:%getEmoji({_e1})%> na wymianę.")

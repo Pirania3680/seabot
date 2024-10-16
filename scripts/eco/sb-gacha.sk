@@ -1,0 +1,198 @@
+# ZMIENNE:
+# {gacha::%{_u}%::%{_t}%::pity-5}
+# {gacha::%{_u}%::%{_t}%::pity-4}
+# {gacha::%{_u}%::%{_t}%::guarantee-5}
+# {gacha::%{_u}%::%{_t}%::guarantee-4}
+
+# ŁADOWANIE
+
+on load:
+    load yaml "plugins/Skript/data/gacha/history.yml" as "history"
+
+# USTAWIANIE STARTOWYCH ZMIENNYCH
+
+function gachaCreateData(u: string, pt: string):
+    set {gacha::%{_u}%::%{_pt}%::pity-5} to 0
+    set {gacha::%{_u}%::%{_pt}%::pity-4} to 0
+    set {gacha::%{_u}%::%{_pt}%::guarantee-5} to false
+    set {gacha::%{_u}%::%{_pt}%::guarantee-4} to false
+
+# OTRZYMYWANIE DROPU
+
+function gachaGetDrop(u: string, t: string) :: objects:
+    set {_pt} to yaml value "economy_banners.%{_t}%.id" from "eco"
+
+    if {gacha::%{_u}%::%{_pt}%::pity-5} is not set:
+        gachaCreateData({_u}, {_pt})
+
+    add 1 to {gacha::%{_u}%::%{_pt}%::pity-5}
+    add 1 to {gacha::%{_u}%::%{_pt}%::pity-4}
+
+    set {_chance::*} to gachaGetChance({gacha::%{_u}%::%{_pt}%::pity-5}, {gacha::%{_u}%::%{_pt}%::pity-4}, {_t})
+    
+    set {_unix} to "%unix timestamp of now%"
+    replace every "." with "-" in {_unix}
+
+    chance of ({_chance::2} / 100):
+        set {_drop} to gachaGetItem(5, {gacha::%{_u}%::%{_pt}%::guarantee-5}, {_t}, {_u})
+
+        gachaHistorySave({_u}, {_pt}, {_drop}, {gacha::%{_u}%::%{_pt}%::pity-5}, 5)
+
+        set {_pity} to {gacha::%{_u}%::%{_pt}%::pity-5}
+        set {gacha::%{_u}%::%{_pt}%::pity-5} to 0
+
+        return {_drop} and 5 and {_pity}
+        stop
+    
+    chance of ({_chance::1} / 100):
+        set {_drop} to gachaGetItem(4, {gacha::%{_u}%::%{_pt}%::guarantee-4}, {_t}, {_u})
+
+        gachaHistorySave({_u}, {_pt}, {_drop}, {gacha::%{_u}%::%{_pt}%::pity-4}, 4)
+
+        set {_pity} to {gacha::%{_u}%::%{_pt}%::pity-4}
+        set {gacha::%{_u}%::%{_pt}%::pity-4} to 0
+
+        return {_drop} and 4 and {_pity}
+        stop
+
+    set {_drop} to gachaGetItem(3, true, {_t}, {_u})
+
+    gachaHistorySave({_u}, {_pt}, {_drop}, 1, 3)
+
+    return {_drop} and 3 and 1
+
+function gachaGetChance(pity5: number, pity4: number, t: string) :: numbers:
+    set {_5s} to yaml value "economy_banners.%{_t}%.5_soft" from "eco"
+    set {_5h} to yaml value "economy_banners.%{_t}%.5_hard" from "eco"
+    set {_5c} to yaml value "economy_banners.%{_t}%.5_chance" from "eco"
+    set {_4s} to yaml value "economy_banners.%{_t}%.4_soft" from "eco"
+    set {_4h} to yaml value "economy_banners.%{_t}%.4_hard" from "eco"
+    set {_4c} to yaml value "economy_banners.%{_t}%.4_chance" from "eco"
+
+    set {_loop} to 4
+    loop 2 times:
+        if {_pity%{_loop}%} >= {_%{_loop}%h}:
+            set {_return::%loop-number%} to 100
+
+        else if {_pity%{_loop}%} >= {_%{_loop}%s}:
+            set {_min} to {_%{_loop}%h} - {_%{_loop}%s} + 1
+            set {_div} to 100 / {_min}
+
+            loop {_min} times:
+                set {_map::%loop-number-2%} to {_div} * loop-number-2
+
+            set {_index} to round({_pity%{_loop}%} - {_%{_loop}%s} + 1)
+            set {_return::%loop-number%} to {_map::%{_index}%}
+
+        else:
+            set {_return::%loop-number%} to {_%{_loop}%c}
+
+        add 1 to {_loop}
+
+    return {_return::*}
+
+function gachaGetItem(rarity: integer, g: boolean, t: string, id: string) :: string:
+    set {_pt} to yaml value "economy_banners.%{_t}%.id" from "eco"
+
+    set {_type} to gachaGetItemType({_pt}, {_rarity}, {_id})
+
+    if {_rarity} = 5 or 4:
+        if {_g} is not true:
+            chance of 50%:
+                set {_win} to true
+                ecoEvent({_id}, "50-50-win", 0) if {_rarity} is 5
+        else:
+            set {_win} to true
+ 
+        if {_win} is true:
+            set {_drops::*} to yaml list "economy_banners.%{_t}%.%{_rarity}%_drops_promote" from "eco"
+            delete {gacha::%{_id}%::%{_pt}%::guarantee-%{_rarity}%}
+        else:
+            set {_drops::*} to yaml list "economy_banners.%{_t}%.%{_rarity}%_drops_lost" from "eco"
+            set {gacha::%{_id}%::%{_pt}%::guarantee-%{_rarity}%} to true
+            ecoEvent({_id}, "50-50-lost", 0) if {_rarity} is 5
+    
+    else:
+        set {_drops::*} to yaml list "economy_banners.%{_t}%.%{_rarity}%_drops" from "eco"
+        
+    if {_drops::1} is "all":
+        delete {_drops::*}
+        loop gachaGetAllCharacters():
+            if gachaGetValue(loop-value, "rarity") is {_rarity}:
+                add loop-value to {_characters::*}
+        loop gachaGetAllWeapons():
+            if gachaGetValue(loop-value, "rarity") is {_rarity}:
+                add loop-value to {_weapons::*}
+
+    else:
+        loop {_drops::*}:
+            if gachaGetValue(loop-value, "type") is "character":
+                add loop-value to {_characters::*}
+            if gachaGetValue(loop-value, "type") is "weapon":
+                add loop-value to {_weapons::*}
+
+    delete {_drops::*}
+
+    if {_%{_type}%s::1} is not set:
+        set {_drops::*} to {_characters::*} and {_weapons::*}
+    else:
+        set {_drops::*} to {_%{_type}%s::*}
+    
+    set {_r} to random integer between 1 and (size of {_drops::*})
+    return {_drops::%{_r}%}
+
+function gachaGetItemType(pt: string, rarity: integer, id: string) :: string:
+
+    set {_character} to {gacha::%{_id}%::%{_pt}%::character-strike-%{_rarity}%} ? 0
+    set {_weapon} to {gacha::%{_id}%::%{_pt}%::weapon-strike-%{_rarity}%} ? 0
+
+    if {_character} >= 2:
+        add 1 to {gacha::%{_id}%::%{_pt}%::weapon-strike-%{_rarity}%}
+        set {gacha::%{_id}%::%{_pt}%::character-strike-%{_rarity}%} to 0
+        return "weapon"
+    
+    else if {_weapon} >= 2:
+        add 1 to {gacha::%{_id}%::%{_pt}%::character-strike-%{_rarity}%}
+        set {gacha::%{_id}%::%{_pt}%::weapon-strike-%{_rarity}%} to 0
+        return "character"
+    
+    else:
+        set {_random} to random integer between 1 and 2
+
+        if {_random} is 1:
+            add 1 to {gacha::%{_id}%::%{_pt}%::character-strike-%{_rarity}%}
+            set {gacha::%{_id}%::%{_pt}%::weapon-strike-%{_rarity}%} to 0
+            return "character"
+
+        if {_random} is 2:
+            add 1 to {gacha::%{_id}%::%{_pt}%::weapon-strike-%{_rarity}%}
+            set {gacha::%{_id}%::%{_pt}%::character-strike-%{_rarity}%} to 0
+            return "weapon"
+
+function gachaHistorySave(id: string, gacha: string, item: string, pity: number, rarity: number):
+    add {_item} to {temp::history::%{_id}%.%{_gacha}%::item::*}
+    add {_pity} to {temp::history::%{_id}%.%{_gacha}%::pity::*}
+    add {_rarity} to {temp::history::%{_id}%.%{_gacha}%::rarity::*}
+
+    wait 1 second
+
+    {temp::history-proccessing} is not set
+
+    loop {temp::history::%{_id}%.%{_gacha}%::item::*}:
+        set {temp::history-proccessing} to true
+        set {_unix} to "%unix timestamp of now%"
+        replace every "." with "-" in {_unix}
+
+        set yaml value "%{_id}%.%{_gacha}%.%{_unix}%.item" from "history" to {temp::history::%{_id}%.%{_gacha}%::item::%loop-index%}
+        set yaml value "%{_id}%.%{_gacha}%.%{_unix}%.pity" from "history" to {temp::history::%{_id}%.%{_gacha}%::pity::%loop-index%}
+        set yaml value "%{_id}%.%{_gacha}%.%{_unix}%.rarity" from "history" to {temp::history::%{_id}%.%{_gacha}%::rarity::%loop-index%}
+
+        delete {temp::history::%{_id}%.%{_gacha}%::item::%loop-index%}
+        delete {temp::history::%{_id}%.%{_gacha}%::pity::%loop-index%}
+        delete {temp::history::%{_id}%.%{_gacha}%::rarity::%loop-index%}
+
+        wait 1 tick
+
+    save yaml "history"
+
+    delete {temp::history-proccessing}

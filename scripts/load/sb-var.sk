@@ -1,0 +1,8 @@
+on load:
+    delete {temp::*}
+    delete {autorole::temp::*}
+    delete {level::temp::*}
+    delete {temp-level-top::*}
+    delete {system::status::*}
+    delete {system::temp::*}
+    delete {eco-temp::*}

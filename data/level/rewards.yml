@@ -1,0 +1,146 @@
+# Nagrody do odebrania za zdobyty level
+# Format nagród to '- <ilość> <typ>'
+# Dostępne nagrody to primo i wish (narazie)
+# Nagród może być więcej niż jedna
+
+2:
+  - 120 primo
+3:
+  - 60 primo
+  - 1 wish
+4:
+  - 120 primo
+5:
+  - 3 wish
+6:
+  - 60 primo
+  - 1 wish
+7:
+  - 120 primo
+8:
+  - 60 primo
+  - 1 wish
+9:
+  - 120 primo
+10:
+  - 3 wish
+11:
+  - 60 primo
+  - 1 wish
+12:
+  - 120 primo
+13:
+  - 60 primo
+  - 1 wish
+14:
+  - 120 primo
+15:
+  - 3 wish
+16:
+  - 60 primo
+  - 1 wish
+17:
+  - 120 primo
+18:
+  - 60 primo
+  - 1 wish
+19:
+  - 120 primo
+20:
+  - 3 wish
+21:
+  - 60 primo
+  - 1 wish
+22:
+  - 120 primo
+23:
+  - 60 primo
+  - 1 wish
+24:
+  - 120 primo
+25:
+  - 3 wish
+26:
+  - 60 primo
+  - 1 wish
+27:
+  - 120 primo
+28:
+  - 60 primo
+  - 1 wish
+29:
+  - 120 primo
+30:
+  - 5 wish
+31:
+  - 60 primo
+  - 1 wish
+32:
+  - 120 primo
+33:
+  - 60 primo
+  - 1 wish
+34:
+  - 120 primo
+35:
+  - 3 wish
+36:
+  - 60 primo
+  - 1 wish
+37:
+  - 120 primo
+38:
+  - 60 primo
+  - 1 wish
+39:
+  - 120 primo
+40:
+  - 3 wish
+41:
+  - 60 primo
+  - 1 wish
+42:
+  - 120 primo
+43:
+  - 60 primo
+  - 1 wish
+44:
+  - 120 primo
+45:
+  - 3 wish
+46:
+  - 60 primo
+  - 1 wish
+47:
+  - 120 primo
+48:
+  - 60 primo
+  - 1 wish
+49:
+  - 120 primo
+50:
+  - 5 wish
+  - 300 primo
+51:
+  - 60 primo
+  - 1 wish
+52:
+  - 120 primo
+53:
+  - 60 primo
+  - 1 wish
+54:
+  - 120 primo
+55:
+  - 10 wish
+56:
+  - 10 wish
+57:
+  - 10 wish
+58:
+  - 10 wish
+59:
+  - 10 wish
+60:
+  - 30 wish
+  - 1600 primo

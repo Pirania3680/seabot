@@ -1,0 +1,114 @@
+on slash command:
+    event-string is "kolejka"
+
+    defer the interaction and wait
+
+    set {_objects::*} to embedQueue(1, event-guild, {music::%discord id of event-guild%::waiting})
+    
+    create a new message and store it in {_msg}:
+        add {_objects::1} to the embeds of the message
+        add rowQueueButtons(1, {_objects::2}, discord id of event-user) to rows of the message
+
+    reply with {_msg}
+
+on button click:
+    if discord id of event-button starts with "queue::":
+        defer the interaction
+
+        if discord id of event-button ends with "::clear":
+            set {_parse::*} to discord id of event-button parsed as "queue::%string%::clear"
+
+            if {_parse::1} is not discord id of event-user:
+                reply with styleDeny("To nie jest twoja interakcja.")
+                stop
+            
+            musicQueueReset()
+
+            wait 1 tick
+
+            set {_objects::*} to embedQueue(1, event-guild, {music::%discord id of event-guild%::waiting})
+
+            create a new message and store it in {_msg}:
+                add {_objects::1} to the embeds of the message
+                add rowQueueButtons(1, {_objects::2}, discord id of event-user) to rows of the message
+            edit event-message to show {_msg}
+
+        else:
+            set {_parse::*} to discord id of event-button parsed as "queue::%string%::%number%"
+
+            if discord id of event-button ends with "::refresh":
+                set {_parse::2} to 1
+
+            set {_objects::*} to embedQueue({_parse::2}, event-guild, {music::%discord id of event-guild%::waiting})
+
+            create a new message and store it in {_msg}:
+                add {_objects::1} to the embeds of the message
+                add rowQueueButtons({_parse::2}, {_objects::2}, discord id of event-user) to rows of the message
+            edit event-message to show {_msg}
+
+# GUZIKI
+
+function rowQueueButtons(page: number, last: boolean, uid: string) :: row:
+    set {_r1} to yaml value "emoji_icon_wish_next" from "config"
+    set {_r2} to yaml value "emoji_icon_wish_previous" from "config"
+    set {_r3} to yaml value "emoji_refresh" from "config"
+
+    make new component row and store it in {_row}:
+        if ({_page} - 1) > 0:
+            add new secondary button with id "queue::%{_uid}%::%{_page} - 1%" named "" with emoji getEmoji({_r2}) to components of the row builder
+        else:
+            add new disabled secondary button with id "queue::%{_uid}%::%{_page} - 1%" named "" with emoji getEmoji({_r2}) to components of the row builder
+        
+        add new secondary button with id "queue::%{_uid}%::1::refresh" named "" with emoji getEmoji({_r3}) to components of the row builder
+    
+        if {_last} is not true:
+            add new secondary button with id "queue::%{_uid}%::%{_page} + 1%" named "" with emoji getEmoji({_r1}) to components of the row builder
+        else:
+            add new disabled secondary button with id "queue::%{_uid}%::%{_page} + 1%" named "" with emoji getEmoji({_r1}) to components of the row builder
+        
+        add new danger button with id "queue::%{_uid}%::clear" named "Wyczyść" with emote "wastebasket" to components of the row builder
+    return {_row}
+
+# EMBED
+
+function embedQueue(page: number, g: guild, warn: boolean) :: objects:
+
+    set {_topi::*} to musicQueueFull("name")
+        
+    set {_section} to round(({_page} - 1) * 10)
+
+    if playing track of {_g} is set:
+        set {_current} to "Teraz gramy: %playing track of {_g}%"
+    else:
+        set {_current} to "Nic nie jest obecnie grane.."
+
+    make embed:
+        set title of embed to {_current}
+        # set thumbnail of embed to "{@link_icon_level}"
+
+        if {_topi::%{_section} + 1%} is not set:
+            add field named "" with value "Kolejka jest pusta. Dołącz na kanał i coś puść!" to fields of embed
+            set {_empty} to true
+        
+        if {_topi::%{_section} + 11%} is not set:
+            set {_last} to true
+
+        set {_desc} to ""
+
+        loop 10 times:
+            set {_loop} to loop-number + {_section}
+
+            if {_topi::%{_loop}%} is set:
+
+                set {_desc} to "%{_desc}%%nl%%{_loop}%. `%{_topi::%{_loop}%}%`"
+        
+        if {_warn} is true:
+            if {_empty} is not true:
+                set {_desc} to "%{_desc}%%nl%%nl%⚠️ Nie ma nikogo na kanale, kolejka zostanie usunięta za 1 minutę."
+        
+        set description of embed to {_desc}
+
+        embedStart({_g})
+        embedEnd()
+
+    return (last embed) and {_last}

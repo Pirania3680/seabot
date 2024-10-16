@@ -1,0 +1,15 @@
+function slashComplete(o: objects, a: string) :: slashchoices:
+    loop {_o::*}:
+        if loop-value start with {_a}:
+            add 1 to {_nr}
+            if {_nr} > 25:
+                continue
+            add new choice named loop-value with value loop-value to {_list::*}
+            continue
+        if loop-value contains {_a}:
+            add 1 to {_nr}
+            if {_nr} > 25:
+                continue
+            add new choice named loop-value with value loop-value to {_list::*}
+            continue
+    return {_list::*}

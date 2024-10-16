@@ -1,0 +1,74 @@
+on slash command:
+    event-string is "banner"
+
+    set {_list::*} to gachaGetAllBanners()
+
+    if {_list::1} is not set:
+        reply with hidden styleDeny("Nie ma aktualnie żadnego aktywnego banneru.")
+        stop
+    
+    defer the interaction and wait
+
+    create a new message and store it in {_msg}:
+        set {_path} to yaml value "economy_banners.%{_list::1}%.image" from "eco"
+        add "plugins/Skript/data/gacha/banners/%{_path}%" to the attachments of the message
+        add embedBanner({_list::1}) to the embeds of the message
+        if {_list::2} is set:
+            add rowBannerSelect("1") to rows of the message
+        
+        # add rowBannerWish({_parse::1}) to rows of the message
+    
+    reply with {_msg}
+
+on button click:
+    if discord id of event-button starts with "banner::select":
+        defer the interaction
+
+        set {_parse::*} to discord id of event-button parsed as "banner::select::%string%"
+
+        create a new message and store it in {_msg}:
+            set {_path} to yaml value "economy_banners.%{_parse::1}%.image" from "eco"
+            add "plugins/Skript/data/gacha/banners/%{_path}%" to the attachments of the message
+            add embedBanner({_parse::1}) to the embeds of the message
+            if yaml value "economy_banners.2.id" from "eco" is set:
+                add rowBannerSelect({_parse::1}) to rows of the message
+            
+            # add rowBannerWish({_parse::1}) to rows of the message
+
+        edit event-message to show {_msg}
+
+
+
+function rowBannerSelect(id: string) :: row:
+    make new component row and store it in {_row}:
+
+        loop gachaGetAllBanners():
+            set {_name} to yaml value "economy_banners.%loop-value%.short_name" from "eco"
+            set {_emote} to yaml value "economy_banners.%loop-value%.emoji" from "eco"
+
+            if {_id} is loop-value:
+                add new disabled secondary button with id "banner::select::%loop-value%" named {_name} with emoji getEmoji({_emote}) to components of the row builder
+            else:
+                add new secondary button with id "banner::select::%loop-value%" named {_name} with emoji getEmoji({_emote}) to components of the row builder
+
+    return {_row}
+
+function rowBannerWish(id: string) :: row:
+    set {_r1} to yaml value "emoji_wish" from "config"
+
+    make new component row and store it in {_row}:
+        add new success button with id "banner::wish1::%{_id}%" named "Wish x1" with emoji getEmoji({_r1}) to components of the row builder
+        add new success button with id "banner::wish10::%{_id}%" named "Wish x10" with emoji getEmoji({_r1}) to components of the row builder
+    return {_row}
+
+function embedBanner(id: string) :: embedbuilder:
+    set {_title} to yaml value "economy_banners.%{_id}%.name" from "eco"
+    set {_desc} to yaml value "economy_banners.%{_id}%.description" from "eco"
+    set {_img} to yaml value "economy_banners.%{_id}%.image" from "eco"
+    replace every "%%nl%%" with nl in {_desc}
+
+    make embed:
+        set title of embed to {_title}
+        set description of embed to {_desc}
+        set image of embed to "attachment://%{_img}%"
+    return last embed

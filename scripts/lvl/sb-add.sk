@@ -1,0 +1,62 @@
+function expAdd(u: user, ch: channel, i: number):
+
+    # WYŁĄCZENIA
+    if discord id of {_u} is "%yaml value "bot" from "config"%":
+        stop
+
+    set {_channels::*} to yaml list "level_channels_exception" from "config"
+    loop {_channels::*}:
+        if (discord id of {_ch}) is ("%loop-value%"):
+            stop
+    
+    set {_users::*} to yaml list "level_users_exception" from "config"
+    loop {_users::*}:
+        if (discord id of {_u}) is ("%loop-value%"):
+            stop
+    
+    # USTAWIANIE STARTOWYCH ZMIENNYCH
+    if {level::%discord id of {_u}%::join} is not true:
+        
+        set {level::%discord id of {_u}%::join} to true
+        set {level::%discord id of {_u}%::lvl} to 1
+        set {level::%discord id of {_u}%::exp} to 0
+
+    # ==========
+
+    add {_i} to {level::%discord id of {_u}%::exp}
+    set {_lvl} to expGetLvL({level::%discord id of {_u}%::exp})
+    set {_g} to guild with id "%yaml value "server" from "config"%"
+
+    if {level::%discord id of {_u}%::lvl} < {_lvl}:
+
+        add 1 to {level::%discord id of {_u}%::lvl}
+
+        # DAWANIE ROLI
+        set {_role} to yaml value "level_role_on_rank.%{level::%discord id of {_u}%::lvl}%" from "config"
+        if {_role} is set:
+            retrieve member with id (discord id of {_u}) from {_g} and store it in {_member}
+            add role with id "%{_role}%" to roles of {_member}
+
+        # GENEROWANIE EMBEDU
+        set {_type} to yaml value "level_notification" from "config"
+
+        create a new message and store it in {_msg}:
+            if yaml value "level_notification_ping" from "config" is 1:
+                set the content of the message to mention tag of {_u}
+            add embedLevelUp({_u}, {level::%discord id of {_u}%::lvl}, {_g}) to the embeds of the message
+            add imgExpNextRank({_lvl}) to the attachments of the message
+
+        if {_type} is "current":
+            post {_msg} to {_ch}
+        
+        else:
+            post {_msg} to channel with id "%{_type}%"
+
+function embedLevelUp(u: user, lvl: integer, g: guild) :: embedbuilder:
+    make embed:
+        set title of embed to "Ranga wzrosła!"
+        set description of embed to "Gratulacje %mention tag of {_u}%! Twoja ranga wzrosła z **%{_lvl} - 1%** ⮞ **%{_lvl}%**."
+        set image of embed to "attachment://image1.png"
+        embedStart({_g})
+        embedEnd()
+    return last embed

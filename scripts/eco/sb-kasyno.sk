@@ -1,0 +1,91 @@
+on slash command:
+    event-string is "kasyno"
+
+    set {_id} to discord id of event-user
+    set {_amount} to argument "obstawienie" as integer
+    set {_limit} to yaml value "casino_hour_limit" from "config"
+    set {_e1} to yaml value "emoji_primogem" from "config"
+
+    set {_current} to gachaCurrency("?", {_id}, "primo", 0)
+    set {_minimal} to round({_current} / 10)
+    set {_minimal} to 1 if {_minimal} < 1
+
+    if {_current} < 0:
+        reply with hidden styleDeny("Posiadasz dług. Nie możesz wykonać żadncyh wydatków, dopóki nie uregulujesz należności.")
+        stop
+    if {_amount} < {_minimal}:
+        reply with hidden styleDeny("Minimalna kwota obstawienia to 10%% twojego konta - `%{_minimal}%` <:%getEmoji({_e1})%>.")
+        stop
+    if {_current} < {_amount}:
+        reply with hidden styleDeny("Nie posiadasz %{_amount}% <:%getEmoji({_e1})%> na swoim koncie.")
+        stop
+    
+    if {temp::casino-uses::%{_id}%} >= {_limit}:
+        reply with hidden styleDeny("Możesz obstawić liczby w kasynie maksymalnie %{_limit}% razy na godzinę.")
+        stop
+    
+    defer the interaction and wait
+    
+    add 1 to {temp::casino-uses::%{_id}%}
+    
+    set {_return::*} to kasynoChance({_id})
+    set {_reward} to floor({_amount} * {_return::1})
+
+    if {_return::1} is 0:
+        gachaCurrency("-", {_id}, "primo", {_amount})
+        reply with embedKasynoLost({_amount}, {_return::1}, {_return::2})
+
+        ecoEvent({_id}, "casino-lost", ({_amount} and {_return::2}))
+    else:
+        gachaCurrency("+", {_id}, "primo", ({_reward} - {_amount}))
+        reply with embedKasynoWin({_reward}, {_return::1}, {_return::2})
+
+        ecoEvent({_id}, "casino-win", ({_reward} and {_return::2}))
+    
+    wait 60 minutes
+    remove 1 from {temp::casino-uses::%{_id}%}
+
+
+
+function kasynoChance(id: string) :: numbers:
+    set {_multiple} to {eco::%{_id}%::casino} ? 0
+    if {_multiple} > 5:
+        set {_change} to 10 + ({_multiple} - 5)
+    else:
+        set {_change} to {_multiple} * 2
+
+    if {_change} > 20:
+        set {_change} to 20
+        remove 1 from {eco::%{_id}%::casino}
+    set {_chance} to (50 + {_change}) / 100
+
+    set {_random} to random number between 1.6 and 3.2
+
+    chance of {_chance}:
+        remove 1 from {eco::%{_id}%::casino}
+        return {_random} and {_chance}
+    
+    add 1 to {eco::%{_id}%::casino}
+    return 0 and {_chance}
+
+
+
+function embedKasynoWin(reward: number, multiper: number, chance: number) :: embedbuilder:
+    set {_e1} to yaml value "emoji_zezwolenie" from "config"
+    set {_e2} to yaml value "emoji_primogem" from "config"
+
+    make embed:
+        set title of embed to "<:%getEmoji({_e1})%> Gratulacje!"
+        set description of embed to "Mnożnik: %{_multiper}%x (%{_chance} * 100%%% szans)%nl%Wygrana: %{_reward}% <:%getEmoji({_e2})%>"
+        set embed color of embed to green
+    return last embed
+
+function embedKasynoLost(amount: number, multiper: number, chance: number) :: embedbuilder:
+    set {_e1} to yaml value "emoji_odmowa" from "config"
+    set {_e2} to yaml value "emoji_primogem" from "config"
+
+    make embed:
+        set title of embed to "<:%getEmoji({_e1})%> Przegrana..."
+        set description of embed to "Mnożnik: %{_multiper}%x (%{_chance} * 100%%% szans)%nl%Strata: %{_amount}% <:%getEmoji({_e2})%>"
+        set embed color of embed to red
+    return last embed

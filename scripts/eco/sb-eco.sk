@@ -1,0 +1,22 @@
+on slash command:
+    event-string is "ekonomia"
+
+    defer the interaction and wait
+
+    reply with embedEco(event-guild)
+
+function embedEco(g: guild) :: embedbuilder:
+    set {_e1} to yaml value "emoji_primogem" from "config"
+    set {_e2} to yaml value "emoji_wish" from "config"
+
+    make embed:
+        set title of embed to "Poradnik i opis działania ekonomii"
+
+        add field named "<:%getEmoji({_e1})%> Zarabianie" with value "Aby rozpocząć postęp w ekonomii musisz zarabiać primogemy (<:%getEmoji({_e1})%>). Możesz je zarobić wykonująć zadania - **/daily** dostępne raz na dzień oraz **/praca** dostępne raz na 10 minut. Oprócz tych podstawowych metod możesz również:%nl% - okradać innych komendą **/okradnij**%nl% - inwestować w kasyno komendą **/kasyno**%nl% - zdobywać osiągnięcia, możesz je przejrzeć komendą **/osiągnięcia**" to fields of embed
+        add field named "<:%getEmoji({_e1})%> Wydawanie" with value "Gdy już zarobisz, primogemy będziesz mógł wydać. Najważniejszym sposobem wydania primogemów jest wishowanie - **/wish**. Właśnie wishując zdobywasz postacie do swojego konta. Im więcej zdobywasz postaci, tym bardziej wzrastają twoje punkty rankingowe oraz twoje miejsce w topce. Oprócz wishowania możesz także stracić primogemy w kasynie i innych ryzykownych funkcjach." to fields of embed
+        add field named "<:%getEmoji({_e1})%> Postacie" with value "Postacie dzielą się na 4⭐ i 5⭐. To jakie postacie trafisz wishując, będzie zależeć od obecnego banneru. Możesz go sprawdzić komendą **/banner**. Główną postać 5⭐ z banneru można trafić tylko i wyłącznie podczas trwania tego banneru. Są również 3 postacie 4⭐ z zwiększonym dropem, jednak wszystkie inne postacie 4⭐ wciąż są dostępne. Oprócz głównej postaci 5⭐ możesz również trafić 7 postaci 5⭐ standardowych przegrywając 50/50." to fields of embed
+        add field named "<:%getEmoji({_e1})%> System pity" with value "Trafianie postaci jest zależne od systemu pity. System pity to inaczej system gwarancji, który po wykonaniu wystarczającej ilości wishy zapewni nam postać. Rozróżniamy 2 pojęcia: **soft pity** i **hard pity**. Soft pity zaczyna się od 74 pity i zwiększa nam szansę na drop aż do dotarcia do hard pity, który wynosi 90 pity. Każdy 1 wish dodaje nam do licznika 1 pity, a po trafieniu 5⭐ postaci licznik pity wraca na 0. Swoje obecne pity możesz sprawdzić komendą **/pity**." to fields of embed
+        add field named "<:%getEmoji({_e1})%> 50/50" with value "Oprócz liczenia pity jest jeszcze **system 50/50**. Jeśli twoja ostatnia postać była główną postacią z banneru, to masz 50%% szans, że kolejna będzie główną postacią z banneru oraz 50%% szans, że będzie postacią standardową. Jeśli jednak twoja ostatnia postać była postacią standardową, to masz 100%% szans, że kolejna postać będzie główną postacią z banneru." to fields of embed
+        embedStart({_g})
+        embedEnd()
+    return last embed

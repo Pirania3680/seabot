@@ -1,0 +1,48 @@
+on slash command:
+    event-string is "przelej"
+
+    set {_user} to argument "użytkownik" as user
+    set {_amount} to argument "ilość" as integer
+
+    set {_id} to discord id of event-user
+    set {_uid} to discord id of {_user}
+    set {_uprimo} to {eco::%{_uid}%::primo}
+
+    set {_e1} to yaml value "emoji_primogem" from "config"
+
+    if gachaCurrency("?", {_id}, "primo", 0) < 0:
+        reply with hidden styleDeny("Posiadasz dług. Nie możesz wykonać żadncyh wydatków, dopóki nie uregulujesz należności.")
+        stop
+    if {_id} is {_uid}:
+        reply with hidden styleDeny("Nie ma potrzeby przelewawnia sobie kasy...")
+        stop
+    if {eco::%{_uid}%::join} is not set:
+        reply with hidden styleDeny("Ten użytkownik nie dołączył do ekonomii.")
+        stop
+    if {_amount} < 1:
+        reply with hidden styleDeny("Minimalna kwota przelewu to `1` <:%getEmoji({_e1})%>.")
+        stop
+    if gachaCurrency("?", {_id}, "primo", 0) < {_amount}:
+        reply with hidden styleDeny("Nie posiadasz %{_amount}% <:%getEmoji({_e1})%> na swoim koncie.")
+        stop
+    
+    defer the interaction and wait
+
+    gachaCurrency("-", {_id}, "primo", {_amount})
+    gachaCurrency("+", {_uid}, "primo", {_amount})
+    
+    reply with embedPay({_user}, {_amount})
+
+    ecoEvent({_id}, "pay", {_amount})
+
+
+
+function embedPay(u: user, a: number) :: embedbuilder:
+    set {_e1} to yaml value "emoji_zezwolenie" from "config"
+    set {_e2} to yaml value "emoji_primogem" from "config"
+
+    make embed:
+        set title of embed to "<:%getEmoji({_e1})%> Przelano"
+        set description of embed to "Użytkownik %mention tag of {_u}% otrzymał od Ciebie `%{_a}%` <:%getEmoji({_e2})%>."
+        set embed color of embed to green
+    return last embed

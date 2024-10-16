@@ -1,0 +1,136 @@
+# ŁADOWANIE
+on load:
+    load yaml "plugins/Skript/data/gacha/data.yml" as "data"
+
+# DANE WALUT
+function gachaCurrency(action: string, u: string, cur: string, num: number) :: number:
+    if {_cur} is not "primo" or "wish" or "points":
+        stop
+
+    if {_action} is "=" or "set":
+        set {eco::%{_u}%::%{_cur}%} to {_num}
+        return {eco::%{_u}%::%{_cur}%} ? 0
+    
+    else if {_action} is "+" or "add":
+        ecoEvent({_u}, "primo-add", {_num}) if {_cur} is "primo"
+        add {_num} to {eco::%{_u}%::%{_cur}%}
+        return {eco::%{_u}%::%{_cur}%} ? 0
+    
+    else if {_action} is "-" or "remove":
+        ecoEvent({_u}, "primo-remove", {_num}) if {_cur} is "primo"
+        remove {_num} from {eco::%{_u}%::%{_cur}%}
+        return {eco::%{_u}%::%{_cur}%} ? 0
+    
+    else if {_action} is "0" or "reset":
+        set {eco::%{_u}%::%{_cur}%} to 0
+        return {eco::%{_u}%::%{_cur}%} ? 0
+
+    else if {_action} is "?" or "get":
+        return {eco::%{_u}%::%{_cur}%} ? 0
+
+function gachaBothPrimo(u: string, r: number) :: boolean:
+    set {_cost} to yaml value "wish_cost" from "config"
+
+    set {_p} to gachaCurrency("?", {_u}, "primo", 0)
+    set {_w} to gachaCurrency("?", {_u}, "wish", 0)
+
+    set {_d} to floor({_p} / {_cost})
+    set {_amount} to round({_w} + {_d})
+
+    if {_amount} >= {_r}:
+
+        if {_w} <= {_r}:
+            set {_req} to round({_r} - {_w})
+
+            gachaCurrency("0", {_u}, "wish", 0)
+            gachaCurrency("-", {_u}, "primo", {_req} * {_cost})
+        
+        else:
+            gachaCurrency("-", {_u}, "wish", {_r})
+
+        return true
+
+# DANE POSTACI
+function gachaGetValue(v: string, name: string) :: object:
+    return yaml value "%{_v}%.%{_name}%" from "data"
+
+function gachaGetFromID(id: number) :: string:
+    set {_list::*} to all yaml nodes of "data"
+    loop {_list::*} where [input ends with ".id"]:
+
+        set {_v} to yaml value "%loop-value%" from "data"
+
+        if {_v} is {_id}:
+            set {_p::*} to "%loop-value%" parsed as "%string%.id"
+            return {_p::1}
+
+function gachaBannerFromName(name: string) :: string:
+    set {_list::*} to all yaml nodes of "eco"
+    loop {_list::*} where [input ends with ".name"]:
+
+        set {_v} to yaml value "%loop-value%" from "eco"
+
+        if {_v} is {_name}:
+            set {_p::*} to "%loop-value%" parsed as "economy_banners.%string%.name"
+            return {_p::1}
+
+function gachaGetAllCharacters() :: strings:
+    set {_list::*} to all yaml nodes of "data"
+    loop {_list::*} where [input don't contain "."]:
+        if (yaml value "%loop-value%.type" from "data") is "character":
+            add "%loop-value%" to {_return::*}
+
+    return alphabetically sorted {_return::*}
+
+function gachaGetAllWeapons() :: strings:
+    set {_list::*} to all yaml nodes of "data"
+    loop {_list::*} where [input don't contain "."]:
+        if (yaml value "%loop-value%.type" from "data") is "weapon":
+            if (yaml value "%loop-value%.disabled" from "data") is not set:
+                add "%loop-value%" to {_return::*}
+
+    return alphabetically sorted {_return::*}
+
+function gachaGetAllBanners() :: strings:
+    while {_end} is not true:
+        add 1 to {_loop}
+        set {_value} to yaml value "economy_banners.%{_loop}%.id" from "eco"
+        set {_end} to yaml value "economy_banners.%{_loop}%.end" from "eco"
+        set {_start} to yaml value "economy_banners.%{_loop}%.start" from "eco"
+        set {_now} to round(unix timestamp of now)
+
+        if {_value} is set:
+            if {_end} > {_now}:
+                if {_start} < {_now}:
+                    add "%{_loop}%" to {_list::*}
+        
+        else:
+            set {_end} to true
+    
+    return {_list::*}
+
+function gachaGetConstelation(n: number, max: number) :: number:
+    if {_n} <= ({_max} + 1):
+        return round({_n} - 1)
+    else if {_n} > ({_max} + 1):
+        return {_max}
+
+function gachaGetSortedDrops(list: strings) :: strings:
+    loop {_list::*}:
+        set {_rarity} to gachaGetValue(loop-value, "rarity")
+        add loop-value to {_sorted::%{_rarity}%::*}
+    
+    return {_sorted::5::*} and {_sorted::4::*} and {_sorted::3::*}
+
+function gachaGetOwnedAmount(id: string) :: numbers:
+    loop {eco::%{_id}%::obtained::*}:
+        set {_type} to gachaGetValue(loop-index, "type")
+        set {_rarity} to gachaGetValue(loop-index, "rarity")
+
+        add 1 to {_amount::1} if "%{_type}%::%{_rarity}%" is "character::5"
+        add 1 to {_amount::2} if "%{_type}%::%{_rarity}%" is "character::4"
+        add 1 to {_amount::3} if "%{_type}%::%{_rarity}%" is "weapon::5"
+        add 1 to {_amount::4} if "%{_type}%::%{_rarity}%" is "weapon::4"
+        add 1 to {_amount::5} if "%{_type}%::%{_rarity}%" is "weapon::3"
+    
+    return ({_amount::1} ? 0), ({_amount::2} ? 0), ({_amount::3} ? 0), ({_amount::4} ? 0) and ({_amount::5} ? 0)

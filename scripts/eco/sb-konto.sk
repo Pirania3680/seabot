@@ -1,0 +1,169 @@
+options:
+    obtained: plugins/Skript/data/gacha/inventory/obtained
+    unobtained: plugins/Skript/data/gacha/inventory/unobtained
+    constelation: plugins/Skript/data/gacha/inventory/constelation
+    width: 118
+    height: 142
+
+
+
+on slash command:
+    event-string is "konto"
+
+    set {_user} to (argument "użytkownik" as user) ? event-user
+    set {_id} to discord id of {_user}
+
+    # SPRAWDZANIE CZY DOŁĄCZONO
+    if {eco::%{_id}%::join} is not set:
+        reply with hidden styleDeny("Ten użytkownik nie dołączył do ekonomii.")
+        stop
+    
+    defer the interaction and wait
+    
+    # OBLICZANIE PUNKTÓW
+    gachaCalculatePoints({_id})
+
+    create a new message and store it in {_msg}:
+        add embedInventory({_id}, 5) to the embeds of the message
+        add imgInventory({_id}, "character", 5) to the attachments of the message
+        add rowInventoryWeapon({_id}, "character::5", gachaGetOwnedAmount({_id})) to rows of the message
+        add rowInventoryCharacter({_id}, "character::5", gachaGetOwnedAmount({_id})) to rows of the message
+
+    reply with {_msg}
+
+on button click:
+    if discord id of event-button starts with "inventory::select::":
+        defer the interaction
+
+        set {_parse::*} to discord id of event-button parsed as "inventory::select::%string%::%number%::%string%"
+
+        # OBLICZANIE PUNKTÓW
+        gachaCalculatePoints({_parse::3})
+
+        create a new message and store it in {_msg}:
+            add embedInventory({_parse::3}, {_parse::2}) to the embeds of the message
+            add imgInventory({_parse::3}, {_parse::1}, {_parse::2}) to the attachments of the message
+            add rowInventoryWeapon({_parse::3}, "%{_parse::1}%::%{_parse::2}%", gachaGetOwnedAmount({_parse::3})) to rows of the message
+            add rowInventoryCharacter({_parse::3}, "%{_parse::1}%::%{_parse::2}%", gachaGetOwnedAmount({_parse::3})) to rows of the message
+
+        edit event-message to show {_msg}
+
+
+
+function embedInventory(id: string, rarity: number) :: embedbuilder:
+    set {_primo} to rounded gachaCurrency("?", {_id}, "primo", 0)
+    set {_wish} to rounded gachaCurrency("?", {_id}, "wish", 0)
+    set {_points} to rounded gachaCurrency("?", {_id}, "points", 0)
+
+    set {_e1} to yaml value "emoji_primogem" from "config"
+    set {_e2} to yaml value "emoji_wish" from "config"
+    set {_e3} to yaml value "emoji_point" from "config"
+
+    make embed:
+        set title of embed to "Twoje konto:"
+        add inline field named "Primogemy" with value "`%{_primo}%` <:%getEmoji({_e1})%>" to fields of embed
+        add inline field named "Wishe" with value "`%{_wish}%` <:%getEmoji({_e2})%>" to fields of embed
+        add inline field named "Punkty" with value "`%{_points}%` <:%getEmoji({_e3})%>" to fields of embed
+
+        set image of embed to "attachment://image1.png"
+        embedEnd()
+    return last embed
+
+function rowInventoryCharacter(id: string, current: string, amounts: numbers) :: row:
+    set {_max4c} to size of (gachaGetAllCharacters() where [gachaGetValue(input, "rarity") = 4])
+    set {_max5c} to size of (gachaGetAllCharacters() where [gachaGetValue(input, "rarity") = 5])
+
+    set {_e1} to yaml value "emoji_icon_characters" from "config"
+
+    make new component row and store it in {_row}:
+        if {_current} = "character::5":
+            add new disabled secondary button with id "inventory::select::character::5::%{_id}%" named "5⭐ (%{_amounts::1}%/%{_max5c}%)" with emoji getEmoji({_e1}) to components of the row builder
+        else:
+            add new secondary button with id "inventory::select::character::5::%{_id}%" named "5⭐ (%{_amounts::1}%/%{_max5c}%)" with emoji getEmoji({_e1}) to components of the row builder
+
+        if {_current} = "character::4":
+            add new disabled secondary button with id "inventory::select::character::4::%{_id}%" named "4⭐ (%{_amounts::2}%/%{_max4c}%)" with emoji getEmoji({_e1}) to components of the row builder
+        else:
+            add new secondary button with id "inventory::select::character::4::%{_id}%" named "4⭐ (%{_amounts::2}%/%{_max4c}%)" with emoji getEmoji({_e1}) to components of the row builder
+
+    return {_row}
+
+function rowInventoryWeapon(id: string, current: string, amounts: numbers) :: row:
+    set {_max3w} to size of (gachaGetAllWeapons() where [gachaGetValue(input, "rarity") = 3])
+    set {_max4w} to size of (gachaGetAllWeapons() where [gachaGetValue(input, "rarity") = 4])
+    set {_max5w} to size of (gachaGetAllWeapons() where [gachaGetValue(input, "rarity") = 5])
+
+    set {_e1} to yaml value "emoji_icon_weapons" from "config"
+
+    make new component row and store it in {_row}:
+        if {_current} = "weapon::5":
+            add new disabled secondary button with id "inventory::select::weapon::5::%{_id}%" named "5⭐ (%{_amounts::3}%/%{_max5w}%)" with emoji getEmoji({_e1}) to components of the row builder
+        else:
+            add new secondary button with id "inventory::select::weapon::5::%{_id}%" named "5⭐ (%{_amounts::3}%/%{_max5w}%)" with emoji getEmoji({_e1}) to components of the row builder
+        
+        if {_current} = "weapon::4":
+            add new disabled secondary button with id "inventory::select::weapon::4::%{_id}%" named "4⭐ (%{_amounts::4}%/%{_max4w}%)" with emoji getEmoji({_e1}) to components of the row builder
+        else:
+            add new secondary button with id "inventory::select::weapon::4::%{_id}%" named "4⭐ (%{_amounts::4}%/%{_max4w}%)" with emoji getEmoji({_e1}) to components of the row builder
+
+        if {_current} = "weapon::3":
+            add new disabled secondary button with id "inventory::select::weapon::3::%{_id}%" named "3⭐ (%{_amounts::5}%/%{_max3w}%)" with emoji getEmoji({_e1}) to components of the row builder
+        else:
+            add new secondary button with id "inventory::select::weapon::3::%{_id}%" named "3⭐ (%{_amounts::5}%/%{_max3w}%)" with emoji getEmoji({_e1}) to components of the row builder
+
+    return {_row}
+
+function imgInventory(id: string, type: string, rarity: number) :: image:
+    if {_type} is "character":
+        set {_list::*} to gachaGetAllCharacters() where [gachaGetValue(input, "rarity") = {_rarity}]
+        set {_max-const} to 6
+        set {_type-const} to "const"
+    else if {_type} is "weapon":
+        set {_list::*} to gachaGetAllWeapons() where [gachaGetValue(input, "rarity") = {_rarity}]
+        set {_max-const} to 5
+        set {_type-const} to "ref"
+
+    loop {_list::*}:
+        if {eco::%{_id}%::obtained::%loop-value%} >= 1:
+            add loop-value to {_list-1::*}
+        else:
+            add loop-value to {_list-2::*}
+    
+    set {_max} to ceil(size of ({_list-1::*}) / 9)
+    set {_width} to 0
+    set {_height} to 0
+
+    if {_list-1::1} is set:
+        set {_image} to new image with size (9 * {@width}), (({_max} * {@height}) + 80)
+
+        loop {_list-1::*}:
+
+            set {_x} to {_width} * {@width}
+            set {_z} to {_height} * {@height}
+
+            set {_character} to {eco::%{_id}%::obtained::%loop-value%}
+            set {_const} to gachaGetConstelation({_character}, {_max-const})
+
+            if {_character} > 0:
+                draw image from file "{@obtained}/%loop-value%.png" on {_image} at {_x}, ({_z} + 6)
+            else:
+                draw image from file "{@unobtained}/%loop-value%.png" on {_image} at {_x}, ({_z} + 6)
+
+            if {_const} > 0:
+                draw image from file "{@constelation}/%{_type-const}%-%{_const}%.png" on {_image} at {_x} + 88, {_z} + 3
+
+            add 1 to {_width}
+            if {_width} = 9:
+                set {_width} to 0
+                add 1 to {_height}
+
+        set {_adding} to fontGenerate("genshin", 20, 2, "Zebrano %size of {_list-1::*}% na %size of {_list::*}% przedmiotów")
+        set {_width} to width of {_adding}
+        set {_line} to ceil(((9 * {@width}) - {_width}) / 2)
+        draw {_adding} on {_image} at {_line}, (({_height} * {@height}) + {@height} + 30)
+    
+    else:
+        set {_image} to new image with size 1062, 472
+        draw image from file "plugins/Skript/data/gacha/none.png" on {_image} at 0, 0
+
+    return {_image}

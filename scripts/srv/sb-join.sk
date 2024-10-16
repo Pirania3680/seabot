@@ -1,0 +1,11 @@
+on member join guild:
+    if discord id of event-guild is "%yaml value "server" from "config"%":
+        if discord id of event-user is not "%yaml value "bot" from "config"%":
+
+            if discord id of event-user is not "495637419148705793":
+                set {_list::*} to yaml list "role_on_join" from "config"
+                loop {_list::*}:
+                    add role with id "%loop-value%" to roles of event-member
+                
+            else:
+                add role with id "1114265521366511616" to roles of event-member

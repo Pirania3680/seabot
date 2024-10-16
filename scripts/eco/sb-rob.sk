@@ -1,0 +1,108 @@
+on slash command:
+    event-string is "okradnij"
+
+    set {_id} to discord id of event-user
+    set {_user} to argument "użytkownik" as user
+    set {_multiper} to argument "metoda" as string
+
+    set {_time} to {eco::%{_id}%::rob-time}
+    set {_dif} to difference between now and {_time}
+
+    set {_uid} to discord id of {_user}
+
+    if {_multiper} is not "1" or "2" or "3":
+        set {_multiper} to "1"
+    
+    if {_id} is {_uid}:
+        reply with hidden styleDeny("Serio próbujesz okraść siebie?")
+        stop
+    
+    if {_dif} < 60 minutes:
+        set {_wait} to ({eco::%{_id}%::rob-last} + 3600)
+
+        reply with hidden styleDeny("Kolejną kradzież będziesz mógł wykonać <t:%{_wait}%:R>.")
+        stop
+    
+    if {eco::%{_uid}%::join} is not set:
+        reply with hidden styleDeny("Ten użytkownik nie dołączył do ekonomii.")
+        stop
+    
+    defer the interaction and wait
+    
+    set {_chance} to 0.9 if {_multiper} is "1"
+    set {_chance} to 0.7 if {_multiper} is "2"
+    set {_chance} to 0.5 if {_multiper} is "3"
+
+    set {_multiper} to 0.3 if {_multiper} is "1"
+    set {_multiper} to 0.5 if {_multiper} is "2"
+    set {_multiper} to 0.7 if {_multiper} is "3"
+
+    set {_lost} to yaml value "rob_fail" from "config"
+    set {_random} to random integer between 3 and 9
+
+    set {eco::%{_id}%::rob-time} to now
+    set {eco::%{_id}%::rob-last} to round(unix timestamp of now)
+
+    chance of {_chance}:
+        set {_win} to true
+    
+    reply with embedRobWaiting({_user}) and store it in {_reply}
+
+    loop 10 times:
+        if {_win} is not true:
+            if loop-number is {_random}:
+                gachaCurrency("-", {_id}, "primo", {_lost})
+                edit {_reply} to show embedRobLost({_lost}, {_chance}, {_multiper}, {_user})
+
+                ecoEvent({_id}, "rob-failed", 0)
+                stop
+        wait 1 second
+    
+    set {_uprimo} to {eco::%{_uid}%::primo}
+    set {_reward} to round({_uprimo} * {_multiper})
+
+    gachaCurrency("+", {_id}, "primo", {_reward})
+    gachaCurrency("-", {_uid}, "primo", {_reward})
+    edit {_reply} to show embedRobWin({_reward}, {_chance}, {_multiper}, {_user})
+
+    ecoEvent({_id}, "rob-success", {_reward})
+        
+
+on slash completion:
+    event-string is "okradnij"
+    
+    add new choice named "90%% szans, 30%% zysku" with value "1" to {_list::*}
+    add new choice named "70%% szans, 50%% zysku" with value "2" to {_list::*}
+    add new choice named "50%% szans, 70%% zysku" with value "3" to {_list::*}
+    
+    return {_list::*}
+
+
+function embedRobWaiting(u: user) :: embedbuilder:
+    set {_e1} to yaml value "emoji_icon_counting" from "config"
+    set {_e2} to yaml value "emoji_loading" from "config"
+
+    make embed:
+        set title of embed to "<a:%getEmoji({_e2})%> Trwa okradanie..."
+        set description of embed to "Trwa okradanie %mention tag of {_u}%, poczekaj jeszcze <a:%getEmoji({_e1})%> sekund!"
+    return last embed
+
+function embedRobWin(win: number, chance: number, reward: number, u: user) :: embedbuilder:
+    set {_e1} to yaml value "emoji_zezwolenie" from "config"
+    set {_e2} to yaml value "emoji_primogem" from "config"
+
+    make embed:
+        set title of embed to "<:%getEmoji({_e1})%> Okradziono!"
+        set description of embed to "Ofiara: %mention tag of {_u}%%nl%Metoda: %{_chance} * 100%%% szans, %{_reward} * 100%%% zysku%nl%Zarobiono: %{_win}% <:%getEmoji({_e2})%>"
+        set embed color of embed to green
+    return last embed
+
+function embedRobLost(lost: number, chance: number, reward: number, u: user) :: embedbuilder:
+    set {_e1} to yaml value "emoji_odmowa" from "config"
+    set {_e2} to yaml value "emoji_primogem" from "config"
+
+    make embed:
+        set title of embed to "<:%getEmoji({_e1})%> Zostałeś złapany..."
+        set description of embed to "Ofiara: %mention tag of {_u}%%nl%Metoda: %{_chance} * 100%%% szans, %{_reward} * 100%%% zysku%nl%Zapłaciłeś %{_lost}% <:%getEmoji({_e2})%> kary"
+        set embed color of embed to red
+    return last embed

@@ -1,0 +1,95 @@
+on slash command:
+    event-string is "level"
+
+    set {_user} to argument "użytkownik" as user ? event-user
+    set {_id} to discord id of {_user}
+
+    if {level::%{_id}%::join} is not true:
+        reply with hidden styleDeny("Ten użytkownik nie jest w bazie danych levelów.")
+        stop
+    
+    defer the interaction and wait
+    
+    set {_reward} to levelCheckRewards({_id})
+
+    create a new message and store it in {_msg}:
+        add embedLevel({_user}, event-guild) to the embeds of the message
+        add imgLvlMain({_user}, {_reward}) to the attachments of the message
+
+        if {_reward} > 0:
+            add rowReward({_id}) to the rows of the message
+
+    reply with {_msg}
+
+on button click:
+    if discord id of event-button starts with "level-reward::":
+        defer the interaction
+
+        set {_parse::*} to discord id of event-button parsed as "level-reward::%string%"
+        set {_id} to discord id of event-user
+
+        if {_parse::1} is not {_id}:
+            reply with hidden styleDeny("Ten przycisk nie należy do twojej interakcji.")
+            stop
+        
+        set {_reward} to levelCheckRewards({_id})
+
+        if {_reward} <= 0:
+            reply with hidden styleDeny("Wszystkie nagrody zostały już odebrane.")
+            stop
+        
+        set {_items::*} to levelGetRewards({_reward})
+        loop {_items::*}:
+            set {_parse::*} to loop-value parsed as "%number% %string%"
+            set {_type} to yaml value "%{_parse::2}%.type" from "data"
+
+            if {_type} is "currency":
+                gachaCurrency("+", {_id}, {_parse::2}, {_parse::1})
+        
+        set {level::%{_id}%::reward} to {_reward}
+        set {_next} to levelCheckRewards({_id})
+
+        create a new message and store it in {_msg}:
+            add embedLevel(event-user, event-guild) to the embeds of the message
+            add imgLvlMain(event-user, {_next}) to the attachments of the message
+
+            if {_next} > 0:
+                add rowReward({_id}) to the rows of the message
+
+        edit event-message to show {_msg}
+
+        ecoEvent({_id}, "level-reward", {_reward})
+
+
+function embedLevel(u: user, g: guild) :: embedbuilder:
+    set {_lvl} to {level::%discord id of {_u}%::lvl}
+    set {_exp} to round({level::%discord id of {_u}%::exp})
+    set {_current} to expGetCurrentExp({_lvl}, {_exp})
+    set {_required} to expGetRequiredExp({_lvl})
+    set {_percent} to expGetPercent({_current}, {_required})
+
+    set {_msg} to "%{level::%discord id of {_u}%::message}% wiadomości"
+    set {_cmd} to "%{level::%discord id of {_u}%::command}% komend"
+    set {_vc} to formatTime("%{level::%discord id of {_u}%::voice} ? 0%", 3)
+
+    make embed:
+
+        # add inline field named "💭 %{_msg}%" with value "" to fields of embed
+        # add inline field named "🤖 %{_cmd}%" with value "" to fields of embed
+        # add inline field named "🔊 %{_vc}%" with value "" to fields of embed
+
+        add inline field named "🔋 Obecny poziom" with value "%{_lvl}% level" to fields of embed
+        add inline field named "🪫 Do następnego poziomu" with value "%{_current}% / %{_required}% (%{_percent}%%%)" to fields of embed
+        # add inline field named "" with value "" to fields of embed
+
+        set image of embed to "attachment://image1.png"
+        embedStart({_g})
+        embedEnd()
+    return last embed
+
+function rowReward(id: string) :: row:
+    set {_e1} to yaml value "emoji_primogem" from "config"
+
+    make new component row and store it in {_row}:
+        add new success button with id "level-reward::%{_id}%" named "Odbierz nagrody" with emoji getEmoji({_e1}) to components of the row builder
+    return {_row}

@@ -1,0 +1,12 @@
+on slash command:
+    event-string is "archiwum"
+
+    defer the interaction and wait
+
+    make embed:
+        set title of embed to "Archiwum SeaBlocka"
+        set title url of embed to "https://www.pirania.fun/archiwum"
+        set description of embed to "Kliknij powyżej, aby przejść na naszego archwium <:coool:894344340414009344>"
+        embedStart(event-guild)
+        embedEnd()
+    reply with last embed

@@ -1,0 +1,309 @@
+
+# DLA UŻYTKOWNIKÓW
+
+anime:
+  type: user
+  description: 'Komenda wyśle Ci losowe zdjęcia postaci z anime. Jedna z lepszych komend B)'
+  examples:
+    - '/anime'
+
+avatar:
+  type: user
+  description: 'Jeśli chcesz zobaczyć czyiś avatar w większej rozdzielczości lub po prostu go pobrać, komenda idealna. Wysyła zdjęcie podanego użytkownika.'
+  examples:
+    - '/avatar użytkownik:@%user%'
+    - '/avatar użytkownik:@%bot%'
+
+auto:
+  type: user
+  description: 'Jeśli chcesz obejrzeć cuda techniki - komenda idealna. Wysyła stare klasyki lub nowoczesne cudeńka motoryzacji.'
+  examples:
+    - '/auto'
+
+kot:
+  type: user
+  description: 'Komenda zapewni dobrej jakości obrazki z kotami :) Idealne na odprężenie lub nudy.'
+  examples:
+    - '/kot'
+
+pies:
+  type: user
+  description: 'Komenda zapewni dobrej jakości obrazki z psami :) Idealne na odprężenie lub nudy.'
+  examples:
+    - '/pies'
+
+hentai:
+  type: user
+  description: 'Komenda dla prawdziwych Chadów. Wysyła interesujące zdjęcia z hanime.'
+  info: 'Ta komenda jest przeznaczona tylko dla prawdziwych ludzi kultury.'
+  examples:
+    - '/hentai'
+
+losuj:
+  type: user
+  description: 'Dzięki tej komendzie możesz wylosować losową liczbę. Dzięki temu możesz podjąć jakąś decyzję. Możesz też ustawić liczbę minimalną i maksymalną.'
+  examples:
+    - '/losuj'
+    - '/losuj min:1 max:4'
+
+sugestia:
+  type: user
+  description: 'Jeśli zauważyłeś jakiś błąd, masz sugestię lub chcesz poinformować o czymś innym, użyj tej komendy.'
+  examples:
+    - '/sugestia'
+
+tłumacz:
+  type: user
+  description: 'Komenda pomoże Ci przetłumaczyć dany tekst na dany język.'
+  examples:
+    - '/tłumacz język:pl tekst:Hello'
+    - '/tłumacz język:jp tekst:Dzień dobry'
+
+wersja:
+  type: user
+  description: 'Komenda pokazuje zmiany w bocie w każdej wersji.'
+  examples:
+    - '/wersja'
+
+# EKONOMIA I LEVEL
+
+ekonomia:
+  type: eco
+  description: 'Pokaże opis mechanik i pomoc dotyczącą działanie ekonomii'
+  examples:
+    - '/ekonomia'
+
+level:
+  type: eco
+  description: 'Wyświetla twój obecny poziom. Za zdobywanie poziomów możesz zdobyć nagrody do ekonomii.'
+  examples:
+    - '/level'
+    - '/level użytkownik:@%bot%'
+
+konto:
+  type: eco
+  description: 'Pokazuje twoje konto w ekonomii. Znajdziesz tam stan swoich primogemów i wishów oraz wszystkie zebrane dotychczas postacie.'
+  examples:
+    - '/konto'
+
+wish:
+  type: eco
+  description: 'Używa wishy do zdobywania postaci. Drop postaci jest losowy i może zależeć od banneru, na którym wykonasz wisha. Możesz też zrobić 1 lub 10 wishy na raz.'
+  info: ''
+  examples:
+    - '/wish banner:Event Wish 1'
+    - '/wish banner:Event Wish 2 ilość:10'
+
+banner:
+  type: eco
+  description: 'Komenda wyświetla akutalnie trwające bannery na których można wishować. Znajdziesz tam informacje o dropie, czasie i postaciach. Możesz podać, który banner chcesz zobaczyć lub później wybrać go przyciskami w wiadomości.'
+  examples:
+    - '/banner'
+
+praca:
+  type: eco
+  description: 'Pozwala "pracować" w ekonomii. Dzięki wykonywaniu prostych zadań zarobisz primogemy. Prace są losowe i możesz je wykonywać raz na 10 minut.'
+  examples:
+    - '/praca'
+
+kasyno:
+  type: eco
+  description: 'Tą komendą możesz obstawiać primogemy z ekonomii. Musisz podać ile primogemów obstawiasz i jaki wybierasz mnożnik. Im większy mnożnik, tym większa potencjalna wygrana, lecz mniejsza szansa na nią. Szansa na wygranie jest obliczana poprzez 100 / <mnożnik>. Dla mnożniku 4 szansa wynosi 25% a wygrana 4 * <obstawienie>'
+  info: 'Jeśli nie podasz mnożnika, domyślnie będzie on wynosił 2.'
+  examples:
+    - '/kasyno obstawienie:100'
+    - '/kasyno obstawienie:200 mnożnik:4'
+
+okradnij:
+  type: eco
+  description: 'Ta komenda służy do okradania użytkowników w ekonomii. Do wyboru są 3 metody, każda różni się ilością okradanych primogemów i szansą na powodzenie. Jeśli zostaniesz złapany, będziesz musiał zapłacić karę.'
+  examples:
+    - '/okradnij użytkownik:%bot% metoda:70% szans, 50% zysku'
+  
+przelej:
+  type: eco
+  description: 'Tą komendą możesz przelać daną kwotę danemu użytkownikowi w ekonomii.'
+  examples:
+    - '/przelej użytkownik:%bot% ilość:100'
+
+daily:
+  type: eco
+  description: 'Tą komende możesz użyć raz na dzień. Po użyciu otrzymujesz codzienną nagrodę w ekonomii.'
+  examples:
+    - '/daily'
+
+topka:
+  type: eco
+  description: 'Komenda pokazująca najlepszych użytkowników w danych dziedzinach. Topka jest dostępna w punktach z ekonomii oraz w levelach.'
+  info: 'Rodzaj pokazywanej topki będziesz mógł wybrać przyciskami po użyciu komendy.'
+  examples:
+    - '/topka'
+
+osiągnięcia:
+  type: eco
+  description: 'Komenda pokazuje listę wszystkich zdobytych osiągnięć danego użytkownika (lub swoich).'
+  examples:
+    - '/osiągnięcia'
+    - '/osiągnięcia użytkownik:%bot%'
+
+zgadnij:
+  type: eco
+  description: 'Tą komendą możesz spróbować zgadnąć, z jakiej wersji gry pochodzi obecny banner na ekonomii. Za prawidłowe wytypowanie wersji czeka nagroda 10 wishy.'
+  examples:
+    - '/zgadnij wersja:1.6'
+
+# OSU
+
+osu:
+  type: user
+  description: 'Za pomocą tej komendy możesz zobaczyć najważniejsze informacje o profilu podanego użytkownika w grze rytmicznej osu!'
+  examples:
+    - '/osu użytkownik:%bot%'
+
+# MUZYCZNE
+
+zagraj:
+  type: music
+  description: 'Za pomocą tej komendy możesz wyszukać film z youtube i zagrać go botem na kanale głosowym, na którym jesteś. Jeśli coś obecnie jest już grane, twój film zostanie dodany do kolejki.'
+  examples:
+    - '/zagraj wyszukiwanie:adrian nowak żalno'
+
+pauza:
+  type: music
+  description: 'Zatrzymuje lub ponawia granie aktualnego utworu na kanale głosowym.'
+  examples:
+    - '/pauza'
+
+pomiń:
+  type: music
+  description: 'Pomija aktualnie grany utwór i przechodzi do następnego.'
+  examples:
+    - '/pomiń'
+  
+stop:
+  type: music
+  description: 'Kończy granie muzyki na kanale i go opuszcza.'
+  examples:
+    - '/stop'
+
+kolejka:
+  type: music
+  description: 'Wyświetla kolejkę utworów, które zostaną zagrane na kanale głosowym.'
+  examples:
+    - '/kolejka'
+  
+zapętl:
+  type: music
+  description: 'Zapętla aktualnie grany utwór. Będzie on grany dopóki komenda nie zostanie użyta po raz drugi.'
+  examples:
+    - '/zapętl'
+
+# ADMINISTRACYJNE
+
+autorole:
+  type: adm
+  description: 'Dzięki tej komendzie jesteś w stanie stworzyć funkcję autoroli - czyli po kliknięciu reakcji użytkownik otrzyma podaną rolę. W komendzie podajesz tylko, którą rolę bot ma nadać. Po użyciu komendy musisz zareagować emotką którą chcesz na wiadomość którą chcesz - wtedy utworzy się autorola.'
+  info: 'Dokładne instrukcje postępowania wyświetlą się po użyciu komendy.'
+  examples:
+    - '/autorole czynność:stwórz rola:@example'
+    - '/autorole czynność:usuń'
+
+clear:
+  type: adm
+  description: 'Najszybszy sposób na przywrócenie porządku na czacie. Komenda usuwa podaną ilość wiadomości. Limit na raz: 100 wiadomości.'
+  info: 'Uwaga! Wiadomości wysłane dawniej niż 2 tygodnie temu będą usuwane wolno i pojedynczo. Jest to ograniczenie Discorda.'
+  examples:
+    - '/clear ilość:20'
+
+embed:
+  type: adm
+  title: 'Pomoc komendy: /embed oraz /embed-edit'
+  description: 'Dzięki tym dwóm komendom możesz w prosty sposób wygenerować embed (osadzenie). Oto jak ich użyć:%nl%%nl%**1.** /embed `bez żadnych opcji, utworzy nowy generator`%nl%**2.** /embed-edit `z dowolnymi opcjami, zależnie jak chcesz edytować swój embed`%nl%**3.** /embed zapisz `zapisze twój embed z podaną nazwą`%nl%**4.** /send embed `teraz pozostaje Ci tylko wysłać swój embed tam gdzie go potrzeba!`'
+  examples:
+    - '/embed czynność:stwórz'
+    - '/embed-edit tytuł:Przykładowy embed'
+    - '/embed czynność:zapisz nazwa:przykład'
+    - '/send embed:przykład'
+
+embed-edit:
+  type: adm
+  title: 'Pomoc komendy: /embed oraz /embed-edit'
+  description: 'Dzięki tym dwóm komendom możesz w prosty sposób wygenerować embed (osadzenie). Oto jak ich użyć:%nl%%nl%**1.** /embed `bez żadnych opcji, utworzy nowy generator`%nl%**2.** /embed-edit `z dowolnymi opcjami, zależnie jak chcesz edytować swój embed`%nl%**3.** /embed zapisz `zapisze twój embed z podaną nazwą`%nl%**4.** /send embed `teraz pozostaje Ci tylko wysłać swój embed tam gdzie go potrzeba!`'
+  examples:
+    - '/embed czynność:stwórz'
+    - '/embed-edit tytuł:Przykładowy embed'
+    - '/embed czynność:zapisz nazwa:przykład'
+    - '/send embed:przykład'
+
+wyślij:
+  type: adm
+  description: 'Komenda pozwala na wysyłanie różnorakich wiadomości z użyciem bota. Może wysłać dowolny tekst lub wygenerowany embed (patrz /help embed). Może się nadać do regulaminów lub ankiet.'
+  info: 'Aby zrobić enter w tej komendzie, wpisz w tekście %nl%'
+  examples:
+    - '/wyślij wiadomość:To wyśle bot'
+    - '/wyślij embed:nazwa-zapisanego-embedu'
+    - '/wyślij wiadomość:@everyone embed:informacja'
+
+slowmode:
+  type: adm
+  description: 'Jest to tryb powolny dostępny w opcjach kanału. Dlaczego więc taka komenda? Ponieważ w opcjach nie możemy ustawić np. 1 sekundy, a z botem to żaden problem! Aby wyłączyć - wpisz 0 sekund.'
+  examples:
+    - '/slowmode sekundy:1'
+    - '/slowmode sekundy:0 kanał:#ekonomia'
+
+# KARANIE
+
+warn:
+  type: penalt
+  description: 'Komenda służąca do upominania użytkowników na serwerze.'
+  examples:
+    - '/warn użytkownik:%bot% powód:drabinki'
+
+mute:
+  type: penalt
+  description: 'Komenda służąca do wyciszania użytkowników na serwerze. Komenda używa wbudowanej w discord funkcji Wysłania użytkownika na przerwę. Czas może być dowolną liczbą z końcówką **s** (sekundy), **m** (minuty), **h** (godziny), **d** (dni).'
+  info: 'Z powodu ograniczeń discorda, maksymalny czas wyciszenia wynosi 28 dni.'
+  examples:
+    - '/mute użytkownik:%bot% czas:8h powód:spam'
+    - '/mute użytkownik:%bot% czas:1d12h powód:brak kultury'
+
+unmute:
+  type: penalt
+  description: 'Komenda służąca do odciszania użytkowników.'
+  examples:
+    - '/unmute użytkownik:%bot%'
+  
+kick:
+  type: penalt
+  description: 'Komenda służąca do wyrzucania użytkowników z serwera. Jeśli użytkownik ma zaproszenie, będzie mógł odrazu dołączyć spowrotem na serwer.'
+  examples:
+    - '/kick użytkownik:%bot% powód:podejrzana aktywność'
+
+ban:
+  type: penalt
+  description: 'Komenda służąca do banowania użytkowników na określony czas. Komenda banuje użytkownika i po podanym czasie usuwa nadanego bana. Czas może być dowolną liczbą z końcówką **s** (sekundy), **m** (minuty), **h** (godziny), **d** (dni), lub jeśli ma być na zawsze, użyj *****.'
+  examples:
+    - '/ban użytkownik:%bot% czas:7d powód:reklama'
+    - '/ban użytkownik:%bot% czas:* powód:bot'
+
+unban:
+  type: penalt
+  description: 'Komenda służąca do odbanowania użytkowników.'
+  examples:
+    - '/unban użytkownik:%bot%'
+
+# CUSTOMOWE
+
+archiwum:
+  server: 893534861527236670
+  type: user
+  description: 'Wysyła link do archiwum SeaBlocka.'
+  examples:
+    - '/archiwum'
+
+nick:
+  server: 893534861527236670
+  type: user
+  description: 'Tą komendą możesz zmienić swój nick na serwerze.'
+  examples:
+    - '/nick nick:nowy'

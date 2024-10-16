@@ -1,0 +1,36 @@
+on slash command:
+    event-string is "sugestia"
+    
+    set {_m} to new modal with id "suggestion" named "Sugestia"
+
+    set {_input1} to new short text input with id "suggestion-title" named "Tytuł sugestii"
+    set placeholder of {_input1} to "Podaj krótką nazwę dla twojej sugestii."
+    set minimum range of {_input1} to 1
+    set maximum range of {_input1} to 30
+    set required state of {_input1} to true
+    
+    set {_input2} to new text input with id "suggestion-desc" named "Dokładny opis"
+    set placeholder of {_input2} to "Napisz swoją sugestię."
+    set minimum range of {_input2} to 1
+    set maximum range of {_input2} to 1000
+    set required state of {_input2} to true
+
+    add {_input1} to rows of {_m}
+    add {_input2} to rows of {_m}
+
+    show {_m} to the user
+
+on modal receive:
+    event-string is "suggestion":
+        make embed:
+            set title of embed to "Nowa sugestia!"
+            set description of embed to "🏷️ **Nazwa:** %value of textinput with id "suggestion-title"%%nl%%nl%📡 **Autor:** %mention tag of event-user% | %event-user%%nl%%nl%🗒️ **Opis:**%nl%%value of textinput with id "suggestion-desc"%"
+            set thumbnail of embed to avatar of event-user
+            embedStart(event-guild)
+            embedEnd()
+        set {_id} to yaml value "owner" from "config"
+        set {_user} to user with id "%{_id}%"
+        open private channel of {_user} and store it in {_dm}
+        post last embed to {_dm}
+    
+        reply with styleReady("Twoja sugestia została wysłana do właściciela bota!")

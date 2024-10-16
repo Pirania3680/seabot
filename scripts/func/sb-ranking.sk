@@ -1,0 +1,17 @@
+function createTop(name: string, size: integer) :: strings:
+    set {_num} to size of {%{_name}%::*}
+    loop {_num} times:
+        loop {%{_name}%::*}:
+            {_v.%loop-number%} is not set:
+                set {_v.%loop-number%} to loop-value-2
+                set {_n.%loop-number%} to loop-index
+            loop-value-2 is greater than {_v.%loop-number%}:
+                set {_v.%loop-number%} to loop-value-2
+                set {_n.%loop-number%} to loop-index
+        remove {_v.%loop-number%} from {%{_name}%::*}
+    loop {_num} times:
+        loop-number is less than or equal to {_size}:
+            {_n.%loop-number%} isn't "<player>"
+            add {_n.%loop-number%} to {_return::*}
+
+    return {_return::*}

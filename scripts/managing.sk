@@ -1,0 +1,40 @@
+command /manage [<text>] [<text>] [<text>]:
+    executable by: console
+    trigger:
+        if arg 1 is "transform-level":
+
+            if arg 3 is set:
+                
+                if {level::%arg-2%::exp} is not set:
+                    send "&cID &f%arg-2% &cnie zostało znalezione w bazie danych."
+                    stop
+                
+                if {level::%arg-3%::exp} is not set:
+                    send "&cID &f%arg-3% &cnie zostało znalezione w bazie danych."
+                    stop
+
+                if {temp::manage::confirm} is not set:
+                    send "&ePotwierdź, że chcesz przerzucić dane użytkownika z ID &c%arg-2% &edo użytkownika z ID &c%arg-3% wpisując komendę jeszcze raz."
+                    set {temp::manage::confirm} to true
+                    wait 10 seconds
+                    delete {temp::manage::confirm}
+                    stop
+                
+                set {level::%arg-2%::exp} to round({level::%arg-2%::exp}) + round({level::%arg-3%::exp})
+                delete {level::%arg-2%::exp}
+                set {level::%arg-2%::message} to round({level::%arg-2%::message}) + round({level::%arg-3%::message})
+                delete {level::%arg-2%::message}
+                set {level::%arg-2%::voice} to round({level::%arg-2%::voice}) + round({level::%arg-3%::voice})
+                delete {level::%arg-2%::voice}
+                set {level::%arg-2%::command} to round({level::%arg-2%::command}) + round({level::%arg-3%::command})
+                delete {level::%arg-2%::command}
+                delete {level::%arg-2%::join}
+                delete {level::%arg-2%::lvl}
+                delete {level::%arg-2%::reward}
+                delete {temp::manage::confirm}
+                stop
+            
+            send "&cMusisz podać dwa ID użytkowników."
+            stop
+        
+        send "&cDostępne opcje - &etransform-level&c."

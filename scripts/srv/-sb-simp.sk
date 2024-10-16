@@ -1,0 +1,3 @@
+every 5 minutes:
+    set {_role} to role with id "893620211431907359"
+    post "gri pantofel %mention tag of {_role}%" to channel with id "893831483729539073"

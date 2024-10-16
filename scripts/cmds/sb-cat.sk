@@ -1,0 +1,23 @@
+on slash command:
+    event-string is "kot"
+    
+    defer interaction and wait
+
+    delete {system::temp::cat-json::*} and {system::temp::cat-json}
+
+    send a request to "https://api.thecatapi.com/v1/images/search?size=full"
+    set {system::temp::cat-json} to body of last http response
+    replace every "[{" with "{" in {system::temp::cat-json}
+    replace every "}]" with "}" in {system::temp::cat-json}
+    map json {system::temp::cat-json} to {system::temp::cat-json::*}
+
+    if {system::temp::cat-json::url} is not set:
+        reply with styleDeny("Wystąpił problem z odpowiedzią API.")
+        stop
+    
+    make embed:
+        set title of embed to "Oto twój kot:"
+        set image of embed to "%{system::temp::cat-json::url}%"
+        embedStart(event-guild)
+        embedEnd()
+    reply with last embed

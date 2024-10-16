@@ -1,0 +1,36 @@
+on load:
+    delete {music::queue::*}
+
+function musicQueueAdd(track: audiotracks, author: string):
+    set {_unix} to unix timestamp of now
+    loop {_track::*}:
+        set {_id} to "%{_unix}%:%loop-index%"
+
+        set {music::queue::%{_id}%} to loop-value
+
+function musicQueueGet() :: audiotrack:
+    loop {music::queue::*}:
+        set {_unix} to loop-index
+        exit loop
+    
+    if {_unix} is not set:
+        stop
+
+    set {_track} to {music::queue::%{_unix}%}
+    delete {music::queue::%{_unix}%}
+
+    return {_track}
+
+function musicQueueFull(type: string) :: strings:
+    set {_type} to "id" if {_type} is "name"
+
+    loop {music::queue::*}:
+        set {_unix} to loop-index
+
+        if {_type} is "id":
+            add "%{music::queue::%{_unix}%}%" to {_data::*}
+    
+    return {_data::*}
+
+function musicQueueReset():
+    delete {music::queue::*}

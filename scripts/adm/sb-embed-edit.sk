@@ -1,0 +1,116 @@
+on slash command:
+    event-string is "embed-edit"
+
+    defer the interaction and wait
+
+    if argument "tytuł" as string is set:
+        set {_edited} to true
+        if {embed::%discord id of event-user%::edit} is set:
+            if argument "tytuł" as string is "-del" or "-delete":
+                delete {embed::%discord id of event-user%::temp::title}
+            else:
+                set {_s} to argument "tytuł" as string
+                replace every "%%nl%%" with nl in {_s}
+                set {embed::%discord id of event-user%::temp::title} to {_s}
+        else:
+            reply with hidden styleDeny("Nie wykryto aktywnej edycji embedu.")
+            stop
+    
+    if argument "opis" as string is set:
+        set {_edited} to true
+        if {embed::%discord id of event-user%::edit} is set:
+            if argument "opis" as string is "-del" or "-delete":
+                delete {embed::%discord id of event-user%::temp::desc}
+            else:
+                set {_s} to argument "opis" as string
+                replace every "%%nl%%" with nl in {_s}
+                set {embed::%discord id of event-user%::temp::desc} to {_s}
+        else:
+            reply with hidden styleDeny("Nie wykryto aktywnej edycji embedu.")
+            stop
+    
+    if argument "autor" as string is set:
+        set {_edited} to true
+        if {embed::%discord id of event-user%::edit} is set:
+            if argument "autor" as string is "-del" or "-delete":
+                delete {embed::%discord id of event-user%::temp::author}
+            else:
+                set {_s} to argument "autor" as string
+                replace every "%%nl%%" with nl in {_s}
+                set {embed::%discord id of event-user%::temp::author} to {_s}
+        else:
+            reply with hidden styleDeny("Nie wykryto aktywnej edycji embedu.")
+            stop
+    
+    if argument "autor-avatar" as string is set:
+        set {_edited} to true
+        if {embed::%discord id of event-user%::edit} is set:
+            if argument "autor-avatar" as string is "-del" or "-delete":
+                delete {embed::%discord id of event-user%::temp::author-avatar}
+            else:
+                set {embed::%discord id of event-user%::temp::author-avatar} to argument "autor-avatar" as string
+        else:
+            reply with hidden styleDeny("Nie wykryto aktywnej edycji embedu.")
+            stop
+    
+    if argument "stopka" as string is set:
+        set {_edited} to true
+        if {embed::%discord id of event-user%::edit} is set:
+            if argument "stopka" as string is "-del" or "-delete":
+                delete {embed::%discord id of event-user%::temp::footer}
+            else:
+                set {_s} to argument "stopka" as string
+                replace every "%%nl%%" with nl in {_s}
+                set {embed::%discord id of event-user%::temp::footer} to {_s}
+        else:
+            reply with hidden styleDeny("Nie wykryto aktywnej edycji embedu.")
+            stop
+    
+    if argument "stopka-avatar" as string is set:
+        set {_edited} to true
+        if {embed::%discord id of event-user%::edit} is set:
+            if argument "stopka-avatar" as string is "-del" or "-delete":
+                delete {embed::%discord id of event-user%::temp::footer-avatar}
+            else:
+                set {embed::%discord id of event-user%::temp::footer-avatar} to argument "stopka-avatar" as string
+        else:
+            reply with hidden styleDeny("Nie wykryto aktywnej edycji embedu.")
+            stop
+    
+    if argument "zdjęcie" as string is set:
+        set {_edited} to true
+        if {embed::%discord id of event-user%::edit} is set:
+            if argument "zdjęcie" as string is "-del" or "-delete":
+                delete {embed::%discord id of event-user%::temp::image}
+            else:
+                set {embed::%discord id of event-user%::temp::image} to argument "zdjęcie" as string
+        else:
+            reply with hidden styleDeny("Nie wykryto aktywnej edycji embedu.")
+            stop
+    
+    if argument "miniaturka" as string is set:
+        set {_edited} to true
+        if {embed::%discord id of event-user%::edit} is set:
+            if argument "miniaturka" as string is "-del" or "-delete":
+                delete {embed::%discord id of event-user%::temp::thumbnail}
+            else:
+                set {embed::%discord id of event-user%::temp::thumbnail} to argument "miniaturka" as string
+        else:
+            reply with hidden styleDeny("Nie wykryto aktywnej edycji embedu.")
+            stop
+    
+    if argument "kolor" as string is set:
+        set {_edited} to true
+        if {embed::%discord id of event-user%::edit} is set:
+            if argument "kolor" as string is "-del" or "-delete":
+                delete {embed::%discord id of event-user%::temp::color}
+            else:
+                set {embed::%discord id of event-user%::temp::color} to argument "kolor" as string
+        else:
+            reply with hidden styleDeny("Nie wykryto aktywnej edycji embedu.")
+            stop
+    
+    if {_edited} is true:
+        destroy {embed::%discord id of event-user%::edit}
+        reply with regenerateEmbed(event-user, "temp") and store it in {embed::%discord id of event-user%::edit}
+        stop

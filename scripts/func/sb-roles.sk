@@ -1,0 +1,53 @@
+on load:
+    load yaml "plugins/Skript/data/roles.yml" as "roles"
+
+    while "main" is not loaded on discord:
+        wait 1 second
+
+    set {_gid} to yaml value "server" from "config"
+
+    saveRoles(guild with id "%{_gid}%")
+
+function saveRoles(g: guild):
+    set {_gid} to discord id of {_g}
+    load all members from {_g} and store them in {_members::*}
+
+    loop {_members::*}:
+        set {_uid} to discord id of loop-value
+
+        set {_roles::*} to all roles of loop-value
+
+        if yaml list "%{_gid}%.%{_uid}%" from "roles" is set:
+            delete yaml list "%{_gid}%.%{_uid}%" from "roles"
+
+        loop {_roles::*}:
+            set {_rid} to discord id of loop-value-2
+
+            add "%{_rid}%" to yaml list "%{_gid}%.%{_uid}%" from "roles"
+            wait 1 tick
+  
+        delete {_roles::*}
+        wait 5 seconds
+    
+    save yaml "roles" 
+    wait 1 minute
+    
+    saveRoles({_g})
+
+function restoreRoles(g: guild, member: member):
+    set {_gid} to discord id of {_g}
+    set {_uid} to discord id of {_member}
+
+    if yaml list "%{_gid}%.%{_uid}%" from "roles" is set:
+        
+        set {_roles::*} to yaml list "%{_gid}%.%{_uid}%" from "roles"
+
+        loop {_roles::*}:
+            add role with id "%loop-value%" to roles of {_member}
+            wait 1 second
+
+on member join:
+    set {_option} to yaml value "restore_roles" from "config"
+    if {_option} is 1:
+
+        restoreRoles(event-guild, event-member)

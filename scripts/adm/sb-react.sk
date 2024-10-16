@@ -1,0 +1,32 @@
+on slash command:
+    event-string is "reakcja"
+
+    defer interaction and wait silently
+
+    if {temp::react::%discord id of event-user%} is not set:
+
+        set {temp::react::%discord id of event-user%} to true
+
+        set {_e1} to yaml value "emoji_info" from "config"
+        
+        make embed:
+            set title of embed to "Tryb reagowania włączony"
+            set description of embed to "☕ Bot od teraz doda taką samą reakcję, którą dodasz do dowolnej wiadomości.%nl%%nl%<:%getEmoji({_e1})%> Ten tryb zostanie automatycznie wyłączony za 5 minut."
+            embedStart(event-guild)
+            embedEnd()
+        reply with hidden last embed
+
+        wait 5 minutes
+        delete {temp::react::%discord id of event-user%}
+    
+    else:
+        delete {temp::react::%discord id of event-user%}
+        
+        reply with hidden styleReady("Tryb reagowania wyłączony")
+
+
+
+on reaction add:
+    event is from guild
+    event-user is not a discord bot
+    retrieve event-value "message" and store it in {_msg}

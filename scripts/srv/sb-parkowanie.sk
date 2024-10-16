@@ -1,0 +1,104 @@
+on load:
+    load yaml "plugins/Skript/data/parkowanie.yml" as "parkowanie"
+
+    # set {server::parkowanie} to "1014234019107438663"
+    if {server::parkowanie} is not set:
+        set {server::parkowanie} to "1014234019107438663"
+
+on message receive:
+    set {_bot} to yaml value "bot" from "config"
+    discord id of event-channel is {server::parkowanie}
+    discord id of event-user is not "%{_bot}%"
+
+    set {_id} to discord id of event-user
+    set {_content} to content of event-message
+    set {_time} to round(unix timestamp of now)
+    set {_attachments::*} to attachments of event-message
+
+    loop {_attachments::*}:
+        add discord file name of loop-value to {_names::*}
+
+    replace every "." with "" in {_content}
+
+    set yaml value "%{_time}%.user" from "parkowanie" to {_id}
+    set yaml value "%{_time}%.content" from "parkowanie" to {_content}
+
+    if {_attachments::1} is set:
+        set yaml list "%{_time}%.attachments" from "parkowanie" to {_names::*}
+        create directory "plugins/Skript/data/parkowanie/%{_time}%"
+    
+    save yaml "parkowanie"
+    
+    loop {_attachments::*}:
+        download attachment loop-value to the folder "plugins/Skript/data/parkowanie/%{_time}%"
+
+on slash command:
+    event-string is "przywróć-parkowanie"
+
+    set {_channel} to argument "kanał" as channel
+    set {_id} to discord id of event-user
+    set {_owner} to yaml value "owner" from "config"
+
+    set {server::parkowanie} to discord id of {_channel}
+    set {server::parkowanie-category} to discord id of (parent of {_channel})
+
+    if {_id} is not "%{_owner}%":
+        reply with styleDeny("Tylko właściciel bota może użyć tej komendy.")
+        stop
+
+    if {_channel} is not set:
+        reply with hidden styleDeny("Musisz podać kanał, na którym należy odtworzyć wiadomości.")
+        stop
+    
+    parkowanieRecover({_channel})
+    
+    reply with styleFlat("Rozpoczynam odtwarzanie kanału...")
+
+function parkowanieRecover(channel: channel):
+    set {_yaml::*} to all yaml nodes of "parkowanie"
+    loop ({_yaml::*} where [input doesn't contain "."]):
+
+        set {_id} to discord id of {_channel}
+        if channel with id "%{_id}%" is not set:
+            stop
+
+        add 1 to {_loop}
+        if {_loop} is 1:
+            post "Poniżej znajdują się wszystkie zapisane wiadomości od <t:%loop-value%:f>." to {_channel}
+            wait 1 second
+
+        set {_time} to loop-value
+        set {_author} to yaml value "%{_time}%.user" from "parkowanie"
+        set {_content} to yaml value "%{_time}%.content" from "parkowanie"
+        set {_attachments::*} to yaml list "%{_time}%.attachments" from "parkowanie"
+
+        set {_author} to "%{_author}%"
+
+        create a new message and store it in {_msg}:
+            set content of message to "%getNameTag({_author})% ➤ %{_content}%" if {_content} is not ""
+            set content of message to getNameTag({_author}) if {_content} is ""
+
+            loop {_attachments::*}:
+                add "plugins/Skript/data/parkowanie/%{_time}%/%loop-value-2%" to the attachments of the message
+        
+        post {_msg} to {_channel}
+        wait 1 second
+
+every 10 seconds:
+    set {_check} to channel with id {server::parkowanie}
+
+    if discord id of {_check} is not set:
+
+        set {_server} to yaml value "server" from "config"
+        set {_guild} to guild with id "%{_server}%"
+        set {_category} to category with id "%{server::parkowanie-category}%"
+
+        set {_action} to new text channel action in {_guild}
+        set channel parent of {_action} to {_category}
+        set channel name of {_action} to "〘🚗〙parkownia-necera"
+        create {_action} and store it in {_new}
+
+        set {server::parkowanie} to discord id of {_new}
+        set {server::parkowanie-category} to discord id of (parent of {_new})
+
+        parkowanieRecover({_new})

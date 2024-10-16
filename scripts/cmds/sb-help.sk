@@ -1,0 +1,111 @@
+on load:
+    load yaml "plugins/Skript/data/help.yml" as "help"
+
+on slash command:
+    event-string is "pomoc"
+    
+    defer interaction and wait
+
+    if argument "komenda" as string is not set:
+        
+        set {_owner} to yaml value "owner" from "config"
+        set {_name} to yaml value "custom_help_embed" from "config"
+        set {_reply} to regenerateEmbed(user with id "%{_owner}%", {_name})
+
+        if description of {_reply} = "...":
+            reply with helpEmbed(event-guild)
+        else:
+            reply with {_reply}
+        stop
+
+    set {_list::*} to helpAllCommands("all")
+    set {_bot} to yaml value "bot" from "config"
+
+    loop {_list::*}:
+        if argument "komenda" as string is "%loop-value%" or "/%loop-value%":
+            
+            set {_desc} to yaml value "%loop-value%.description" from "help"
+            set {_info} to yaml value "%loop-value%.info" from "help"
+            set {_title} to yaml value "%loop-value%.title" from "help"
+            set {_ex::*} to yaml list "%loop-value%.examples" from "help"
+
+            retrieve user with id "%{_bot}%" from bot "main" and store it in {_ubot}
+
+            replace every "%%nl%%" with nl in {_desc}
+            replace every "%%user%%" with (discord name of event-user) in {_desc}
+            replace every "%%bot%%" with (discord name of {_ubot}) in {_desc}
+
+            loop {_ex::*}:
+                replace every "%%user%%" with (discord name of event-user) in {_ex::%loop-index-2%}
+                replace every "%%bot%%" with (discord name of {_ubot}) in {_ex::%loop-index-2%}
+            
+            reply with helpEmbedCommand(event-guild, {_title}, {_desc}, {_info}, {_ex::*})
+            stop
+    
+    reply with styleDeny("Niestety nie znalazłem podanej komendy... Powrót za 5sek.") and store it in {_reply}
+    wait 5 seconds
+    edit {_reply} to show helpEmbed(event-guild)
+
+on slash completion:
+    event-string is "pomoc"
+    
+    loop helpAllCommands("all"):
+        add "/%loop-value%" to {_list::*}
+    
+    return slashComplete({_list::*}, argument "komenda" as string)
+
+
+
+function helpEmbed(g: guild) :: embedbuilder:
+
+    set {_loop::*} to "user", "eco", "music", "adm", "penalt"
+    loop {_loop::*}:
+        set {_list::%loop-value%} to ""
+
+        loop helpAllCommands(loop-value):
+            set {_list::%loop-value-1%} to "%{_list::%loop-value-1%}% `/%loop-value-2%`"
+
+    make embed:
+        set title of embed to "Pomoc bota %yaml value "name" from "config"%"
+        set description of embed to "Wpisz `/pomoc komenda` aby zobaczyć opis i użycie komendy.%nl%%nl%📌 **Komendy dla każdego**%nl%%{_list::user}%%nl%%nl%📌 **Komendy ekonomii i poziomów**%nl%%{_list::eco}%%nl%%nl%📌 **Komendy muzyczne**%nl%%{_list::music}%%nl%%nl%📌 **Komendy administracyjne**%nl%%{_list::adm}%%nl%%nl%📌 **Komendy karania**%nl%%{_list::penalt}%"
+        embedStart({_g})
+        embedEnd()
+    return last embed
+
+function helpEmbedCommand(g: guild, title: string, desc: string, info: string, ex: strings) :: embedbuilder:
+    set {_e1} to yaml value "emoji_info" from "config"
+
+    if {_info} is not set:
+        set {_info} to ""
+    else:
+        set {_info} to "%nl%%nl%<:%getEmoji({_e1})%> %{_info}%"
+    
+    set {_ex} to ""
+    loop {_ex::*}:
+        set {_ex} to "%{_ex}%%loop-value%%nl%"
+
+    make embed:
+        set title of embed to {_title}
+        set description of embed to "📁 **Opis i działanie**%nl%%{_desc}%%{_info}%%nl%%nl%🏷️ **Użycie**%nl%```%{_ex}%```"
+        embedStart({_g})
+        embedEnd()
+    return last embed
+
+
+
+function helpAllCommands(category: string) :: strings:
+    set {_server} to yaml value "server" from "config"
+    set {_list::*} to all yaml nodes of "help"
+    loop {_list::*} where [input don't contain "."]:
+
+        if (yaml value "%loop-value%.server" from "help") is set:
+            if (yaml value "%loop-value%.server" from "help") is not {_server}:
+                continue
+
+        if {_category} is "all":
+            add "%loop-value%" to {_return::*}
+
+        else if (yaml value "%loop-value%.type" from "help") is {_category}:
+            add "%loop-value%" to {_return::*}
+
+    return {_return::*}

@@ -1,0 +1,36 @@
+# Plik z punktami za różne rzeczy w ekonomii
+
+character:
+  '5':
+    first: 25
+    constelation: 10
+    more: 5
+  '4':
+    first: 5
+    constelation: 2
+    more: 1
+
+weapon:
+  char:
+    '5':
+      '1': 20
+      '2': 12
+      '3': 8
+      '4': 4
+      '5': 3
+    '4':
+      '1': 4
+      '2': 2.5
+      '3': 1.5
+      '4': 0.8
+      '5': 0.6
+    
+  bonus:
+    '5': 0
+    '4': -0.3
+    '3': -0.6
+  
+  refinement:
+    first: 0
+    refine: 0.2
+    more: 0.05

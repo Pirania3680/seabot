@@ -1,0 +1,85 @@
+
+#  1 = nick
+#  2 = id konta
+#  3 = kraj
+#  4 = ranking globalny
+#  5 = ranking krajowy
+#  6 = pp
+#  7 = celność
+#  8 = liczba zagrań
+#  9 = liczba zagranych sekund
+# 10 = level
+function osuApiGetUser(pid: string, name: string, mode: string, nick-type: string):
+
+    delete {system::temp::*}
+
+    set {system::temp::osu-user-data::user} to {_name}
+    set {system::temp::osu-user-data::mode} to {_mode}
+    set {system::temp::osu-user-data::pid} to {_pid}
+    set {system::temp::osu-user-data::nick-type} to {_nick-type}
+
+    send a request to "https://osu.ppy.sh/api/get_user?k=%yaml value "osu_api_key" from "config"%&u=%{system::temp::osu-user-data::user}%&m=%{system::temp::osu-user-data::mode}%&type=%{system::temp::osu-user-data::nick-type}%"
+    map json body of last http response to {system::temp::osu-user-json::*}
+
+    set {_data::1} to {system::temp::osu-user-json::1::username} ? ""
+    set {_data::2} to {system::temp::osu-user-json::1::user_id} ? "-"
+    set {_data::3} to {system::temp::osu-user-json::1::country} ? "-"
+    set {_data::4} to {system::temp::osu-user-json::1::pp_rank} ? "-"
+    set {_data::5} to {system::temp::osu-user-json::1::pp_country_rank} ? "-"
+    set {_data::6} to {system::temp::osu-user-json::1::pp_raw} ? "-"
+    set {_data::7} to {system::temp::osu-user-json::1::accuracy} ? "-"
+    set {_data::8} to {system::temp::osu-user-json::1::playcount} ? "-"
+    set {_data::9} to {system::temp::osu-user-json::1::total_seconds_played} ? "-"
+    set {_data::10} to {system::temp::osu-user-json::1::level} ? "-"
+
+    set {_pid} to {system::temp::osu-user-data::pid}
+    set {temp::osu-api::%{_pid}%-ready} to true
+    add {_data::*} to {temp::osu-api::%{_pid}%::*}
+
+
+
+#  11 * x + 1 = mapa x - id mapy
+#  11 * x + 2 = mapa x - id setu mapy
+#  11 * x + 3 = mapa x - tytuł
+#  11 * x + 4 = mapa x - trudność
+#  11 * x + 5 = mapa x - mody
+#  11 * x + 6 = mapa x - pp
+#  11 * x + 7 = mapa x - ilość 300
+#  11 * x + 8 = mapa x - ilość 100
+#  11 * x + 9 = mapa x - ilość 50
+# 11 * x + 10 = mapa x - ilość missów
+# 11 * x + 11 = mapa x - ocena
+function osuApiGetMaps(pid: string, id: string, mode: string, type: string, limit: number):
+
+    delete {system::temp::*}
+
+    set {system::temp::osu-temp::user_id} to {_id}
+    set {system::temp::osu-temp::mode} to {_mode}
+    set {system::temp::osu-temp::limit} to {_limit}
+    set {system::temp::osu-temp::type} to {_type}
+    set {system::temp::osu-temp::pid} to {_pid}
+
+    send a request to "https://osu.ppy.sh/api/get_user_%{system::temp::osu-temp::type}%?k=%yaml value "osu_api_key" from "config"%&u=%{system::temp::osu-temp::user_id}%&m=%{system::temp::osu-temp::mode}%&type=id&limit=%{system::temp::osu-temp::limit}%"
+    map json body of last http response to {system::temp::osu-maps-json::*}
+
+    loop {system::temp::osu-temp::limit} times:
+        send a request to "https://osu.ppy.sh/api/get_beatmaps?k=%yaml value "osu_api_key" from "config"%&b=%{system::temp::osu-maps-json::%loop-number%::beatmap_id}%&limit=1"
+        map json body of last http response to {system::temp::osu-beatmap-%loop-number%-json::*}
+
+    loop {system::temp::osu-temp::limit} times:
+        set {_loop} to (loop-number - 1) * 11
+        set {_data::%{_loop} + 1%} to {system::temp::osu-maps-json::%loop-number%::beatmap_id} ? "-"
+        set {_data::%{_loop} + 2%} to {system::temp::osu-beatmap-%loop-number%-json::1::beatmapset_id} ? "-"
+        set {_data::%{_loop} + 3%} to {system::temp::osu-beatmap-%loop-number%-json::1::title} ? ""
+        set {_data::%{_loop} + 4%} to {system::temp::osu-beatmap-%loop-number%-json::1::difficultyrating} ? "-"
+        set {_data::%{_loop} + 5%} to {system::temp::osu-maps-json::%loop-number%::enabled_mods} ? 0
+        set {_data::%{_loop} + 6%} to {system::temp::osu-maps-json::%loop-number%::pp} ? "-"
+        set {_data::%{_loop} + 7%} to {system::temp::osu-maps-json::%loop-number%::count300} ? 0
+        set {_data::%{_loop} + 8%} to {system::temp::osu-maps-json::%loop-number%::count100} ? 0
+        set {_data::%{_loop} + 9%} to {system::temp::osu-maps-json::%loop-number%::count50} ? 0
+        set {_data::%{_loop} + 10%} to {system::temp::osu-maps-json::%loop-number%::countmiss} ? 0
+        set {_data::%{_loop} + 11%} to {system::temp::osu-maps-json::%loop-number%::rank} ? "F"
+
+    set {_pid} to {system::temp::osu-temp::pid} 
+    set {temp::osu-api::%{_pid}%-ready} to true
+    add {_data::*} to {temp::osu-api::%{_pid}%::*}

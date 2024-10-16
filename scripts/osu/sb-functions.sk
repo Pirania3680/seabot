@@ -1,0 +1,68 @@
+on load:
+    load yaml "plugins/Skript/data/osu/mods.yml" as "mods"
+
+function decodeMods(code: integer) :: strings:
+
+    if {_code} is 0:
+        return "NM"
+        stop
+    
+    set {_mods::*} to all yaml nodes of "mods" where [input starts with "mapping."]
+
+    while {_end} is not true:
+        loop {_mods::*}:
+            set {_index} to loop-value
+            replace every "mapping." with "" in {_index}
+            set {_index} to {_index} parsed as integer
+
+            if ({_index} * 2) > {_code}:
+
+                remove {_index} from {_code}
+                add yaml value loop-value from "mods" to {_return::*}
+                exit loop
+
+        if {_code} <= 0:
+            set {_end} to true
+    
+    return {_return::*}
+
+function sortMods(mods: strings) :: strings:
+
+    set {_sort::*} to yaml list "sorting" from "mods"
+    loop {_mods::*}:
+
+        loop {_sort::*}:
+
+            if loop-value-1 is loop-value-2:
+                set {_return::%loop-index-2%} to loop-value-1
+                exit loop
+    
+    return {_return::*}
+
+function generareImageMods(mods: strings) :: image:
+
+    set {_height} to yaml value "image.height" from "mods"
+    set {_width} to yaml value "image.width" from "mods"
+    set {_space} to yaml value "image.space" from "mods"
+    set {_size} to size of {_mods::*}
+
+    set {_image} to new image with size (({_width} * {_size}) + ({_space} * ({_size} - 1))), {_height}
+
+    loop {_mods::*}:
+        set {_adding} to image from file "plugins/Skript/data/osu/mods/%loop-value%.png"
+        draw {_adding} on {_image} at ({_current} ? 0), 0
+
+        add ({_width} + {_space}) to {_current}
+    
+    return {_image}
+
+
+
+function accuracyCalculate(300: integer, 100: integer, 50: integer, miss: integer) :: number:
+    set {_all} to {_300} + {_100} + {_50} + {_miss}
+
+    set {_a} to (5 * {_50}) + (10 * {_100}) + (30 * {_300})
+    set {_b} to 30 * {_all}
+
+    set {_return} to {_a} / {_b} * 100
+    return {_return}

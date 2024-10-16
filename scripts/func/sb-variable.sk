@@ -1,0 +1,28 @@
+
+command /v [<string>] [<number>] [<boolean>] [<text>]:
+    trigger:
+        if arg 1 is not set:
+            send "&cPodaj nazwę zmiennej a potem jej wartość."
+            stop
+
+        set {_v} to arg 1
+
+        if arg-number is set:
+            set {%{_v}%} to arg-number
+            send "&a{%{_v}%} &8» &c%arg-number%"
+            stop
+        if arg-boolean is set:
+            set {%{_v}%} to arg-boolean
+            send "&a{%{_v}%} &8» &c%arg-boolean%"
+            stop
+        if arg-text-2 is set:
+            if arg-text-2 is "-del":
+                delete {%{_v}%}
+                send "&a{%{_v}%} &8» &cusunięto."
+                stop
+            else:
+                set {%{_v}%} to arg-text-2
+                send "&a{%{_v}%} &8» &c""%arg-text-2%"""
+                stop
+        send "&a{%{_v}%} &8» &c%{%{_v}%}%"
+        stop

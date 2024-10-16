@@ -1,0 +1,14 @@
+
+define new bot named "main":
+    token: %yaml value "token" from "config"%
+    intents: default intents
+    policy: all
+    auto reconnect: true
+    compression: none
+
+on load:
+    if "main" is loaded on discord:
+        console("&a%yaml value "name" from "config"% został poprawnie zalogowany.")
+
+    else:
+        console("&cWystąpił błąd podczas logowania do Discorda.")

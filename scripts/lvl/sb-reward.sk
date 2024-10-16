@@ -1,0 +1,52 @@
+on load:
+    load yaml "plugins/Skript/data/level/rewards.yml" as "level-rewards"
+
+
+
+function levelCheckRewards(id: string) :: number:
+    set {_lvl} to {level::%{_id}%::lvl}
+    set {_last} to {level::%{_id}%::reward} ? 1
+
+    if {_lvl} > {_last}:
+        return round({_last} + 1)
+    else:
+        return 0
+    
+function levelGetRewards(lvl: number) :: objects:
+    set {_rewards::*} to yaml list "%{_lvl}%" from "level-rewards"
+    return {_rewards::*}
+
+
+
+function imgLevelRewards(lvl: number) :: image:
+
+    set {_rewards::*} to levelGetRewards({_lvl})
+    set {_width} to (size of {_rewards::*} * 120) - 11
+    set {_image} to new image with size {_width}, 132
+    set {_current} to 0
+
+    loop {_rewards::*}:
+        set {_parse::*} to loop-value parsed as "%number% %string%"
+    
+        set {_rarity} to yaml value "%{_parse::2}%.rarity" from "data"
+        set {_adding} to resized imgItem({_parse::2}, {_rarity}, {_parse::1}) to size 109, 132 with algorithm 16
+
+        draw {_adding} on {_image} at {_current}, 0
+
+        add 120 to {_current}
+    
+    return {_image}
+
+function imgItem(name: string, rarity: number, amount: number) :: image:
+    set {_image} to new image with size 307, 369
+    draw image from file "plugins/Skript/data/gacha/gui/%{_rarity}%-star-B.png" on {_image} at 0, 0
+
+    set {_adding} to fontGenerate("genshin-gray", 46, 3, "%{_amount}%")
+    set {_width} to width of {_adding}
+    draw {_adding} on {_image} at ceil((307 - {_width}) / 2), 315
+
+    set {_file} to "plugins/Skript/data/gacha/items/%{_name}%.png"
+    set {_adding} to resized image from file {_file} to size 270, 272 with algorithm 16
+    draw {_adding} on {_image} at 19, 19
+
+    return {_image}

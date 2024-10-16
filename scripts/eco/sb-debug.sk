@@ -1,0 +1,154 @@
+on load:
+    wait 0.5 second
+    gachaDebug()
+
+command /eco:
+    trigger:
+        gachaDebug()
+
+function gachaDebug():
+    set {_elements::*} to "pyro", "electro", "dendro", "hydro", "cryo", "anemo", "geo"
+
+    loop {_elements::*}:
+        if file "plugins/Skript/data/gacha/elements/%loop-value%.png" exists:
+            add 1 to {_amount}
+        else:
+            broadcast "&4Błąd! &cNie wykryto grafiki żywiołu &f%loop-value%.png&c."
+            add 1 to {_error}
+
+    loop 6 times:
+        if file "plugins/Skript/data/gacha/inventory/constelation/const-%loop-number%.png" exists:
+            add 1 to {_amount}
+        else:
+            broadcast "&4Błąd! &cNie wykryto grafiki do ekwipunku (konstelacja) nr &fconst-%loop-number%.png&c."
+            add 1 to {_error}
+    
+    if file "plugins/Skript/data/gacha/wish-background.jpg" exists:
+        add 1 to {_amount}
+    else:
+        broadcast "&4Błąd! &cNie wykryto grafiki do tła wishy &fwish-background.png&c."
+        add 1 to {_error}
+
+    loop (gachaGetAllCharacters() where [input is not "none"]) and (gachaGetAllWeapons() where [input is not "none"]):
+
+        if file "plugins/Skript/data/gacha/inventory/obtained/%loop-value%.png" exists:
+            add 1 to {_amount}
+        else:
+            broadcast "&4Błąd! &cNie wykryto grafiki do ekwipunku (zdobytego) postaci &f%loop-value%.png&c."
+            add 1 to {_error}
+        
+        if file "plugins/Skript/data/gacha/inventory/unobtained/%loop-value%.png" exists:
+            add 1 to {_amount}
+        else:
+            broadcast "&4Błąd! &cNie wykryto grafiki do ekwipunku (niezdobytego) postaci &f%loop-value%.png&c."
+            add 1 to {_error}
+        
+        if file "plugins/Skript/data/gacha/splash/%loop-value%.jpg" exists:
+            add 1 to {_amount}
+        else:
+            broadcast "&4Błąd! &cNie wykryto grafiki do wish splash postaci &f%loop-value%.jpg&c."
+            add 1 to {_error}
+        
+        if file "plugins/Skript/data/gacha/cards/%loop-value%.png" exists:
+            add 1 to {_amount}
+        else:
+            broadcast "&4Błąd! &cNie wykryto grafiki do wish x10 postaci &f%loop-value%.png&c."
+            add 1 to {_error}
+    
+    broadcast "%{system::prefix}%&a Załadowano %{_amount}%/%{_amount} + {_error}% grafik do ekonomii."
+    
+    while {_end} is not true:
+        add 1 to {_loop}
+        set {_value} to yaml value "economy_banners.%{_loop}%.id" from "eco"
+        if {_value} is set:
+
+            wait 1 tick
+            
+            if getEmoji(yaml value "economy_banners.%{_loop}%.emoji" from "eco") is not set:
+                broadcast "&4Błąd! &cBłędne emoji w aktywnym bannerze &fID:%{_loop}%&c."
+            
+            loop (yaml list "economy_banners.%{_loop}%.5_drops_promote" from "eco"):
+                if loop-value is "all":
+                    continue
+                if (yaml value "%loop-value%.type" from "data") is not set:
+                    broadcast "&4Błąd! &cBłędna wartość w 5_drops_promote &f%loop-value% w aktywnych bannerach (ID:%{_loop}%)&c."
+            
+            loop (yaml list "economy_banners.%{_loop}%.5_drops_lost" from "eco"):
+                if loop-value is "all":
+                    continue
+                if (yaml value "%loop-value%.type" from "data") is not set:
+                    broadcast "&4Błąd! &cBłędna wartość w 5_drops_lost &f%loop-value% w aktywnych bannerach (ID:%{_loop}%)&c."
+            
+            loop (yaml list "economy_banners.%{_loop}%.4_drops_promote" from "eco"):
+                if loop-value is "all":
+                    continue
+                if (yaml value "%loop-value%.type" from "data") is not set:
+                    broadcast "&4Błąd! &cBłędna wartość w 4_drops_promote &f%loop-value% w aktywnych bannerach (ID:%{_loop}%)&c."
+            
+            loop (yaml list "economy_banners.%{_loop}%.4_drops_lost" from "eco"):
+                if loop-value is "all":
+                    continue
+                if (yaml value "%loop-value%.type" from "data") is not set:
+                    broadcast "&4Błąd! &cBłędna wartość w 4_drops_lost &f%loop-value% w aktywnych bannerach (ID:%{_loop}%)&c."
+            
+            loop (yaml list "economy_banners.%{_loop}%.3_drops" from "eco"):
+                if loop-value is "all":
+                    continue
+                if (yaml value "%loop-value%.type" from "data") is not set:
+                    broadcast "&4Błąd! &cBłędna wartość w 5_drops_promote &f%loop-value% w aktywnych bannerach (ID:%{_loop}%)&c."
+        
+        else:
+            set {_end} to true
+    
+    broadcast "%{system::prefix}%&a Skończono sprawdzanie poprawności aktywnych bannerów."
+    
+    delete {_loop} and {_end}
+    while {_end} is not true:
+        add 1 to {_loop}
+        set {_value} to yaml value "%{_loop}%.version" from "banners"
+        if {_value} is set:
+
+            wait 1 tick
+
+            loop 2 times:
+
+                if yaml value "%{_loop}%.banners.character.%loop-value%.name" from "banners" is set:
+
+                    if getEmoji(yaml value "%{_loop}%.banners.character.%loop-value%.emoji" from "banners") is not set:
+                        broadcast "&4Błąd! &cBłędne emoji we wszystkich bannerach &fID:%{_loop}% - character - %loop-value%&c."
+                    
+                    loop (yaml list "%{_loop}%.banners.character.%loop-value%.5_drops_promote" from "banners"):
+                        if loop-value-2 is "all":
+                            continue
+                        if (yaml value "%loop-value-2%.type" from "data") is not set:
+                            broadcast "&4Błąd! &cBłędna wartość w 5_drops_promote &f%loop-value-2% we wszystkich bannerach (ID:%{_loop}% - character - %loop-value-1%)&c."
+                    
+                    loop (yaml list "%{_loop}%.banners.character.%loop-value%.4_drops_promote" from "banners"):
+                        if loop-value-2 is "all":
+                            continue
+                        if (yaml value "%loop-value-2%.type" from "data") is not set:
+                            broadcast "&4Błąd! &cBłędna wartość w 4_drops_promote &f%loop-value-2% we wszystkich bannerach (ID:%{_loop}% - character - %loop-value-1%)&c."
+            
+            loop 2 times:
+
+                if yaml value "%{_loop}%.banners.weapon.%loop-value%.name" from "banners" is set:
+
+                    if getEmoji(yaml value "%{_loop}%.banners.weapon.%loop-value%.emoji" from "banners") is not set:
+                        broadcast "&4Błąd! &cBłędne emoji w zapisach bannerów &fID:%{_loop}% - weapon - %loop-value%&c."
+                    
+                    loop (yaml list "%{_loop}%.banners.weapon.%loop-value%.5_drops_promote" from "banners"):
+                        if loop-value-2 is "all":
+                            continue
+                        if (yaml value "%loop-value-2%.type" from "data") is not set:
+                            broadcast "&4Błąd! &cBłędna wartość w 5_drops_promote &f%loop-value-2% we wszystkich bannerach (ID:%{_loop}% - weapon - %loop-value-1%)&c."
+                    
+                    loop (yaml list "%{_loop}%.banners.weapon.%loop-value%.4_drops_promote" from "banners"):
+                        if loop-value-2 is "all":
+                            continue
+                        if (yaml value "%loop-value-2%.type" from "data") is not set:
+                            broadcast "&4Błąd! &cBłędna wartość w 4_drops_promote &f%loop-value-2% we wszystkich bannerach (ID:%{_loop}% - weapon - %loop-value-1%)&c."
+        
+        else:
+            set {_end} to true
+        
+    broadcast "%{system::prefix}%&a Skończono sprawdzanie poprawności wszystkich bannerów."

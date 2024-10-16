@@ -1,0 +1,43 @@
+on load:
+    load yaml "plugins/Skript/data/gacha/codes.yml" as "codes"
+
+on slash command:
+    event-string is "odbierz"
+
+    defer the interaction and wait silently
+
+    set {_code} to argument "kod" as string
+    set {_id} to discord id of event-user
+    set {_now} to round(unix timestamp of now)
+
+    if (yaml value "%{_code}%.expire" from "codes") is not set:
+        reply with hidden styleDeny("Podano kod nie istnieje lub wygasł.")
+        stop
+    
+    if (yaml value "%{_code}%.expire" from "codes") < {_now}:
+        reply with hidden styleDeny("Podano kod nie istnieje lub wygasł.")
+        stop
+    
+    if {code::%{_code}%::all} or {code::%{_code}%::%{_id}%} is true:
+        reply with hidden styleDeny("Podano kod został już zużyty.")
+        stop
+    
+    set {_reward} to (yaml value "%{_code}%.reward" from "codes")
+    set {_amount} to (yaml value "%{_code}%.amount" from "codes")
+    set {_type} to (yaml value "%{_code}%.type" from "codes")
+    set {_reward} to gachaGetFromID({_reward})
+
+    set {code::%{_code}%::all} to true if {_type} is "one"
+    set {code::%{_code}%::%{_id}%} to true if {_type} is "multiple"
+
+    gachaCurrency("+", {_id}, {_reward}, {_amount})
+
+    set {_e1} to (yaml value "emoji_%{_reward}%" from "config")
+
+    reply with hidden embedClaimCode("`%{_amount}%` <:%getEmoji({_e1})%>")
+
+function embedClaimCode(reward: string) :: embedbuilder:
+    make embed:
+        set title of embed to "💎 Kod odebrany"
+        set description of embed to "Do twojego konta zostało dodane %{_reward}%."
+    return last embed

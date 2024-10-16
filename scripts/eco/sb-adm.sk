@@ -1,0 +1,13 @@
+on slash command:
+    event-string is "eco-reset"
+
+    set {_u} to argument "użytkownik" as user
+
+    if discord id of event-user is not "%yaml value "owner" from "config"%":
+        reply with hidden styleDeny("Tylko właściciel bota może użyć tej komendy.")
+        stop
+    
+    defer the interaction and wait silently
+
+    delete {eco::%discord id of {_u}%::*}
+    reply with hidden styleReady("Konto ekonomii użytkownika %mention tag of {_u}% zostało zresetowane.")

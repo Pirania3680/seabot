@@ -1,0 +1,36 @@
+on slash command:
+    event-string is "pomiń"
+
+    set {_channel} to voice channel of event-member
+    set {_bot-channel} to voice channel of (self member of event-bot in event-guild)
+
+    if {_channel} is not set:
+        reply with hidden styleDeny("Nie jesteś na kanale głosowym.")
+        stop
+    
+    if {_bot-channel} is set:
+        if {_bot-channel} is not {_channel}:
+            reply with hidden styleDeny("Bot jest połączony z innym kanałem.")
+            stop
+    
+    defer the interaction and wait
+
+    # if size of queue of event-guild is 0:
+    #     reply with hidden styleDeny("Nie ma żadnego następnego utworu.")
+    #     stop
+    
+    stop the track of event-guild
+    # force play {_track} in event-guild
+
+    wait 0.5 second
+
+    reply with embedSkip("%playing track of event-guild%")
+
+function embedSkip(song: string) :: embedbuilder:
+    set {_e1} to yaml value "emoji_zezwolenie" from "config"
+
+    make embed:
+        set title of embed to "<:%getEmoji({_e1})%> Pominięto utwór"
+        set description of embed to "Teraz gramy: `%{_song}%`"
+        set embed color of embed to green
+    return last embed

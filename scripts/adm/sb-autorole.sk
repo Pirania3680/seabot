@@ -1,0 +1,147 @@
+on slash command:
+    event-string is "autorole"
+
+    set {_type} to argument "czynność" as string
+    
+    if {_type} = "stwórz":
+        if argument "rola" as role is set:
+
+            defer the interaction and wait
+
+            set {_e1} to yaml value "emoji_zezwolenie" from "config"
+
+            make embed:
+                set title of embed to "Zaareaguj na wiadomość"
+                set description of embed to "📮 Podałeś już rolę, jaką mamy nadać po kliknięciu autoroli. Teraz musisz nam jeszcze wskazać jaką reakcję i którą wiadomość mamy pilnować. **Aby to zrobić, zareaguj na odpowiednią wiadomość odpowiednią reakcją.** Bot to zauważy i zapisze ✌%nl%%nl%<:%getEmoji({_e1})%> Jeśli chcesz użyć animowanej emotki bez nitro, możesz użyć też reagowania bota komendą **/react**.%nl%%nl%⌛ Po 5 minutach automatycznie anulujemy dodawanie autoroli."
+                embedStart(event-guild)
+                embedEnd()
+            reply with last embed and store it in {autorole::temp::%discord id of event-user%::create-info}
+
+            set {autorole::temp::%discord id of event-user%::create-role} to discord id of argument "rola" as role
+            set {autorole::temp::%discord id of event-user%::create-guild} to discord id of event-guild
+
+            wait 5 minutes
+
+            if {autorole::temp::%discord id of event-user%::create-role} is set:
+                edit {autorole::temp::%discord id of event-user%::create-info} to show styleInfo("Czas na nadanie autoroli minął.")
+
+            delete {autorole::temp::%discord id of event-user%::create-role}
+            delete {autorole::temp::%discord id of event-user%::create-guild}
+            delete {autorole::temp::%discord id of event-user%::create-info}
+
+        else:
+            reply with hidden styleDeny("Musisz podać rolę jaka ma zostać przypisana.")
+    
+    if {_type} = "usuń":
+        
+        delete {autorole::temp::%discord id of event-user%::delete-map-cha::*}
+        delete {autorole::temp::%discord id of event-user%::delete-map-msg::*}
+        delete {autorole::temp::%discord id of event-user%::delete-map-emo::*}
+        delete {autorole::temp::%discord id of event-user%::delete-map-idx::*}
+        delete {autorole::temp::%discord id of event-user%::delete-msg-id}
+        
+        set {_dropdown} to new dropdown with id "autorole::deletelist"
+
+        set {_id} to 1000
+        loop {autorole::saved::*}:
+            set {_index::*} to loop-index parsed as "%text%..%text%..%text%..%text%"
+            if {_index::1} is discord id of event-guild:
+                add 1 to {_id}
+                set {autorole::temp::%discord id of event-user%::delete-map-idx::%{_id}%} to loop-index
+                set {autorole::temp::%discord id of event-user%::delete-map-cha::%{_id}%} to {_index::2}
+                set {autorole::temp::%discord id of event-user%::delete-map-msg::%{_id}%} to {_index::3}
+                set {autorole::temp::%discord id of event-user%::delete-map-emo::%{_id}%} to {_index::4}
+                retrieve message with id "%{_index::3}%" from channel with id "%{_index::2}%" and store it in {_msg}
+                set {_desc} to "%{_desc} ? ""%%nl%`%{_id}%` | %emote {_index::4}% ➞ %mention tag of role with id {autorole::saved::%loop-index%}% | [wiadomość](%jump url of {_msg}%)"
+                
+                add new option with value "autorole::deletelist::%{_id}%" named "%{_id}%" with description "Rola: @%discord name of role with id {autorole::saved::%loop-index%}%" with emote {_index::4} to options of {_dropdown}
+        
+        if size of {autorole::temp::%discord id of event-user%::delete-map-cha::*} = 0:
+            reply with hidden styleInfo("Na tym serwerzenie nie ma żadnych autoról.")
+            stop
+        
+        defer the interaction and wait
+        
+        set min range of {_dropdown} to 1
+        set max range of {_dropdown} to size of {autorole::temp::%discord id of event-user%::delete-map-cha::*}
+        
+        set {_row} to new components row
+        add {_dropdown} to components of {_row}
+
+        create a new message and store it in {_msg}:
+            make embed:
+                set title of embed to "Lista autoról na tym serwerze:"
+                set description of embed to "%{_desc}%%nl%%nl%Wybierz poniżej, które autorole mają zostać usunięte."
+                embedStart(event-guild)
+                embedEnd()
+            add last embed to the embeds of the message
+            add {_row} to rows of the message
+        reply with {_msg} and store it in {_msg}
+        
+        set {autorole::temp::%discord id of event-user%::delete-msg-id} to discord id of {_msg}
+        stop
+
+on dropdown click:
+    if "%selected value%" contains "autorole::deletelist::":
+        if {autorole::temp::%discord id of event-user%::delete-msg-id} is discord id of event-message:
+            loop selected value:
+                set {_id::*} to loop-value parsed as "autorole::deletelist::%number%"
+                delete {autorole::saved::%{autorole::temp::%discord id of event-user%::delete-map-idx::%{_id::1}%}%}
+                add "%{_id::1}%" to {_list::*}
+            defer interaction
+            edit event-message to show styleReady("Autorole z ID `%{_list::*}%` zostały usunięte.")
+        else:
+            reply with hidden styleDeny("To nie jest twoja wiadomość!")
+
+function autoroleReacted(g: guild, u: user, e: string):
+    set {_gid} to discord id of {_g}
+    set {_msg::*} to {autorole::temp::%discord id of {_u}%::event-message} parsed as "%text%::%text%"
+    retrieve message with id "%{_msg::2}%" from channel with id "%{_msg::1}%" and store it in {_msg}
+    
+    set {autorole::saved::%{_gid}%..%{_msg::1}%..%{_msg::2}%..%{_e}%} to {autorole::temp::%discord id of {_u}%::create-role}
+
+    react to {_msg} with reaction {_e}
+    
+    make embed:
+        set title of embed to "Wszystko gotowe!"
+        set description of embed to "👌 Twoja autorola już działa! Gdy ktoś zareaguje na tą wiadomość za pomocą %emote {_e}%, otrzyma rolę %mention tag of role with id {autorole::temp::%discord id of {_u}%::create-role}%. Gdy usunie reakcję, straci rolę."
+        embedStart({_g})
+        embedEnd()
+    edit {autorole::temp::%discord id of {_u}%::create-info} to show last embed
+
+    delete {autorole::temp::%discord id of {_u}%::create-role}
+    delete {autorole::temp::%discord id of {_u}%::create-guild}
+    delete {autorole::temp::%discord id of {_u}%::create-info}
+    delete {autorole::temp::%discord id of {_u}%::event-message}
+
+on reaction add:
+    event is from guild
+    event-user is not a discord bot
+    retrieve event-value "message" and store it in {_msg}
+    
+    if {autorole::temp::%discord id of event-user%::create-role} is set:
+        if {autorole::temp::%discord id of event-user%::create-guild} is discord id of event-guild:
+            
+            set {autorole::temp::%discord id of event-user%::event-message} to "%discord id of event-channel%::%discord id of {_msg}%"
+            
+            autoroleReacted(event-guild, event-user, discord name of event-emote)
+            stop
+    
+    if {autorole::saved::%discord id of event-guild%..%discord id of event-channel%..%discord id of {_msg}%..%discord name of event-emote%} is set:
+        add role with id "%{autorole::saved::%discord id of event-guild%..%discord id of event-channel%..%discord id of {_msg}%..%discord name of event-emote%}%" to roles of event-member
+
+on reaction remove:
+    event is from guild
+    event-user is not a discord bot
+    retrieve event-value "message" and store it in {_msg}
+    
+    if {autorole::saved::%discord id of event-guild%..%discord id of event-channel%..%discord id of {_msg}%..%discord name of event-emote%} is set:
+        remove role with id "%{autorole::saved::%discord id of event-guild%..%discord id of event-channel%..%discord id of {_msg}%..%discord name of event-emote%}%" from roles of event-member
+
+on slash completion:
+    event-string is "autorole"
+    
+    add new choice named "stwórz" with value "stwórz" to {_list::*}
+    add new choice named "usuń" with value "usuń" to {_list::*}
+    
+    return {_list::*}

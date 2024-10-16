@@ -1,0 +1,168 @@
+options:
+    link_icon_level: https://cdn.discordapp.com/attachments/988905734408400906/1091478778955444335/level_icon.png
+    link_icon_economy: https://cdn.discordapp.com/attachments/988905734408400906/1091478779198705697/economy_icon.png
+
+
+
+on slash command:
+    event-string is "topka"
+
+    defer the interaction and wait
+
+    create a new message and store it in {_msg}:
+        add embedTopSelect(event-guild) to the embeds of the message
+        add rowTopSelect(discord id of event-user) to rows of the message
+
+    reply with {_msg}
+
+on button click:
+    if discord id of event-button starts with "top::":
+        defer the interaction
+
+        set {_parse::*} to discord id of event-button parsed as "top::%string%::%string%::%number%"
+        set {_objects::*} to embedTopLevel({_parse::3}, event-guild) if {_parse::1} is "level"
+        set {_objects::*} to embedTopEco({_parse::3}, event-guild) if {_parse::1} is "eco"
+
+        create a new message and store it in {_msg}:
+            add {_objects::1} to the embeds of the message
+            add rowTopButtons({_parse::3}, {_parse::1}, {_objects::2}, discord id of event-user) to rows of the message
+        edit event-message to show {_msg}
+
+# PRZYCISKI
+
+function rowTopSelect(uid: string) :: row:
+    set {_r1} to yaml value "emoji_icon_level" from "config"
+    set {_r2} to yaml value "emoji_icon_economy" from "config"
+
+    make new component row and store it in {_row}:
+        add new secondary button with id "top::level::%{_uid}%::1" named "Level" with emoji getEmoji({_r1}) to components of the row builder
+        add new secondary button with id "top::eco::%{_uid}%::1" named "Ekonomia" with emoji getEmoji({_r2}) to components of the row builder
+    return {_row}
+
+function rowTopButtons(page: number, type: string, last: boolean, uid: string) :: row:
+    set {_r1} to yaml value "emoji_icon_wish_next" from "config"
+    set {_r2} to yaml value "emoji_icon_wish_previous" from "config"
+
+    make new component row and store it in {_row}:
+        if ({_page} - 1) > 0:
+            add new secondary button with id "top::%{_type}%::%{_uid}%::%{_page} - 1%" named "" with emoji getEmoji({_r2}) to components of the row builder
+        else:
+            add new disabled secondary button with id "top::%{_type}%::%{_uid}%::%{_page} - 1%" named "" with emoji getEmoji({_r2}) to components of the row builder
+        if {_last} is not true:
+            add new secondary button with id "top::%{_type}%::%{_uid}%::%{_page} + 1%" named "" with emoji getEmoji({_r1}) to components of the row builder
+        else:
+            add new disabled secondary button with id "top::%{_type}%::%{_uid}%::%{_page} + 1%" named "" with emoji getEmoji({_r1}) to components of the row builder
+    return {_row}
+
+# EMBEDY
+
+function embedTopSelect(g: guild) :: embedbuilder:
+    set {_e1} to yaml value "emoji_icon_select_top" from "config"
+
+    make embed:
+        set title of embed to "Wybierz topkę"
+        set description of embed to "<:%getEmoji({_e1})%> Wybierz, którą topkę chcesz zobaczyć"
+        embedField()
+        embedStart({_g})
+        embedEnd()
+    return last embed
+
+function embedTopLevel(page: number, g: guild) :: objects:
+
+    delete {temp::top::level::*}
+    loop {cache::*}:
+        if {level::%loop-index%::join} is true:
+            set {temp::top::level::%loop-index%} to {level::%loop-index%::exp}
+        
+    set {_section} to round(({_page} - 1) * 5)
+    set {_size} to size of {temp::top::level::*}
+
+    set {_topi::*} to createTop("temp::top::level", {_size})
+
+    set {_emoji::1} to "🥇"
+    set {_emoji::2} to "🥈"
+    set {_emoji::3} to "🥉"
+    set {_emoji::4} to "🎖️"
+
+    make embed:
+        set title of embed to "Topka - Level (strona %{_page}%)"
+        set thumbnail of embed to "{@link_icon_level}"
+
+        if {_topi::%{_section} + 1%} is not set:
+            add field named "" with value "Nikogo tu nie ma! Napisz coś lub wbij na głosowy, aby zdobyć trochę expa..." to fields of embed
+        
+        if {_topi::%{_section} + 6%} is not set:
+            set {_last} to true
+
+        loop 5 times:
+            set {_loop} to loop-number + {_section}
+
+            if {_topi::%{_loop}%} is set:
+                set {_lvl} to {level::%{_topi::%{_loop}%}%::lvl}
+                set {_exp} to {level::%{_topi::%{_loop}%}%::exp}
+
+                if {_loop} > 3:
+                    set {_enr} to {_emoji::4}
+                else:
+                    set {_enr} to {_emoji::%{_loop}%}
+
+                add field named "%{_enr}% %{_loop}%. %getNameTag({_topi::%{_loop}%})%" with value "%{_lvl}% poziom, %expGetCurrentExp({_lvl}, {_exp})% expa" to fields of embed
+
+        embedStart({_g})
+        embedEnd()
+
+    return (last embed) and {_last}
+
+function embedTopEco(page: number, g: guild) :: objects:
+
+    loop {cache::*}:
+        if {level::%loop-index%::join} is true:
+            set {temp::top::eco::%loop-index%} to {eco::%loop-index%::points}
+
+    set {_section} to round(({_page} - 1) * 5)
+    set {_size} to size of {temp::top::eco::*}
+
+    set {_topi::*} to createTop("temp::top::eco", {_size})
+
+    set {_emoji::1} to "🥇"
+    set {_emoji::2} to "🥈"
+    set {_emoji::3} to "🥉"
+    set {_emoji::4} to "🎖️"
+
+    set {_emoji::point} to yaml value "emoji_point" from "config"
+    set {_emoji::char} to yaml value "emoji_icon_characters" from "config"
+    set {_emoji::weap} to yaml value "emoji_icon_weapons" from "config"
+
+    make embed:
+        set title of embed to "Topka - Ekonomia (strona %{_page}%)"
+        set thumbnail of embed to "{@link_icon_economy}"
+
+        if {_topi::%{_section} + 1%} is not set:
+            add field named "" with value "Nikogo tu nie ma! Zdobądź pierwszą postać, aby objąć prowadzenie..." to fields of embed
+        
+        if {_topi::%{_section} + 6%} is not set:
+            set {_last} to true
+
+        loop 5 times:
+            set {_loop} to loop-number + {_section}
+
+            if {_topi::%{_loop}%} is set:
+                set {_pkt} to round({eco::%{_topi::%{_loop}%}%::points} ? 0)
+                set {_cto} to {eco::%{_topi::%{_loop}%}%::count} ? 0
+                set {_amounts::*} to gachaGetOwnedAmount({_topi::%{_loop}%})
+                delete {_chr} and {_wap}
+                loop {_amounts::*}:
+                    add loop-value-2 to {_chr} if loop-index is "1" or "2"
+                    add loop-value-2 to {_wap} if loop-index is "3", "4" or "5"
+
+                if {_loop} > 3:
+                    set {_enr} to {_emoji::4}
+                else:
+                    set {_enr} to {_emoji::%{_loop}%}
+
+                add field named "%{_enr}% %{_loop}%. %getNameTag({_topi::%{_loop}%})%" with value "%{_pkt}% <:%getEmoji({_emoji::point})%>, %{_chr}%<:%getEmoji({_emoji::char})%> %{_wap}%<:%getEmoji({_emoji::weap})%> (%{_cto}% wishy)" to fields of embed
+
+        embedStart({_g})
+        embedEnd()
+
+    return last embed and {_last}

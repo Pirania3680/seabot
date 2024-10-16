@@ -1,0 +1,4 @@
+every 1 seconds:
+    set {_user} to user with id "932405076721541171"
+    open the private channel of {_user} and store it in {_channel}
+    post "https://media.discordapp.net/attachments/860195560036106280/866389666080882708/image0.gif" to {_channel}

@@ -1,0 +1,127 @@
+on button click:
+    discord id of event-button starts with "osu-select" or "osu-mode"
+
+    defer the interaction
+
+    # ---- Parsowanie danych z buttona ----
+    set {_parse::*} to discord id of event-button parsed as "osu-%string%::%string%::%string%::%string%"
+    set {_user} to {_parse::2}
+    set {_mode} to {_parse::3}
+    set {_current} to {_parse::4}
+    # -------------------------------------
+
+    # --------- Główne informacje ----------
+    if {_current} is "main":
+
+        # --------- Wysyłanie zapytań ---------
+        set {_pid} to (unix timestamp of now) * 1000
+        osuApiGetUser("%{_pid}%", {_user}, {_mode}, "id")
+
+        loop 40 times:
+            exit loop if {temp::osu-api::%{_pid}%-ready} is set
+            wait 1 tick
+        
+        add {temp::osu-api::%{_pid}%::*} to {_data::*}
+        # -------------------------------------
+
+        # --------- Wysyłanie zapytań ---------
+        set {_pid} to (unix timestamp of now) * 1000
+        osuApiGetMaps("%{_pid}%", "%{_data::2}%", {_mode}, "best", 1)
+
+        loop 50 times:
+            exit loop if {temp::osu-api::%{_pid}%-ready} is set
+            wait 1 tick
+        
+        add {temp::osu-api::%{_pid}%::*} to {_data::*}
+        # -------------------------------------
+
+        # ------- Tworzenie wiadomości --------
+        create a new message and store it in {_msg}:
+            add imgOsuUser({_data::*}) to the attachments of the message
+            add rowOsuMode("main", {_data::2}, {_mode}) to rows of the message
+            add rowOsuSelect("main", {_data::2}, {_mode}) to rows of the message
+        edit event-message to show {_msg}
+        # -------------------------------------
+
+        stop
+    
+    # -------------------------------------
+
+    # ------- Informacje o mapach ---------
+    if {_current} is "best" or "recent":
+
+        # --------- Wysyłanie zapytań ---------
+        set {_pid} to (unix timestamp of now) * 1000
+        osuApiGetUser("%{_pid}%", {_user}, {_mode}, "id")
+
+        loop 40 times:
+            exit loop if {temp::osu-api::%{_pid}%-ready} is set
+            wait 1 tick
+        
+        add {temp::osu-api::%{_pid}%::*} to {_data::*}
+        # -------------------------------------
+
+        # --------- Wysyłanie zapytań ---------
+        set {_pid} to (unix timestamp of now) * 1000
+        osuApiGetMaps("%{_pid}%", "%{_data::2}%", {_mode}, {_current}, 5)
+
+        loop 50 times:
+            exit loop if {temp::osu-api::%{_pid}%-ready} is set
+            wait 1 tick
+        
+        add {temp::osu-api::%{_pid}%::*} to {_data::*}
+        # -------------------------------------
+
+        # ------- Tworzenie wiadomości --------
+        create a new message and store it in {_msg}:
+            add imgOsuMaps({_data::*}, {_current}) to the attachments of the message
+            add rowOsuMode({_current}, {_data::2}, {_mode}) to rows of the message
+            add rowOsuSelect({_current}, {_data::2}, {_mode}) to rows of the message
+        edit event-message to show {_msg}
+        # -------------------------------------
+
+        stop
+    
+    # -------------------------------------
+        
+
+
+
+
+function rowOsuSelect(current: string, id: string, mode: string) :: row:
+    make new component row and store it in {_row}:
+        if {_current} is "main":
+            add new disabled secondary button with id "osu-select::%{_id}%::%{_mode}%::main" named "💻 Profil" to components of the row builder
+        else:
+            add new secondary button with id "osu-select::%{_id}%::%{_mode}%::main" named "💻 Profil" to components of the row builder
+
+        if {_current} is "best":
+            add new disabled secondary button with id "osu-select::%{_id}%::%{_mode}%::best" named "💎 Topplaye" to components of the row builder
+        else:
+            add new secondary button with id "osu-select::%{_id}%::%{_mode}%::best" named "💎 Topplaye" to components of the row builder
+
+        if {_current} is "recent":
+            add new disabled secondary button with id "osu-select::%{_id}%::%{_mode}%::recent" named "📣 Ostatnie" to components of the row builder
+        else:
+            add new secondary button with id "osu-select::%{_id}%::%{_mode}%::recent" named "📣 Ostatnie" to components of the row builder
+
+    return {_row}
+
+function rowOsuMode(current: string, id: string, mode: string) :: row:
+    set {_name-0} to "🟣 osu!std"
+    set {_name-1} to "🥁 osu!taiko"
+    set {_name-2} to "🍊 osu!ctb"
+    set {_name-3} to "🎹 osu!mania"
+
+    make new component row and store it in {_row}:
+        
+        set {_loop} to -1
+        loop 4 times:
+            add 1 to {_loop}
+
+            if {_mode} parsed as number = {_loop}:
+                add new disabled secondary button with id "osu-mode::%{_id}%::%{_loop}%::%{_current}%" named {_name-%{_loop}%} to components of the row builder
+            else:
+                add new secondary button with id "osu-mode::%{_id}%::%{_loop}%::%{_current}%" named {_name-%{_loop}%} to components of the row builder
+
+    return {_row}

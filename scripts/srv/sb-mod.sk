@@ -1,0 +1,34 @@
+# # ANTY-DRABINKI
+on message receive:
+    discord id of event-guild is "%yaml value "server" from "config"%"
+    discord id of event-user is not "%yaml value "bot" from "config"%"
+    
+    if event-member has discord permission message manage:
+        delete {temp::ladders-last-user}
+        stop
+
+    if messageLadders2(event-user) is true:
+        destroy event-message
+
+        if {temp::ladders-notification::%discord id of event-user%} is not true:
+            reply with "⚠️ Wykryto drabinki, poczekaj chwilkę lub pisz dłuższe wiadomości!" and store it in {_reply}
+            set {temp::ladders-notification::%discord id of event-user%} to true
+
+            wait 5 seconds
+            destroy {_reply}
+            delete {temp::ladders-notification::%discord id of event-user%}
+
+function messageLadders2(user: user) :: boolean:
+    if discord id of {_user} is {temp::ladders-last-user}:
+        add 1 to {temp::ladders-user-cumulate}
+        if {temp::ladders-user-cumulate} >= 16:
+            set {_t} to difference between now and {temp::ladders-user-date}
+            if {_t} < 6 minutes:
+                return true
+                stop
+            else:
+                set {temp::ladders-user-cumulate} to 0
+        set {temp::ladders-user-date} to now
+    else:
+        set {temp::ladders-last-user} to discord id of {_user}
+        set {temp::ladders-user-cumulate} to 0

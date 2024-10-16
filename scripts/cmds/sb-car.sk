@@ -1,0 +1,20 @@
+on slash command:
+    event-string is "auto" or "samohud"
+    
+    defer interaction and wait
+
+    delete {system::temp::car-json::*}
+
+    send a request to "https://api.popcat.xyz/car"
+    map json body of last http response to {system::temp::car-json::*}
+
+    if {system::temp::car-json::image} is not set:
+        reply with styleDeny("Wystąpił problem z odpowiedzią API.")
+        stop
+
+    make embed:
+        set title of embed to "Samochód: %{system::temp::car-json::title}%"
+        set image of embed to "%{system::temp::car-json::image}%"
+        embedStart(event-guild)
+        embedEnd()
+    reply with last embed

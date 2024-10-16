@@ -1,0 +1,166 @@
+on slash command:
+    event-string is "ban"
+    
+    set {_user} to argument "użytkownik" as user
+    set {_time} to argument "czas" as string
+    set {_reason} to argument "powód" as string ? "brak powodu"
+    set {_msg} to argument "wiadomości" as integer
+    set {_id} to "%yaml value "bot" from "config"%"
+    
+    retrieve member with id (discord id of {_user}) from event-guild and store it in {_member}
+    
+#   ---  CHECKING BOT PERMISSIONS  -----------------------------------------------------------
+    if (self member of event-bot in event-guild) has discord permission BAN_MEMBERS:
+        set {_xd} to true
+    else:
+        reply with hidden styleError("Bot nie posiada uprawnień do banowania członków.")
+        stop
+
+#   ---  CHECKING IDIOTYZM  ------------------------------------------------------------------
+    if {_member} is not set:
+        reply with hidden styleDeny("Nie rozpoznano takiego użytkownika na serwerze.")
+        stop
+    
+    if discord id of {_user} is discord id of event-user:
+        reply with hidden styleDeny("Nie możesz zbanować siebie.")
+        stop
+    
+    if discord id of {_user} is {_id}:
+        reply with hidden styleDeny("Nie mogę zbanować sam siebie.")
+        stop
+    
+    set {_role1::*} to roles of event-member
+    set {_role2::*} to roles of {_member}
+
+    if (role position of {_role2::1}) >= (role position of {_role1::1}):
+        reply with hidden styleDeny("Nie możesz zbanować użytkownika z tą samą lub wyższą rolą.")
+        stop
+#   ------------------------------------------------------------------------------------------
+
+    if {_time} is not "*" or "-":
+        set {_t} to formatDate({_time})
+
+#   ---  CHECKING FOR BAD TIME  --------------------------------------------------------------
+    if {_t} is less than a second later:
+        reply with hidden styleDeny("Podano błędny czas. Dostępne jednostki: `*`, `1d`, `1h`, `1m`, `1s`")
+        stop
+#   ------------------------------------------------------------------------------------------
+    
+    defer interaction and wait
+    
+    reply with penaltBan(event-guild, {_user}, event-user, {_t}, {_time}, {_reason}, {_msg})
+
+    wait 1 second
+    
+    if {_msg} is set:
+        ban discord member {_member} due to {_reason} and delete {_msg} worth of messages
+    else:
+        ban discord member {_member} due to {_reason}
+
+on slash command:
+    event-string is "unban"
+    
+    set {_user} to argument "użytkownik" as string
+
+    defer interaction and wait
+    
+    retrieve every bans from event-guild and store them in {_bans::*}
+
+    loop {_bans::*}:
+        if "%banned user of loop-value%" is {_user}:
+            set {_r} to (ban reason of loop-value) ? "brak powodu"
+            set {_u} to banned user of loop-value
+            exit loop
+
+    if {_u} is set:
+        unban discord user {_u} in guild event-guild
+        reply with penaltUnBan(event-guild, {_u}, event-user, {_r})
+    else:
+        reply with hidden styleDeny("Podany użytkownik nie jest zbanowany.")
+
+on slash completion:
+    event-string is "unban"
+    
+    retrieve every bans from event-guild and store them in {_bans::*}
+    
+    loop {_bans::*}:
+        add "%banned user of loop-value%" to {_list::*}
+    
+    if {_list::1} is not set:
+        set {_list::1} to "Żaden użytkownik nie jest zbanowany."
+    
+    set {_arg} to argument "użytkownik" as string
+    
+    return slashComplete({_list::*}, {_arg})
+
+function penaltBan(g: guild, u: user, a: user, t: date, tx: string, r: string, d: number) :: embedbuilder:
+    add 1 to {penalt::%discord id of {_g}%::ban::number::%discord id of {_u}%::%discord id of {_a}%}
+    add 1 to {penalt::%discord id of {_g}%::ban::number::%discord id of {_u}%::all}
+    set {penalt::%discord id of {_g}%::ban::time::%discord id of {_u}%} to {_t} ? "*"
+    
+    if {_tx} is "*" or "-":
+        set {_always} to true
+    else:
+        set {_diff} to formatTime({_tx}, 2)
+        
+    if {_d} > 0:
+        set {_deleted} to "Usunięto wiadomości użytkownika z ostatnich %{_d}% dni."
+    
+    set {_time} to round(unix timestamp of {_t})
+    
+    make embed:
+        add inline field named "Użytkownik:" with value "%mention tag of {_u}%%nl%%{_u}%" to fields of embed
+        add inline field named "Administrator:" with value "%mention tag of {_a}%%nl%%{_a}%" to fields of embed
+        
+        if {_always} is true:
+            add inline field named "Czas:" with value "Na zawsze." to fields of embed
+        else:
+            add inline field named "Czas:" with value "do <t:%{_time}%:f>%nl%`%{_diff}%`" to fields of embed
+        add field named "Powód:" with value "%{_r}%%nl%%nl%*%{_deleted} ? "Nie usunięto wiadomości użytkownika."%*" to fields of embed
+        set embed color of embed to dark red
+        #set thumbnail of embed to avatar of {_u}
+        embedStart({_g})
+        embedEnd()
+    
+        set title of last embed to "⚠️ Zostałeś zbanowany!"
+        directMessage({_u}, "", last embed)
+        set title of last embed to "⚠️ Użytkownik zbanowany!"
+    return last embed
+
+function penaltUnBan(g: guild, u: user, a: user, r: string) :: embedbuilder:
+    delete {penalt::%discord id of {_g}%::ban::time::%discord id of {_u}%}
+
+    make embed:
+        set title of embed to "⚠️ Odbanowano użytkownika!"
+        add inline field named "Użytkownik:" with value "%mention tag of {_u}%%nl%%{_u}%" to fields of embed
+        add inline field named "Administrator:" with value "%mention tag of {_a}%%nl%%{_a}%" to fields of embed
+        add field named "Powód bana:" with value "%{_r}%" to fields of embed
+
+        set embed color of embed to lime
+        #set thumbnail of embed to avatar of {_u}
+        embedStart({_g})
+        embedEnd()
+    return last embed
+
+every 1 second:
+    loop guilds of bot "main":
+
+        # BANY
+        loop {penalt::%discord id of loop-guild%::ban::time::*}:
+            if loop-value-2 < now:
+                
+                retrieve every bans from loop-guild and store them in {_bans::*}
+                loop {_bans::*}:
+                    if discord id of banned user of loop-value-3 is loop-index-1:
+                        set {_u} to banned user of loop-value-3
+                        exit loop
+                
+                unban discord user {_u} in guild loop-guild if {_u} is set
+                delete {penalt::%discord id of loop-guild%::ban::time::%loop-index%}
+
+        # MUTY
+        loop {penalt::%discord id of loop-guild%::mute::time::*}:
+            if loop-value-2 < now:
+
+                delete {penalt::%discord id of loop-guild%::mute::time::%loop-index%}
+                delete {penalt::%discord id of loop-guild%::mute::reason::%loop-index%}

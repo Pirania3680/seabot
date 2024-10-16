@@ -1,0 +1,180 @@
+ZMIENNE W DOKUMENTACJI:
+
+    <GID>               id serwerów
+    <UID>               id użytkowników
+
+
+
+ZMIENNE SKRIPT:
+
+    system::*                           główne zmienne globalne bota
+        │
+        ├─── prefix                     prefix używany w konsoli
+        │
+        ├─── cmd-reg::*                 lista używana do zarejestrowania komend
+        │
+        ├─── cmd-tree::*                lista zmapowanych komend z opisem dostępnych dla użytkowników
+        │   
+        ├─── status::*                  status bota dawany przy komendzie /status
+        │        │
+        │        ├─── name              nazwa statusu
+        │        │
+        │        └─── time              czas statusu
+        │
+        └─── temp::*                    randomowe zmienne tymczasowe
+    
+    var::*                              zmienne globalne
+        │   
+        ├─── 
+        │
+        └─── 
+    
+
+    options::<GID>::*                   zmienne tymczasowe, usuwane przy ładowaniu bota
+        │
+        ├─── cmd::*                     jeśli true, to komenda jest wyłączona
+        │
+        └─── 
+    
+    penalt::<GID>::*                    zmienne kar
+        │   
+        ├─── warn::*                    zmienne ostrzeżeń
+        │        │        
+        │        └─── number::<UID>     licznik ilości warnów
+        │
+        ├─── mute::*
+        │
+        ├─── kick::*
+        │
+        ├─── ban::*
+        │        │        
+        │        └─── time::<UID>       czas bana (timestamp jako data)
+        │
+        └───
+    
+    embed::<UID>::*                     zmienne dotyczące komendy /embed editor
+        │   
+        ├─── edit                       wiadomość z embedem aktualnie w edycji
+        │
+        ├─── temp::*                    szczegóły embedu aktualnie w edycji
+        │
+        ├─── saved::<nazwa>::*          wszystkie zapisane embedy użytkownika
+        │
+        └─── 
+    
+    autorole::*                         zmienne dotyczące komendy /autorole
+        │   
+        ├─── saved::<GID>::<MSG>::<E>   wszystkie zapisane autorole (value = rola)
+        │
+        └─── temp::<UID>::*             zmienne tymczasowe autoroli
+
+
+LISTA ZMIENNYCH TYMCZASOWYCH:
+    
+    embed::<UID>::edit
+    autorole::temp::*
+    system::status::*
+    system::temp::*
+
+
+
+STYLE
+
+    styleReady(<TEXT>)
+    ┌──────────────────────────────┐
+    │ ✔️ <TEXT>                    │
+    └──────────────────────────────┘ 
+
+    styleDeny(<TEXT>)
+    ┌──────────────────────────────┐
+    │ ❌ <TEXT>                    │
+    └──────────────────────────────┘ 
+    
+    styleError(<TEXT>)
+    ┌──────────────────────────────┐
+    │ ❌ Wystąpił błąd!            │
+    │ `<TEXT>`                     │
+    └──────────────────────────────┘ 
+
+    
+FUNCTIONS
+    
+    directMessage(u: user, m: string, e: embedbuilder = "")
+    
+    createTop(name: string, size: integer, format: string="[P] - [V]") :: strings:
+
+    slashComplete(o: objects, a: string) :: slashchoices:
+    
+    getEmoji(s: string) :: strings
+    
+    formatTime(time: string) :: string:
+    
+    formatDate(s: string) :: date:
+    
+    
+    
+    penaltWarn(g: guild, u: user, a: user, r: string) :: embedbuilder:
+
+    penaltMute(g: guild, u: user, a: user, t: string, r: string) :: embedbuilder:
+
+
+
+
+
+
+
+set {_m} to new modal with id "autorole-delete" named "Które należy usunąć?"
+
+set {_row1} to new components row
+
+set {_input1} to new text input with id "autorole-delete-1" named "xd"
+set placeholder of {_input1} to "Wpisz tutaj ID autoról do usunięcia. Oddziel je przecinkami."
+set minimum range of {_input1} to 4
+set maximum range of {_input1} to 400
+set required state of {_input1} to true
+add {_input1} to components of {_row1}
+
+set components row of {_m} to {_row1}
+
+show {_m} to the user
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ┌───────────┬───────────┐
+    │           │           │
+    ├───────────┼───────────┤
+    │           │           │
+    └───────────┴───────────┘ 

@@ -1,0 +1,70 @@
+on load:
+    set {_all::*} to files in dir "plugins/Skript/data/font" where [file input is a directory]
+    loop {_all::*}:
+        set {_name} to name of file loop-value
+        load yaml "plugins/Skript/data/font/%{_name}%/config.yml" as {_name}
+
+function fontGenerate(font: string, font-size: integer, spacing: integer, text: string) :: image:
+    set {_current} to 0
+    set {_width} to 0
+
+    set {_height} to yaml value "height" from "%{_font}%"
+    set {_line} to yaml value "line" from "%{_font}%"
+    set {_space} to yaml value "space" from "%{_font}%"
+    set {_factor} to {_font-size} / {_height}
+
+    set {_text::*} to {_text} split at ""
+
+    loop {_text::*}:
+        set {_loop} to loop-value
+
+        replace every "/" with "slash" in {_loop}
+        replace every "?" with "question" in {_loop}
+        replace every "!" with "exc" in {_loop}
+        replace every ":" with "colon" in {_loop}
+        replace every "*" with "star" in {_loop}
+        replace every """" with "quote" in {_loop}
+        replace every "'" with "apostrophe" in {_loop}
+
+        if number of uppercase chars in {_loop} >= 1:
+            set {_loop} to "%{_loop} in uppercase%%{_loop} in lowercase%"
+
+        if {_loop} is " ":
+            set {_size} to {_space} * {_factor}
+        else:
+            set {_img-check} to image from file "plugins/Skript/data/font/%{_font}%/%{_loop}%.png"
+            set {_size} to ceil((width of {_img-check}) * {_factor})
+
+        add round({_size} + {_spacing}) to {_width}
+    
+    set {_image} to new image with size {_width}, {_font-size}
+
+    loop {_text::*}:
+        set {_loop} to loop-value
+
+        replace every "/" with "slash" in {_loop}
+        replace every "?" with "question" in {_loop}
+        replace every "!" with "exc" in {_loop}
+        replace every ":" with "colon" in {_loop}
+        replace every "*" with "star" in {_loop}
+        replace every """" with "quote" in {_loop}
+        replace every "'" with "apostrophe" in {_loop}
+        
+        if number of uppercase chars in loop-value >= 1:
+            set {_loop} to "%{_loop} in uppercase%%{_loop} in lowercase%"
+        
+        if {_loop} is " ":
+            set {_img-width} to {_space} * {_factor}
+        else:
+            set {_adding} to image from file "plugins/Skript/data/font/%{_font}%/%{_loop}%.png"
+            set {_img-width} to ceil((width of {_adding}) * {_factor})
+            set {_img-height} to ceil((height of {_adding}) * {_factor})
+            set {_offset-x} to (yaml value "offset-x.%{_loop}%" from "%{_font}%") ? 0
+            set {_offset-y} to (yaml value "offset-y.%{_loop}%" from "%{_font}%") ? 0
+
+            set {_adding} to resized {_adding} to size {_img-width}, {_img-height} with algorithm 16
+            draw {_adding} on {_image} at {_current} + ({_offset-x} * {_factor}), (({_line} * {_factor}) - {_img-height} + ({_offset-y} * {_factor}))
+
+        add round({_img-width} + {_spacing}) to {_current}
+
+    return {_image}

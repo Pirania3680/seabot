@@ -1,0 +1,131 @@
+on slash command:
+    event-string is "mute"
+    
+    set {_user} to argument "użytkownik" as user
+    set {_time} to argument "czas" as string
+    set {_reason} to argument "powód" as string ? "brak powodu"
+    set {_id} to "%yaml value "bot" from "config"%"
+
+    retrieve member with id discord id of {_user} from event-guild and store it in {_member}
+    
+#   ---  CHECKING BOT PERMISSIONS  -----------------------------------------------------------
+    if (self member of event-bot in event-guild) has discord permission MODERATE_MEMBERS:
+        set {_xd} to true
+    else:
+        reply with hidden styleError("Bot nie posiada uprawnień do wyciszania członków.")
+        stop
+#   ---  CHECKING IDIOTYZM  ------------------------------------------------------------------
+    if {_member} is not set:
+        reply with hidden styleDeny("Nie rozpoznano takiego użytkownika na serwerze.")
+        stop
+    
+    if discord id of {_user} is discord id of event-user:
+        reply with hidden styleDeny("Nie możesz wyciszyć siebie.")
+        stop
+    
+    if discord id of {_user} is {_id}:
+        reply with hidden styleDeny("Nie mogę wyciszyć sam siebie.")
+        stop
+    
+    set {_role1::*} to roles of event-member
+    set {_role2::*} to roles of {_member}
+
+    if (role position of {_role2::1}) >= (role position of {_role1::1}):
+        reply with hidden styleDeny("Nie możesz wyciszyć użytkownika z tą samą lub wyższą rolą.")
+        stop
+#   ------------------------------------------------------------------------------------------
+
+    set {_t} to formatDate({_time})
+
+#   ---  CHECKING FOR BAD TIME  --------------------------------------------------------------
+    if {_t} is less than a second later:
+        reply with hidden styleDeny("Podano błędny czas. Dostępne jednostki: `1d`, `1h`, `1m`, `1s`")
+        stop
+    
+    if difference between {_t} and now is more than 28 days:
+        reply with hidden styleDeny("Wyciszenie może być nałożone na maksymalnie 28 dni.")
+        stop
+#   ------------------------------------------------------------------------------------------
+    
+    defer interaction and wait
+    
+    timeout {_member} until {_t} due to {_reason}
+
+    reply with penaltMute(event-guild, {_user}, event-user, {_t}, {_time}, {_reason})
+
+on slash command:
+    event-string is "unmute"
+    
+    set {_user} to argument "użytkownik" as string
+
+    defer interaction and wait
+    
+    load all members from event-guild and store them in {_members::*}
+    loop {_members::*}:
+        if (loop-value.isTimedOut()) is true:
+            add loop-value to {_mutes::*}
+
+    loop {_mutes::*}:
+        if "%loop-value%" is {_user}:
+            set {_u} to loop-value
+            exit loop
+
+    if {_u} is set:
+        stop timeout of {_u}
+        reply with penaltUnMute(event-guild, {_u}, event-user, {_r})
+    else:
+        reply with hidden styleDeny("Podany użytkownik nie jest wyciszony.")
+
+on slash completion:
+    event-string is "unmute"
+    
+    load all members from event-guild and store them in {_members::*}
+    loop {_members::*}:
+        if (loop-value.isTimedOut()) is true:
+            add "%loop-value%" to {_list::*}
+    
+    if {_list::1} is not set:
+        set {_list::1} to "Żaden użytkownik nie ma wyciszenia."
+    
+    set {_arg} to argument "użytkownik" as string
+
+    return slashComplete({_list::*}, {_arg})
+
+    
+function penaltMute(g: guild, u: user, a: user, t: date, tx: string, r: string) :: embedbuilder:
+    add 1 to {penalt::%discord id of {_g}%::mute::number::%discord id of {_u}%::%discord id of {_a}%}
+    add 1 to {penalt::%discord id of {_g}%::mute::number::%discord id of {_u}%::all}
+    set {penalt::%discord id of {_g}%::mute::reason::%discord id of {_u}%} to {_r}
+    set {penalt::%discord id of {_g}%::mute::time::%discord id of {_u}%} to {_t}
+    
+    set {_diff} to formatTime({_tx}, 2)
+    set {_time} to round(unix timestamp of {_t})
+    
+    make embed:
+        set title of embed to "⚠️ Wyciszenie!"
+        add inline field named "Użytkownik:" with value "%mention tag of {_u}%%nl%%{_u}%" to fields of embed
+        add inline field named "Administrator:" with value "%mention tag of {_a}%%nl%%{_a}%" to fields of embed
+        add inline field named "Czas:" with value "do <t:%{_time}%:f>%nl%`%{_diff}%`" to fields of embed
+        add field named "Powód:" with value {_r} to fields of embed
+        set embed color of embed to red
+        # set thumbnail of embed to avatar of {_u}
+        embedStart({_g})
+        embedEnd()
+    return last embed
+
+function penaltUnMute(g: guild, u: user, a: user, r: string) :: embedbuilder:
+    set {_r} to {penalt::%discord id of {_g}%::mute::reason::%discord id of {_u}%} ? "brak powodu"
+    delete {penalt::%discord id of {_g}%::mute::reason::%discord id of {_u}%}
+    delete {penalt::%discord id of {_g}%::mute::time::%discord id of {_u}%}
+
+    make embed:
+        set title of embed to "⚠️ Odciszono użytkownika!"
+        add inline field named "Użytkownik:" with value "%mention tag of {_u}%%nl%%{_u}%" to fields of embed
+        add inline field named "Administrator:" with value "%mention tag of {_a}%%nl%%{_a}%" to fields of embed
+        add field named "Powód wyciszenia:" with value "%{_r}%" to fields of embed
+
+        set embed color of embed to lime
+        #set thumbnail of embed to avatar of {_u}
+        embedStart({_g})
+        embedEnd()
+    return last embed

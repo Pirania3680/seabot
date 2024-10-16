@@ -1,0 +1,55 @@
+on slash command:
+    event-string is "hentai"
+    
+    if nsfw of event-channel is not true:
+        reply with hidden styleDeny("Tej komendy możesz użyć tylko na kanałach NSFW.")
+        stop
+    
+    defer interaction and wait
+
+    delete {system::temp::hentai-json::*}
+    delete {system::temp::hentai-category}
+    
+    set {_api} to random integer between 1 and 3
+    
+    # if {_api} is 1:
+
+    #     send a request to "https://neko-love.xyz/api/v1/nekolewd"
+    #     map json body of last http response to {system::temp::hentai-json::*}
+    
+    if {_api} is 2 or 3:
+        
+        set {_random} to random integer between 1 and 3
+        if {_random} is 1 or 2:
+            set {system::temp::hentai-category} to "waifu"
+        if {_random} is 3:
+            set {system::temp::hentai-category} to "neko"
+        
+        send a request to "https://api.waifu.pics/nsfw/%{system::temp::hentai-category}%"
+        map json body of last http response to {system::temp::hentai-json::*}
+    
+    if {_api} is 4 or 1:
+        
+        set {_random} to random integer between 1 and 4
+        if {_random} is 1:
+            set {system::temp::hentai-category} to "hentai"
+        if {_random} is 2:
+            set {system::temp::hentai-category} to "nsfwNeko"
+        if {_random} is 3:
+            set {system::temp::hentai-category} to "yuri"
+        if {_random} is 4:
+            set {system::temp::hentai-category} to "classic"
+        
+        send a request to "https://hmtai.herokuapp.com/nsfw/%{system::temp::hentai-category}%"
+        map json body of last http response to {system::temp::hentai-json::*}
+    
+    if {system::temp::hentai-json::url} is not set:
+        reply with styleDeny("Wystąpił problem z odpowiedzią API.")
+        stop
+
+    make embed:
+        set title of embed to "Oto twoja HANIME girl:"
+        set image of embed to "%{system::temp::hentai-json::url}%"
+        embedStart(event-guild)
+        embedEnd()
+    reply with last embed

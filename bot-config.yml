@@ -1,0 +1,411 @@
+# Przed ustawieniem tych opcji warto zapoznać się z opcją wbudowaną w Dicord: Ustawienia Serwera > Integracje > (Ten-Bot) Zarządzanie
+# W tym miejscu możesz według swoich upodobań zarządzać dostępem komend dla danych użytkowników, roli i kanałów.
+# Pozwoli to na pełne zarządzanie porządkiem i brakiem dostępu niepowołanych użytkowników do komend.
+# Poniżej mogą pojawić się podpowiedzi jak ustawić niektóre opcje, tak by spełniały wszystkie wymagania.
+
+# Jeśli nie zmieniasz kodu bota, nie ma potrzeby zmiany tych ustawień
+
+# -----------
+# USTAWIENIA SYSTEMOWE
+# -----------
+
+file_emotes: 'plugins/DiSky/emojis.json'
+file_lyrics: 'plugins/Skript/temp/lyrics.txt'
+file_changelog: 'plugins/Skript/changelog.txt'
+
+# -----------
+# GLOBALNE USTAWIENIA BOTA
+# -----------
+
+# Token do bota
+token: ''
+
+# Nazwa bota
+name: SeaBot
+
+# Discord ID właściciela bota
+owner: 000000000000000000
+
+# Discord ID samego bota
+bot: 000000000000000000
+
+# Discord ID głównego serwera
+server: 000000000000000000
+
+# Prefix w konsoli z różnymi informacjami
+console_prefix: '&9SeaBot &7» '
+
+# Aktywności które bot będzie wyświetlał
+# Jeśli podasz jedną, będzie wyświetlana cały czas
+# Jeśli podasz więcej, będą zmieniane losowo co 30 sekund.
+#
+# Na początku napisz rodzaj aktywności, dostępne: playing; watching; listening; competing
+# Przykład: 'watching dziwnych ludzi'
+# Wynik w Discordzie po Polsku: 'Ogląda dziwnych ludzi'
+activities:
+  - 'watching SeaBot'
+  - 'playing SeaBot'
+
+# Jeśli chcesz, aby zamiast standardowej pomocy wyświetlał się twój własny embed, wpisz tutaj jego nazwę (wygenerowaną komendą /embed)
+custom_help_embed: pomoc
+
+# ID ról, które bot nada przy wejściu na serwer
+# Możesz zostawić tą listę pustą (wtedy dodaj na początku linijki # aby zakomentować)
+# Uwaga! Tutaj nie należy wpisywać roli do weryfikacji jeśli tryb weryfikacji (verification_type) jest ustawiony na 0.
+role_on_join:
+  - 000000000000000000
+
+# Tutaj podaj ID kanału na którym ma być wysyłana wiadomość powitalna (po zarejestrowaniu się)
+join_message: 000000000000000000
+
+# Podaj nazwę dla embedu, który będzie wysyłany jako wiadomość powitalna
+#
+# Możesz użyć zmiennych przy tworzeniu:
+# %mention% = oznaczenie użytkownika
+# %name% = discordowy nick
+# %tag% = discordowy tag
+# %nick% = serwerowy nick
+join_embed: powitanie
+
+# Tutaj podaj ID kanału na którym ma być wysyłana wiadomość pożegnalna
+quit_message: 000000000000000000
+
+# Podaj nazwę dla embedu, który będzie wysyłany jako wiadomość pożegnalna
+#
+# Możesz użyć zmiennych przy tworzeniu:
+# %mention% = oznaczenie użytkownika
+# %name% = discordowy nick
+# %tag% = discordowy tag
+# %nick% = serwerowy nick
+quit_embed: pożegnanie
+
+# Ta opcja będzie oddawać użytkownikom którzy dołączyli na serwer ponownie ich role, które mieli przed wyjściem/wyrzuceniem z serwera
+# 0 = role nie będą przywracane
+# 1 = role będą przywracane po wejściu na serwer
+restore_roles: 1
+
+# ID do poszczególnych kanałów używanych przez bota:
+channel_verification: 000000000000000000
+channel_rules: 000000000000000000
+channel_info: 000000000000000000
+
+# ID do poszczególnych ról używanych przez bota:
+# (jeszcze nic tu nie ma)
+
+# ID różnych emoji (bot musi być na tym samym serwerze co dane emoji)
+# Jeśli współpracujesz z Piranią to raczej nie trzeba tego ruszać
+# Info: emotki są odczytywane jako: '<ID serwera>::<ID emotki>'
+emoji_arrow_top_1: '813692704571654144::1090617735005884426'
+emoji_arrow_top_2: '813692704571654144::1090617738629746739'
+emoji_arrow_down_1: '813692704571654144::1090617720363548762'
+emoji_arrow_down_2: '813692704571654144::1090617725421887559'
+emoji_arrow_right_1: '813692704571654144::1090617730778017863'
+emoji_arrow_right_2: '813692704571654144::1090617733516886106'
+emoji_arrow_left_1: '813692704571654144::1090617727888130190'
+emoji_arrow_left_2: '813692704571654144::1090617729070940232'
+emoji_refresh: '813692704571654144::1119730035180458035'
+
+emoji_zezwolenie: '813692704571654144::988921186807345272'
+emoji_odmowa: '813692704571654144::988921185830055956'
+emoji_info: '813692704571654144::988934399515033600'
+emoji_lag: '813692704571654144::893627701842288670'
+emoji_loading: '813692704571654144::990033753894166578'
+emoji_back: '813692704571654144::924985881876627466'
+
+emoji_primogem: '813692704571654144::880952113541312563'
+emoji_wish: '813692704571654144::1092952956783038596'
+emoji_point: '813692704571654144::1093952240353554512'
+emoji_mora: ''
+emoji_achievement: '813692704571654144::1104143137435287572'
+emoji_exp: '813692704571654144::1101480415291772968'
+
+emoji_icon_select_top: '813692704571654144::906606219752521760'
+emoji_icon_level: '813692704571654144::1091406685077262346'
+emoji_icon_economy: '813692704571654144::1091406681684066376'
+emoji_icon_characters: '813692704571654144::1099103057180115024'
+emoji_icon_weapons: '813692704571654144::1106307966757523588'
+emoji_icon_wish_next: '813692704571654144::1099101595498729583'
+emoji_icon_wish_previous: '813692704571654144::1099725680058581032'
+emoji_icon_wish_skip: '813692704571654144::1099101596354359368'
+
+emoji_icon_counting: '813692704571654144::1100492849407086612'
+
+# Weryfikacja działa w sposób inny niż wiele innych serwerów. Po wejściu użytkownik musi wpisać komendę /register, dopiero po tym zostanie ustawiony jego nick, role i otrzyma on dostęp do serwera. Aby zapewnić działanie tej funkcji, musisz utworzyć specjalny kanał, który będzie:
+
+# 1) widoczny tylko dla użytkowników z daną rolą (np. niezweryfikowany)
+# 2) widoczny dla każdego nieposiadającego roli (np. zweryfikowany)
+
+# Wybór pomiędzy 1) a 2) należy do Ciebie i do wydajnieszego sposobu na Twoim serwerze.
+
+# Zalecaną czynnością w tym miejscu jest ustawienie komendy /register (w Integracjach opisanych na samej górze) dostępnej tylko i wyłącznie dla osób z rolą niezweryfikowany lub zakazać jej osobom z rangą zweryfikowany. Analogicznie powinno się zablokować wszystkie inne komendy (inne od /register) na kanale z weryfikacją
+
+# Pamiętaj, że wiadomości informacyjne (mające na celu poinformować użytkownika co ma zrobić w danym momencie) musisz zrobić i wysłać na kanał samemu i ręcznie (używając /embed i /send)
+
+# -----------
+# USTAWIENIA DOTYCZĄCE WERYFIKACJI
+# -----------
+
+# Tryb roli do weryfikacji (verification_role poniżej)
+# ustaw 0 jeśli używasz sytuacji opisanej w punkcie 1)
+# ustaw 1 jeśli używasz sytuacji opisanej w punkcie 2)
+verification_type: 0
+
+# Rola używana przez bota w sytuacjach podanych nieco wyżej
+verification_role: 000000000000000000
+
+# Jeśli chcesz, aby po weryfikacji bot zmieniał nick i ustawiał do niego prefix, ustaw tą opcje na prefix który chcesz
+# Jeśli nie chcesz prefixu, zostaw tą opcje pustą ('')
+verification_prefix: 'Gracz | '
+
+# Po weryfikacji bot musi jakoś odpisać. Musisz utworzyć embed komendą /embed a następnie tutaj podać jego nazwę.
+# Bot odpisze zwykłą prostą wiadomość jeśli ta opcja będzie źle ustawiona
+verification_embed: zweryfikowano
+
+# Lista słów zabronionych w komendzie /register
+bad_words:
+  - kurwa
+  - japierdole
+  - jebać
+  - jebac
+  - huj
+  - pizda
+  - spierdalaj
+  - wypierdalaj
+  - kuźwa
+  - kuzwa
+  - debil
+  - dziwka
+  - dzifka
+  - idiot
+  - kutas
+  - pedal
+  - pedał
+  - cipa
+  - cipka
+  - delfin
+
+
+# -----------
+# USTAWIENIA DOTYCZĄCE LICZENIA LEVELU
+# -----------
+
+# Podaj, jaki maksymalny level użytkownicy mogą osiągnąć
+# Uwaga! Grafiki są wykonane z myślą o maksymalnym levelu 99, wyższe wartości mogą wyglądać nieestetycznie.
+level_max: 60
+
+# Podaj wymagania expa na poszczególny level. Pamiętaj o wpisaniu tylu pozycji, ile ustawiłeś level_max
+# Uwaga! Te wartości to nie wymagania od levelu do levelu, tylko od 0. Czyli aby wbić level 4, trzeba wbić łącznie 1000expa a nie 100+300+600+1000expa.
+level_exp_per_lvl:
+  '1': 0
+  '2': 300
+  '3': 600
+  '4': 1000
+  '5': 1500
+  '6': 2200
+  '7': 3200
+  '8': 4300
+  '9': 5600
+  '10': 7100
+  '11': 8800
+  '12': 10700
+  '13': 12800
+  '14': 15000
+  '15': 17500
+  '16': 20200
+  '17': 23100
+  '18': 26200
+  '19': 29500
+  '20': 33000
+  '21': 36800
+  '22': 40800
+  '23': 45000
+  '24': 49500
+  '25': 54100
+  '26': 59000
+  '27': 64200
+  '28': 69600
+  '29': 75200
+  '30': 81000
+  '31': 87100
+  '32': 93500
+  '33': 100200
+  '34': 107100
+  '35': 114300
+  '36': 121800
+  '37': 129500
+  '38': 137500
+  '39': 145800
+  '40': 154100
+  '41': 162800
+  '42': 171800
+  '43': 181100
+  '44': 190600
+  '45': 200500
+  '46': 210500
+  '47': 220900
+  '48': 231500
+  '49': 242400
+  '50': 253600
+  '51': 265100
+  '52': 276900
+  '53': 289000
+  '54': 301400
+  '55': 314100
+  '56': 370500
+  '57': 445300
+  '58': 538000
+  '59': 650000
+  '60': 800000
+
+# Wpisz tutaj ile expa dostanie użytkownik za wysłanie jednej wiadomości
+level_exp_message: 8
+
+# Wpisz tutaj ile expa dostanie użytkownik za użycie komendy z / tego bota
+level_exp_command: 6
+
+# Wpisz tutaj ile expa dostanie użytkownik za spędzenie 1 minuty na kanale głosowym
+level_exp_voice: 4
+
+# Lista użytkowników, którzy nie będą brani pod uwagę w liczeniu expa i levelu.
+# Uwaga! Użytkownicy z tej listy wciąż będą resetować wiadomości z rzędu opisane niżej.
+# Jeśli nie chcesz aby resetowali, dodaj tego użytkownika również do listy level_message_dividier_users_exception
+level_users_exception:
+  - 000000000000000000
+
+# Lista kanałów, które nie będą brane pod uwagę w liczeniu expa
+level_channels_exception:
+  - 000000000000000000
+
+# Jeśli użytkownik będzie wysyłał samemu wiadomości (drabinki) to wartość expa zostanie podzielona.
+# Przykład dla wartości 2 i expa 10:
+# 1 wiadomość = 10 expa
+# 2 wiadomość z rzędu = 5 expa
+# 3 wiadomość z rzędu = 2,5 expa
+# 4 wiadomość z rzędu = 1,25 expa
+# 5 wiadomość z rzędu = 0,625 expa
+# Wiadomość z rzędu zostanie zresetowana gdy ktokolwiek inny wyśle wiadomość
+level_message_divider: 1.35
+
+# Lista użytkowników / botów, którzy nie będą wpływać na reset wiadomości z rzędu
+# Jeśli nie chcesz, by rozmowa z botami resetowała wiadomość z rzędu, musisz wpisać tutaj wszystkie ID innych botów
+level_message_dividier_users_exception:
+  - 000000000000000000
+
+# Czy jeśli wiadomość jest taka sama jak poprzednia LUB zawiera poprzednią wiadomość w swojej treści, to czy użytkownik powinien dostawać za nią expa
+# 0 = powinien dostać expa
+# 1 = nie powinien dostać expa
+level_message_same: 1
+
+# Jeśli użytkownik jest sam na kanale głosowym, to czy powinien dostawać expa?
+# 0 = nie będzie dostawał
+# 1 = będzie dostawał zgodnie z opcją powyżej
+level_voice_only_one_user: 0
+
+# Lista komend, które nie będą przyznawać expa (jeśli opcja level_exp_command jest ustawiona na więcej niż 0)
+level_commands_exception:
+  - warn
+  - mute
+  - kick
+  - ban
+  - unban
+
+# Podaj ID kanału, na którym mają się wysyłać informacje o zdobyciu następnego levelu
+# LUB
+# Wpisz current, aby wiadomość wysyłała się na kanale, w którym zdobyto kolejny level.
+# Uwaga! W przypadku kanału głosowego, wiadomość zostanie wysłana na kanale tekstowym tego kanału głosowego.
+level_notification: 000000000000000000
+#level_notification: current
+
+# Podaj czy bot ma pingować użytkownika, który własnie wbił następny level
+# 0 = nie będzie pingował
+# 1 = będzie pingował
+level_notification_ping: 1
+
+# Poniżej możesz ustalić, przy jakim poziomie użytkownik otrzyma podane role
+level_role_on_rank:
+  '10': 000000000000000000
+  '20': 000000000000000000
+  '30': 000000000000000000
+  '40': 000000000000000000
+  '50': 000000000000000000
+  '60': 000000000000000000
+
+
+
+# -----------
+# USTAWIENIA DOTYCZĄCE EKONOMII
+# -----------
+
+# Uwaga! Ustawienia bannerów są dostępne w osobnym pliku - bot-economy.yml
+
+# Nagroda w primogemach za wykonanie komendy /daily
+reward_daily: 150
+
+# Nagroda w primogemach za wykonanie komendy /work
+reward_work: 40
+
+# Ile razy na raz można użyć /pracy zanim będzie trzeba zaczekać
+work_limit: 3
+
+# Koszt w primogemach za wykonanie lub kupienie jednego wisha
+wish_cost: 160
+
+# Ile primogemów straci użytkownik, jeśli zostanie złapany podczas kradzieży
+rob_fail: 50
+
+# Włączaj lub wyłączaj różne rodzaje pracy w komendzie /work
+# 1 = włączone
+# 0 = wyłączone
+# Prace są losowane z puli włączonych
+works:
+  math: 1
+  emoji: 1
+
+# Funkcja dająca primogemy losowemu użytkownikowi, który przez ostatnią godzinę wysłał chociaż jedną wiadomość
+# 1 = funkcja włączona, będzie dawać primogemy
+# 0 = funkcja wyłączona
+messages_reward: 1
+
+# Kanał, na którym będą wysyłane informacje o tym, kto dostał nagrodę za pisanie (funkcja wyżej)
+message_reward_channel: 000000000000000000
+
+# Ilość primogemów, które otrzyma wybrany użytkownik z funkcji powyżej
+message_reward_amount: 60
+
+# Ile razy będzie można użyć kasyna na godzinę
+casino_hour_limit: 30
+
+# Ile punktów rankingowych mają dawać poszczególne dropy
+# first - pierwsze trafienie danej postaci
+# constellation - trafienie konstelacji (2-6)
+# more - każde trafienie powyżej 6 konstelacji
+points:
+  first-5: 25
+  constellation-5: 10
+  more-5: 5
+  first-4: 5
+  constellation-4: 2
+  more-4: 1
+
+# Ilość specjalnych walut, które otrzyma użytkownik po trafiniu itemu o danej rzadkości
+wish_reward_3_weapon: 15
+wish_reward_4_character: 2
+wish_reward_4_weapon: 2
+wish_reward_5_character: 10
+wish_reward_5_weapon: 10
+
+# Linki do animacji wishowania dla poszczególnej ilości gwiazdek
+wish_animation_3: 'https://i.imgur.com/CQRzawB'
+wish_animation_4: 'https://i.imgur.com/3stuq6i'
+wish_animation_5: 'https://i.imgur.com/6pckVV4'
+
+
+
+# -----------
+# USTAWIENIA DOTYCZĄCE MODUŁU OSU
+# -----------
+
+# Klucz do systemu API osu, ze względu bezpieczeństwa należy wygenerować swój własny klucz
+# Można to zrobić w ustawieniach swojego konta osu -> https://osu.ppy.sh/p/api/
+# Nazwę aplikacji i adres url aplikacji można podać jakikolwiek, ale najlepiej nazwę swojego bota i zaproszenie na discorda
+osu_api_key: ''

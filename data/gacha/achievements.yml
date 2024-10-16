@@ -1,0 +1,423 @@
+# Zdobądź 1/10/50 postaci
+'001':
+  '1':
+    value: 1
+    reward: 50
+    title: 'Uczniowskie Przymierze'
+    desc: 'Zdobądź pierwszą postać'
+  '2':
+    value: 10
+    reward: 150
+    title: 'Kolekcjoner Postaci'
+    desc: 'Zdobądź 10 postaci'
+  '3':
+    value: 50
+    reward: 600
+    title: 'Ekspert ds. Postaci'
+    desc: 'Zdobądź 50 postaci'
+
+# Zdobądź 1/6 konstelacji
+'002':
+  '1':
+    value: 1
+    reward: 50
+    title: 'Powtórka'
+    desc: 'Zdobądź konstelację do postaci'
+  '2':
+    value: 6
+    reward: 150
+    title: 'Maksymalna Moc'
+    desc: 'Zdobądź 6 konstelacji w jednej postaci'
+
+# Zdobądź 6 konstelacji w 3/10/25 postaciach
+'003':
+  '1':
+    value: 3
+    reward: 150
+    title: 'Kosmiczny Król'
+    desc: 'Zdobądź 6 konstelacji w 3 postaciach'
+  '2':
+    value: 10
+    reward: 350
+    title: 'Przestrzenny Władca'
+    desc: 'Zdobądź 6 konstelacji w 10 postaciach'
+  '3':
+    value: 25
+    reward: 600
+    title: 'Wszechświatowy Potentat'
+    desc: 'Zdobądź 6 konstelacji w 25 postaciach'
+
+# Pierwsza 5 gwiazdkowa postać
+'004':
+  '1':
+    value: 1
+    reward: 150
+    title: 'Złota Szansa'
+    desc: 'Zdobądź swoją pierwszą 5⭐ postać'
+
+# Wygrane 50/50 z rzędu
+'005':
+  '1':
+    value: 1
+    reward: 150
+    title: 'Ulga!'
+    desc: 'Wygraj swoje pierwsze 50/50'
+  '2':
+    value: 3
+    reward: 600
+    title: 'Złota Passa'
+    desc: 'Wygraj 50/50 trzy razy z rzędu'
+
+# Przegrane 50/50 z rzędu
+'006':
+  '1':
+    value: 1
+    reward: 150
+    title: 'Niefart'
+    desc: 'Przegraj swoje pierwsze 50/50'
+  '2':
+    value: 3
+    reward: 600
+    title: 'Niemożliwe!'
+    desc: 'Przegraj 50/50 trzy razy z rzędu'
+
+# Wykonaj 5/20/100 razy daily
+'007':
+  '1':
+    value: 5
+    reward: 150
+    title: 'Szybkie zarobki'
+    desc: 'Ukończ daily w pełni 5 razy'
+  '2':
+    value: 20
+    reward: 350
+    title: 'Sumienny'
+    desc: 'Ukończ daily w pełni 20 razy'
+  '3':
+    value: 5
+    reward: 600
+    title: 'Master Daily'
+    desc: 'Ukończ daily w pełni 100 razy'
+
+# Wykonaj 10/100/1000 razy pracę
+'008':
+  '1':
+    value: 10
+    reward: 150
+    title: 'Robotnik'
+    desc: 'Wykonaj pracę 10 razy'
+  '2':
+    value: 100
+    reward: 350
+    title: 'Kierownik'
+    desc: 'Wykonaj pracę 100 razy'
+  '3':
+    value: 1000
+    reward: 600
+    title: 'Prezes'
+    desc: 'Wykonaj pracę 1000 razy'
+
+# Popsuj pracę z rzędu
+'009':
+  '1':
+    value: 1
+    reward: 50
+    title: 'Wypadek przy pracy!'
+    desc: 'Zepsuj pracę po raz pierwszy'
+  '2':
+    value: 3
+    reward: 600
+    title: 'Nieudolnik'
+    desc: 'Zepsuj pracę 3 razy z rzędu'
+
+# Przelew na daną kwotę
+'010':
+  '1':
+    value: 1
+    reward: 50
+    title: 'Współpraca'
+    desc: 'Przelej dowolną kwotę innemu użytkownikowi'
+  '2':
+    value: 1000
+    reward: 350
+    title: 'Prawdziwy Biznes'
+    desc: 'Przelej minimum 1000 primo innemu użytkownikowi'
+
+# Okradnij kogoś 1/5/25 razy
+'011':
+  '1':
+    value: 1
+    reward: 150
+    title: 'Złodziej'
+    desc: 'Okradnij kogoś po raz pierwszy'
+  '2':
+    value: 5
+    reward: 350
+    title: 'Przestępca'
+    desc: 'Okradnij kogoś 5 razy'
+  '3':
+    value: 25
+    reward: 150
+    title: 'Kryminalista'
+    desc: 'Okradnij kogoś 25 razy'
+
+# Zostałeś złapany z rzędu
+'012':
+  '1':
+    value: 1
+    reward: 150
+    title: 'Wpadka!'
+    desc: 'Zostań złapany podczas kradzieży'
+  '2':
+    value: 3
+    reward: 600
+    title: 'Chyba pora odpuścić...'
+    desc: 'Zostań złapany podczas kradzieży 3 razy z rzędu'
+
+# Wygraj w kasynie 100/1000/10000 primo
+'013':
+  '1':
+    value: 100
+    reward: 50
+    title: 'Niezły zysk'
+    desc: 'Wygraj w kasynie minimum 100 primo'
+  '2':
+    value: 1000
+    reward: 350
+    title: 'Cała wypłata!'
+    desc: 'Wygraj w kasynie minimum 1000 primo'
+  '3':
+    value: 10000
+    reward: 1200
+    title: 'Wygrana jak w Loterii!'
+    desc: 'Wygraj w kasynie minimum 10000 primo'
+
+# Wygraj w kasynie przy 100% szansie
+'014':
+  '1':
+    value: 1
+    reward: 150
+    title: 'Wyliczone.'
+    desc: 'Wygraj w kasynie mając 100% szans'
+
+# Wygraj w kasynie przy 10% szans lub mniej
+'015':
+  '1':
+    value: 1
+    reward: 150
+    title: 'Nie ma mocnych'
+    desc: 'Wygraj w kasynie mając 10% szans lub mniej'
+  
+# Przegraj w kasynie 1000 primo
+'016':
+  '1':
+    value: 1000
+    reward: 150
+    title: 'A miało być tak dobrze...'
+    desc: 'Przegraj w kasynie conajmniej 1000 primo'
+
+# Odbierz nagrody za 10/30/50 level
+'017':
+  '1':
+    value: 10
+    reward: 150
+    title: 'Aktywny'
+    desc: 'Odbierz nagrody za 10 level'
+  '2':
+    value: 30
+    reward: 600
+    title: 'Redaktor'
+    desc: 'Odbierz nagrody za 30 level'
+  '3':
+    value: 50
+    reward: 1200
+    title: 'Legenda Serwera'
+    desc: 'Odbierz nagrody za 50 level'
+
+# Zdobądź 6 konstelacji w 5 gwiazdkowej postaci
+'018':
+  '1':
+    value: 1
+    reward: 600
+    title: 'Magnat Kolekcji'
+    desc: 'Zdobądź 6 konstelacji w 5 gwiazdkowej postaci'
+  '2':
+    value: 3
+    reward: 1200
+    title: 'Nieograniczony Budżet'
+    desc: 'Zdobądź 6 konstelacji w trzech 5 gwiazdkowych postaciach'
+  '3':
+    value: 10
+    reward: 3200
+    title: 'Da się więcej?!'
+    desc: 'Zdobądź 6 konstelacji w dziesięciu 5 gwiazdkowych postaciach'
+
+# Użyj komendy /avatar
+'019':
+  '1':
+    value: 1
+    reward: 50
+    title: 'Ciekawe...'
+    desc: 'Użyj komendy /avatar'
+
+# Zdobądź 50/250/1000 punktów rankingowych
+'020':
+  '1':
+    value: 50
+    reward: 50
+    title: 'Początki w Rankingu'
+    desc: 'Uzyskaj 50 punktów rankingowych na koncie'
+  '2':
+    value: 250
+    reward: 350
+    title: 'Pomału w topce'
+    desc: 'Uzyskaj 250 punktów rankingowych na koncie'
+  '3':
+    value: 1000
+    reward: 600
+    title: 'To TOP 1 prawda?!'
+    desc: 'Uzyskaj 1000 punktów rankingowych na koncie'
+
+# Sprawdź swoje pity 10 razy
+'021':
+  '1':
+    value: 10
+    reward: 50
+    title: 'Zaangażowany'
+    desc: 'Sprawdź swoje pity 10 razy'
+
+# Wykonaj 10/90/300 wishy
+'022':
+  '1': 
+    value: 10
+    reward: 50
+    title: 'Pierwsza dziesiątka'
+    desc: 'Wykonaj łącznie 10 wishy'
+  '2': 
+    value: 90
+    reward: 350
+    title: 'Gwarancik'
+    desc: 'Wykonaj łącznie 90 wishy'
+  '3': 
+    value: 300
+    reward: 600
+    title: 'Sporo tego...'
+    desc: 'Wykonaj łącznie 300 wishy'
+
+# Zbierz łącznie conajmniej 90 wishy na koncie mając gwarant
+'023':
+  '1':
+    value: 1
+    reward: 600
+    title: 'Bezpiecznik'
+    desc: 'Zbierz równowartość conajmniej 90 wishy mając gwarant'
+
+# Zbierz łącznie conajmniej 180 wishy na koncie mając 50/50
+'024':
+  '1':
+    value: 1
+    reward: 600
+    title: 'Całkowita pewność'
+    desc: 'Zbierz równowartość conajmniej 180 wishy mając 50/50'
+
+# Traf dwie 5* postacie/bronie w jednym 10x pullu
+'025':
+  '1':
+    value: 1
+    reward: 600
+    title: 'Ale fart!'
+    desc: 'Zdobądź dwie 5⭐ w jednym 10x wishu'
+
+# Zdobądź postać/broń na 1 pity
+'026':
+  '1':
+    value: 1
+    reward: 150
+    title: 'To rozumiem.'
+    desc: 'Zdobądź postać na 1 pity'
+
+# Zdobądź 3 postacie/bronie pod rząd na 10 pity
+'027':
+  '1':
+    value: 3
+    reward: 350
+    title: 'Rzadziej się nie da?'
+    desc: 'Zdobądź trzy 4⭐ postacie na 10 pity pod rząd'
+
+# Zdobądź 1/10/30 4* lub 5* broni
+'028':
+  '1':
+    value: 1
+    reward: 50
+    title: 'Coś lepszego'
+    desc: 'Zdobądź swoją pierwszą broń 4⭐ lub wyższą'
+  '2':
+    value: 10
+    reward: 350
+    title: 'Jest w czym wybierać'
+    desc: 'Zdobądź 10 broni 4⭐ lub wyższych'
+  '3':
+    value: 30
+    reward: 600
+    title: 'Cały arsenał'
+    desc: 'Zdobądź 30 broni 4⭐ lub wyższych'
+
+# Zdobądź wszystkie 3* bronie
+'029':
+  '1':
+    value: 1
+    reward: 350
+    title: 'Całe gówno zebrane'
+    desc: 'Zdobądź wszystkie 3⭐ bronie'
+
+# Zdobądź 3*/4*/5* broń na R5
+'030':
+  '1':
+    value: 3
+    reward: 50
+    title: 'Troszke lepsze gówno'
+    desc: 'Zdobądź R5 w 3⭐ broni'
+  '2':
+    value: 4
+    reward: 350
+    title: 'Świetna broń!'
+    desc: 'Zdobądź R5 w 4⭐ broni'
+  '3':
+    value: 5
+    reward: 1200
+    title: 'Więcej się nie wyciśnie'
+    desc: 'Zdobądź R5 w 5⭐ broni'
+
+# Wyposaż 1/10/30 postaci bisem
+'031':
+  '1':
+    value: 1
+    reward: 350
+    title: 'Na wymiar'
+    desc: 'Zdobądź bisa do postaci'
+  '2':
+    value: 10
+    reward: 600
+    title: 'Armia'
+    desc: 'Zdobądź bisy w 10 postaciach'
+  '3':
+    value: 30
+    reward: 1200
+    title: 'Endgame'
+    desc: 'Zdobądź bisy w 30 postaciach'
+
+# Zdobądź 5* bisa do 5* postaci
+'032':
+  '1':
+    value: 1
+    reward: 600
+    title: 'Prawdziwa siła'
+    desc: 'Zdobądź 5⭐ bisa do 5⭐ postaci'
+
+# Zdobądź postać i broń w jednym 10x wishu
+'033':
+  '1':
+    value: 1
+    reward: 150
+    title: 'Mieszanka'
+    desc: 'Zdobądź 4⭐ lub wyższą broń i postać w jednym 10x wishu'

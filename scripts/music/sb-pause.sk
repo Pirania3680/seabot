@@ -1,0 +1,32 @@
+on slash command:
+    event-string is "pauza"
+
+    set {_channel} to voice channel of event-member
+    set {_bot-channel} to voice channel of (self member of event-bot in event-guild)
+
+    if {_channel} is not set:
+        reply with hidden styleDeny("Nie jesteś na kanale głosowym.")
+        stop
+    
+    if {_bot-channel} is set:
+        if {_bot-channel} is not {_channel}:
+            reply with hidden styleDeny("Bot jest połączony z innym kanałem.")
+            stop
+        
+    if playing track of event-guild is not set:
+        reply with hidden styleDeny("Obecnie nic nie jest grane.")
+        stop
+    
+    defer the interaction and wait
+    
+    if {music::%discord id of event-guild%::paused} is true:
+        resume track in event-guild
+        set {music::%discord id of event-guild%::paused} to false
+
+        reply with styleReady("Wznowiono utwór.")
+    
+    else:
+        pause track in event-guild
+        set {music::%discord id of event-guild%::paused} to true
+
+        reply with styleReady("Zatrzymano utwór.")

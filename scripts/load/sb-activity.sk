@@ -1,0 +1,40 @@
+on ready:
+    while "main" is not loaded on discord:
+        wait 1 second
+    
+    set {_list::*} to yaml list "activities" from "config"
+    loop {_list::*}:
+        set {_parse::%loop-index%::*} to loop-value parsed as "%text% %text%"
+        add 1 to {_size}
+
+    set online status of bot "main" to do not disturb
+    set presence of bot "main" to playing "Ładowanie modułów..."
+    wait 3 seconds
+    set online status of bot "main" to online
+    set {_time} to 30
+    if {_size} is not set:
+        set presence of bot "main" to playing ""
+    
+    while "main" is loaded on discord:
+        add 1 to {_time}
+        if {_time} >= 30:
+            set {_time} to 0
+            set {_r} to random integer between 1 and {_size}
+
+            if {_parse::%{_r}%::1} is "playing":
+                set presence of bot "main" to playing {_parse::%{_r}%::2}
+
+            else if {_parse::%{_r}%::1} is "watching":
+                set presence of bot "main" to watching {_parse::%{_r}%::2}
+
+            else if {_parse::%{_r}%::1} is "listening":
+                set presence of bot "main" to listening {_parse::%{_r}%::2}
+
+            else if {_parse::%{_r}%::1} is "competing":
+                set presence of bot "main" to competing {_parse::%{_r}%::2}
+            
+            else:
+                set presence of bot "main" to playing {_parse::%{_r}%::2}
+
+
+        wait 1 second

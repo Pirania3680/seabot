@@ -1,0 +1,35 @@
+on slash command:
+    event-string is "clear"
+
+    set {_number} to argument "ilość" as number
+
+#   ---  CHECKING BOT PERMISSIONS  -----------------------------------------------------------
+    set {_id} to "%yaml value "bot" from "config"%"
+    retrieve member with id {_id} from event-guild and store it in {_self}
+    if {_self} has discord permission view channel:
+        set {_xd} to true
+    else:
+        reply with hidden styleError("Bot nie posiada uprawnień do wyświetlania tego kanału.")
+        stop
+#   ------------------------------------------------------------------------------------------
+    
+    if {_number} > 100:
+        reply with styleDeny("Limit wiadomości do usunięcia na raz wynosi **100**.")
+        stop
+    if {_number} < 1:
+        reply with styleDeny("Musisz usunąć chociaż 1 wiadomość...")
+        stop
+
+    defer the interaction and wait silently
+
+    retrieve last {_number} messages from event-channel and store them in {_msg::*}
+    purge {_msg::*}
+    
+    reply with hidden styleReady("Usunięto %{_number}% wiadomości.") and store it in {_reply}
+
+
+# command /try:
+#     trigger:
+#         retrieve message from id "1076186751078506516" from channel with id "928786358019977286" and store it in {_delete}
+#         broadcast "%{_delete}%"
+#         destroy discordDestroy({_delete})

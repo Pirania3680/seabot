@@ -1,0 +1,204 @@
+automatic:
+    enabled: false
+    interval: 604800
+    last-date: 1728860400
+    character:
+        4_chance: 8.6
+        4_soft: 8
+        4_hard: 10
+        5_chance: 0.6
+        5_soft: 74
+        5_hard: 90
+        5_drops_lost:
+        - keqing
+        - qiqi
+        - diluc
+        - mona
+        - jean
+        - tighnari
+        - dehya
+    weapon:
+        4_chance: 10.6
+        4_soft: 8
+        4_hard: 10
+        5_chance: 0.8
+        5_soft: 64
+        5_hard: 80
+        5_drops_lost:
+        - amos_bow
+        - skyward_harp
+        - lost_prayer_to_the_sacred_winds
+        - skyward_atlas
+        - skyward_pride
+        - wolfs_gravestone
+        - primordial_jade_winged_spear
+        - skyward_spine
+        - aquila_favonia
+        - skyward_blade
+
+economy_banners:
+    '1':
+        id: 1
+        start: 1728860400
+        end: 1729465140
+        name: Gentry of Hermitage
+        description: "Zwiększony drop limitowanej 5⭐ postaci: **Zhongli** \n\nKażde wykonane 10 wishy to gwarantowany 4⭐ przedmiot lub wyższy.\n\nBanner kończy się <t:1729465140:R>."
+        image: banner-4.0-2.1-character.png
+        short_name: Event Wish 1
+        emoji: 1099449013658456246::1187469104999846029
+        4_chance: 8.6
+        4_soft: 8
+        4_hard: 10
+        5_chance: 0.6
+        5_soft: 74
+        5_hard: 90
+        rolled_number: 52
+        5_drops_promote:
+        - zhongli
+        5_drops_lost:
+        - keqing
+        - qiqi
+        - diluc
+        - mona
+        - jean
+        - tighnari
+        - dehya
+        4_drops_promote:
+        - noelle
+        - sayu
+        - freminet
+        4_drops_lost:
+        - all
+        3_drops:
+        - all
+    '2':
+        id: 1
+        start: 1728860400
+        end: 1729465140
+        name: Farewell of Snezhnaya
+        description: "Zwiększony drop limitowanej 5⭐ postaci: **Tartaglia** \n\nKażde wykonane 10 wishy to gwarantowany 4⭐ przedmiot lub wyższy.\n\nBanner kończy się <t:1729465140:R>."
+        image: banner-4.0-2.2-character.png
+        short_name: Event Wish 2
+        emoji: 1099449013658456246::1187469072892440657
+        4_chance: 8.6
+        4_soft: 8
+        4_hard: 10
+        5_chance: 0.6
+        5_soft: 74
+        5_hard: 90
+        rolled_number: 52
+        5_drops_promote:
+        - tartaglia
+        5_drops_lost:
+        - keqing
+        - qiqi
+        - diluc
+        - mona
+        - jean
+        - tighnari
+        - dehya
+        4_drops_promote:
+        - noelle
+        - sayu
+        - freminet
+        4_drops_lost:
+        - all
+        3_drops:
+        - all
+    '3':
+        id: 2
+        start: 1728860400
+        end: 1729465140
+        name: Epitome Invocation
+        description: "Zwiększony drop limitowanych 5⭐ broni: **Vortex Vanquisher **i** Polar Star** \n\nKażde wykonane 10 wishy to gwarantowany 4⭐ przedmiot lub wyższy.\n\nBanner kończy się <t:1729465140:R>."
+        image: banner-4.0-2.1-weapon.png
+        short_name: Weapon Wish
+        emoji: 1099449013658456246::1117949652625526886
+        4_chance: 10.6
+        4_soft: 8
+        4_hard: 10
+        5_chance: 0.8
+        5_soft: 64
+        5_hard: 80
+        rolled_number: 52
+        5_drops_promote:
+        - vortex_vanquisher
+        - polar_star
+        5_drops_lost:
+        - amos_bow
+        - skyward_harp
+        - lost_prayer_to_the_sacred_winds
+        - skyward_atlas
+        - skyward_pride
+        - wolfs_gravestone
+        - primordial_jade_winged_spear
+        - skyward_spine
+        - aquila_favonia
+        - skyward_blade
+        4_drops_promote:
+        - the_flute
+        - rust
+        - dragons_bane
+        - the_widsith
+        - sacrificial_greatsword
+        4_drops_lost:
+        - all
+        3_drops:
+        - all
+    '4':
+        id: 99
+        start: 1683043200
+        end: 2536934400
+        name: Wanderlust Invocation
+        description: 'Standardowe 5⭐ postacie: **Keqing**, **Mona**, **Qiqi**, **Diluc**, **Jean**, **Tighnari**, **Dehya**%nl%%nl%Każde wykonane 10 wishy to gwarantowana 4⭐ postać lub wyższa.%nl%%nl%Banner jest permamentny.'
+        image: standard.png
+        short_name: Standard
+        emoji: 1099449013658456246::1187469007473872986
+        4_chance: 8.6
+        4_soft: 8
+        4_hard: 10
+        5_chance: 0.6
+        5_soft: 74
+        5_hard: 90
+        5_drops_promote:
+        - keqing
+        - mona
+        - qiqi
+        - diluc
+        - jean
+        - tighnari
+        - dehya
+        - amos_bow
+        - skyward_harp
+        - lost_prayer_to_the_sacred_winds
+        - skyward_atlas
+        - skyward_pride
+        - wolfs_gravestone
+        - primordial_jade_winged_spear
+        - skyward_spine
+        - aquila_favonia
+        - skyward_blade
+        5_drops_lost:
+        - keqing
+        - diluc
+        - qiqi
+        - tighnari
+        - jean
+        - mona
+        - dehya
+        - amos_bow
+        - skyward_harp
+        - lost_prayer_to_the_sacred_winds
+        - skyward_atlas
+        - skyward_pride
+        - wolfs_gravestone
+        - primordial_jade_winged_spear
+        - skyward_spine
+        - aquila_favonia
+        - skyward_blade
+        4_drops_promote:
+        - all
+        4_drops_lost:
+        - all
+        3_drops:
+        - all

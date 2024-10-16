@@ -1,0 +1,40 @@
+on slash command:
+    event-string is "zapętl"
+
+    set {_channel} to voice channel of event-member
+    set {_bot-channel} to voice channel of (self member of event-bot in event-guild)
+
+    if {_channel} is not set:
+        reply with hidden styleDeny("Nie jesteś na kanale głosowym.")
+        stop
+    
+    if {_bot-channel} is set:
+        if {_bot-channel} is not {_channel}:
+            reply with hidden styleDeny("Bot jest połączony z innym kanałem.")
+            stop
+    
+    defer the interaction and wait
+    
+    if repeat of event-guild is false:
+        set repeat of event-guild to true
+    else if repeat of event-guild is not set:
+        set repeat of event-guild to true
+    else:
+        set repeat of event-guild to false
+        set {_disabled} to true
+    
+    reply with embedLoop("%playing track of event-guild%", {_disabled})
+    
+function embedLoop(song: string, disabled: boolean) :: embedbuilder:
+    set {_e1} to yaml value "emoji_zezwolenie" from "config"
+
+    make embed:
+        if {_disabled} is not true:
+            set title of embed to "<:%getEmoji({_e1})%> Zapętlanie włączone"
+            set description of embed to "Będę grać: `%{_song}%`"
+        else:
+            set title of embed to "<:%getEmoji({_e1})%> Zapętlanie wyłączone"
+            set description of embed to "Będę grać kolejne utwory z kolejki."
+        
+        set embed color of embed to green
+    return last embed

@@ -1,0 +1,91 @@
+# EXP Z WIADOMOŚCI
+on message receive:
+    discord id of event-guild is "%yaml value "server" from "config"%"
+
+    add 1 to {level::%discord id of event-user%::message}
+
+    set {_dvexc::*} to yaml list "level_message_dividier_users_exception" from "config"
+    loop {_dvexc::*}:
+        if (discord id of event-user) is ("%loop-value%"):
+            set {_except} to true
+
+    set {_exp} to yaml value "level_exp_message" from "config"
+    set {_div} to yaml value "level_message_divider" from "config"
+    set {_same} to yaml value "level_message_same" from "config"
+
+    if {_except} is not true:
+        set {_ladders} to messageLadders(event-user)
+        if {_ladders} > 0:
+            loop {_ladders} times:
+                set {_exp} to {_exp} / {_div}
+    
+    if {_same} is 1:
+        set {_current} to content of event-message
+        if {_current} contains {level::temp::last-msg-content::%discord id of event-user%}:
+            stop
+        else if {level::temp::last-msg-content::%discord id of event-user%} contains {_current}:
+            stop
+        else:
+            set {level::temp::last-msg-content::%discord id of event-user%} to {_current}
+
+    expAdd(event-user, event-channel, {_exp})
+
+function messageLadders(user: user) :: number:
+    if discord id of {_user} is {temp::ladders-last-user}:
+        add 1 to {temp::ladders-user-cumulate}
+        if {temp::ladders-user-cumulate} >= 5:
+            set {_t} to difference between now and {temp::ladders-user-date}
+            if {_t} < 10 minutes:
+                return {temp::ladders-user-cumulate}
+                stop
+            else:
+                set {temp::ladders-user-cumulate} to 0
+                return 0
+        set {temp::ladders-user-date} to now
+        return {temp::ladders-user-cumulate}
+    else:
+        set {temp::ladders-last-user} to discord id of {_user}
+        set {temp::ladders-user-cumulate} to 0
+        return 0
+
+# EXP Z KOMEND
+on slash command:
+    discord id of event-guild is "%yaml value "server" from "config"%"
+
+    add 1 to {level::%discord id of event-user%::command}
+
+    set {_exception::*} to yaml list "level_commands_exception" from "config"
+    set {_exp} to yaml value "level_exp_command" from "config"
+
+    loop {_exception::*}:
+        if loop-value = event-string:
+            stop
+    
+    expAdd(event-user, event-guildchannel, {_exp})
+
+# EXP Z KANAŁÓW GŁOSOWYCH
+every 1 minute:
+    set {_server} to yaml value "server" from "config"
+    set {_bot} to "%yaml value "bot" from "config"%"
+    set {_option} to yaml value "level_voice_only_one_user" from "config"
+    set {_exp} to yaml value "level_exp_voice" from "config"
+
+    loop all voice channels of guild with id "%{_server}%":
+
+        set {_members::*} to all voice members list of loop-value
+
+        loop {_members::*}:
+
+            add 1 to {level::%discord id of loop-value-2%::voice}
+
+            if size of {_members::*} >= 3:
+                if (discord id of loop-value-2) is not {_bot}:
+                    ecoVoiceConnected(discord id of loop-value-2)
+
+            if {_option} is 0:
+                if size of {_members::*} <= 1:
+                    continue
+            
+            expAdd(loop-value-2, loop-value-1, {_exp})
+
+        delete {_members::*}

@@ -1,0 +1,48 @@
+function registerBroadcast(u: user, nick: string, g: guild):
+    if discord id of {_g} is "%yaml value "server" from "config"%":
+        if discord id of {_u} is not "%yaml value "bot" from "config"%":
+            set {_id} to yaml value "join_message" from "config"
+            if channel with id "%{_id}%" is set:
+
+                set {_owner} to yaml value "owner" from "config"
+                set {_name} to yaml value "join_embed" from "config"
+                set {_reply} to regenerateEmbed(user with id "%{_owner}%", {_name})
+                
+                # set thumbnail of {_reply} to avatar of {_u}
+
+                set {_desc} to description of {_reply}
+                replace every "%%mention%%" with mention tag of {_u} in {_desc}
+                replace every "%%name%%" with getName(discord id of {_u}) in {_desc}
+                replace every "%%tag%%" with getTag(discord id of {_u}) in {_desc}
+                set description of {_reply} to {_desc}
+
+                if description of {_reply} = "...":
+                    post styleReady("Witaj na serwerze %mention tag of {_u}%!") to channel with id "%{_id}%"
+                else:
+                    post {_reply} to channel with id "%{_id}%"
+
+function quitBroadcast(u: user, g: guild):
+    if discord id of {_g} is "%yaml value "server" from "config"%":
+        if discord id of {_u} is not "%yaml value "bot" from "config"%":
+            set {_id} to yaml value "quit_message" from "config"
+            if channel with id "%{_id}%" is set:
+
+                set {_owner} to yaml value "owner" from "config"
+                set {_name} to yaml value "quit_embed" from "config"
+                set {_reply} to regenerateEmbed(user with id "%{_owner}%", {_name})
+                
+                # set thumbnail of {_reply} to avatar of {_u}
+
+                set {_desc} to description of {_reply}
+                replace every "%%mention%%" with mention tag of {_u} in {_desc}
+                replace every "%%name%%" with getName(discord id of {_u}) in {_desc}
+                replace every "%%tag%%" with getTag(discord id of {_u}) in {_desc}
+                set description of {_reply} to {_desc}
+
+                if description of {_reply} = "...":
+                    post styleReady("Żegnaj %mention tag of {_u}%!") to channel with id "%{_id}%"
+                else:
+                    post {_reply} to channel with id "%{_id}%"
+
+on member leave guild:
+    quitBroadcast(event-user, event-guild)

@@ -1,0 +1,24 @@
+on slash command:
+    event-string is "slowmode"
+
+    # if event-channel is of the type voice-channel:
+    #     reply with hidden styleDeny("Ten kanał nie jest kanałem tekstowym.")
+    #     stop
+    
+    if argument "sekundy" as number < 0:
+        reply with hidden styleDeny("Nie możesz ustawić ujemnych liczb.")
+        stop
+    
+    defer the interaction and wait
+
+    if argument "sekundy" as number = 0:
+        set {_text} to "wyłączony."
+    else:
+        set {_text} to "ustawiony na **%argument "sekundy" as number%sek**."
+    if argument "kanał" as channel is set:
+        set {_channel} to argument "kanał" as channel
+    else:
+        set {_channel} to event-channel
+    
+    set slowmode of {_channel} to argument "sekundy" as number
+    reply with styleReady("Tryb powolony kanału %mention tag of {_channel}% %{_text}%.")

@@ -1,0 +1,211 @@
+
+function imgOsuUser(data: strings) :: image:
+
+    set {_image} to new image with size 1920, 954
+
+    # Avatar użytkownika
+    set {_adding} to image from url "http://s.ppy.sh/a/%{_data::2}%"
+    set {_adding} to resized {_adding} to size 212, 212 with algorithm 16
+    draw {_adding} on {_image} at 75, 50
+
+    # Zdjęcie beatmapy (top-play)
+    if {_data::11} is not "-":
+        set {_adding} to image from url "https://b.ppy.sh/thumb/%{_data::12}%l.jpg"
+        set {_adding} to resized {_adding} to size 162, 118 with algorithm 16
+        draw {_adding} on {_image} at 79, 772
+
+    # Tło
+    set {_adding} to image from file "plugins/Skript/data/osu/user.png"
+    draw {_adding} on {_image} at 0, 0
+
+    # Brak top-playu
+    if {_data::11} is "-":
+        set {_adding} to image from file "plugins/Skript/data/osu/none-topplay.png"
+        draw {_adding} on {_image} at 46, 770
+
+    # Nazwa użytkownika
+    draw fontGenerate("torus-bold", 80, 3, "%{_data::1}%") on {_image} at 357, 76
+
+    # Flaga
+    set {_adding} to image from file "plugins/Skript/data/osu/flags/%{_data::3}%.png"
+    draw {_adding} on {_image} at 361, 172
+
+    # Nazwa kraju
+    set {_country} to yaml value {_data::3} from "countries"
+    draw fontGenerate("torus-regular", 50, 3, "%{_country}%") on {_image} at 452, 186
+
+    # PP
+    if {_data::6} is not "-":
+        set {_data::6} to spaceNumbers(round({_data::6} parsed as number))
+    
+    set {_adding} to fontGenerate("torus-bold", 80, 3, {_data::6})
+    set {_width} to width of {_adding}
+    set {_line} to ceil(1170 + (656 - {_width}))
+    draw {_adding} on {_image} at {_line}, 128
+
+    # Ranking globalny
+    if {_data::4} is not "-":
+        set {_data::4} to "##%spaceNumbers({_data::4} parsed as integer)%"
+    draw fontGenerate("torus-bold", 80, 3, {_data::4}) on {_image} at 76, 402
+
+    # Ranking krajowy
+    if {_data::5} is not "-":
+        set {_data::5} to "##%spaceNumbers({_data::5} parsed as integer)%"
+    draw fontGenerate("torus-bold", 80, 3, {_data::5}) on {_image} at 750, 402
+
+    # Celność
+    if {_data::7} is not "-":
+        set {_data::7} to "%round({_data::7} parsed as number * 100) / 100%%%"
+    draw fontGenerate("torus-bold", 80, 3, {_data::7}) on {_image} at 1452, 402
+
+    # Playtime
+    if {_data::9} is not "-":
+        set {_data::9} to "%spaceNumbers(round({_data::9} parsed as number / 3600))%h"
+    draw fontGenerate("torus-bold", 80, 3, {_data::9}) on {_image} at 76, 576
+
+    # Liczba zagrań
+    if {_data::8} is not "-":
+        set {_data::8} to spaceNumbers({_data::8} parsed as integer)
+    draw fontGenerate("torus-bold", 80, 3, {_data::8}) on {_image} at 750, 576
+
+    # Level
+    if {_data::10} is not "-":
+        set {_data::10} to "%floor({_data::10} parsed as number)%"
+    draw fontGenerate("torus-bold", 80, 3, {_data::10}) on {_image} at 1452, 576
+
+    if {_data::11} is not "-":
+
+        # Topplay - nazwa
+        draw fontGenerate("torus-bold", 55, 3, cutText({_data::13}, 35)) on {_image} at 272, 780
+
+        # Topplay - trudność
+        set {_adding} to fontGenerate("torus-regular", 40, 3, "%round({_data::14} parsed as number * 100) / 100%")
+        set {_width} to width of {_adding}
+        draw {_adding} on {_image} at 272, 844
+        draw image from file "plugins/Skript/data/osu/star.png" on {_image} at (276 + {_width}), 838
+
+        # Topplay - mody
+        set {_mods::*} to sortMods(decodeMods({_data::15} parsed as integer))
+        if {_mods::1} is not "NM":
+            draw generareImageMods({_mods::*}) on {_image} at (368 + {_width}), 844
+
+        # Topplay - PP
+        set {_adding} to fontGenerate("torus-bold", 80, 3, spaceNumbers(round({_data::16} parsed as number)))
+        set {_width} to width of {_adding}
+        set {_line} to ceil(1606 + (182 - {_width}))
+        draw {_adding} on {_image} at {_line}, 788
+
+    return {_image}
+
+
+
+
+function imgOsuMaps(data: strings, type: string) :: image:
+
+    # Obliczanie ilości beatmap
+    set {_maps} to 5
+    loop 5 times:
+        set {_loop} to (loop-number - 1) * 11
+        if {_data::%{_loop} + 11%} is "-":
+            set {_maps} to loop-number - 1
+            exit loop
+    
+    if {_maps} >= 5:
+        set {_height} to 1110
+    else if {_maps} = 0:
+        set {_height} to 1024
+    else:
+        set {_height} to 1100 - ((5 - {_maps}) * 143)
+    
+    set {_image} to new image with size 1920, {_height}
+
+    # Avatar użytkownika
+    set {_adding} to image from url "http://s.ppy.sh/a/%{_data::2}%"
+    set {_adding} to resized {_adding} to size 212, 212 with algorithm 16
+    draw {_adding} on {_image} at 75, 50
+
+    # Zdjęcia beatmap
+    loop {_maps} times:
+        set {_loop} to (loop-number - 1) * 11
+        set {_adding} to image from url "https://b.ppy.sh/thumb/%{_data::%{_loop} + 12%}%l.jpg"
+        set {_adding} to resized {_adding} to size 162, 118 with algorithm 16
+        draw {_adding} on {_image} at 72, 211 + (loop-number * 143)
+    
+    # Tło
+    set {_adding} to image from file "plugins/Skript/data/osu/maps.png"
+    draw {_adding} on {_image} at 0, 0
+
+    # Brak mapek
+    if {_maps} = 0:
+        set {_adding} to image from file "plugins/Skript/data/osu/maps-none-%{_type}%.png"
+        draw {_adding} on {_image} at 0, 300
+    
+    # Mało mapek
+    else if {_maps} < 5:
+        set {_adding} to image from file "plugins/Skript/data/osu/none-map.png"
+        draw {_adding} on {_image} at 0, 1068 - ((5 - {_maps}) * 143)
+
+    # Nazwa użytkownika
+    draw fontGenerate("torus-bold", 80, 3, "%{_data::1}%") on {_image} at 357, 76
+
+    # Flaga
+    set {_adding} to image from file "plugins/Skript/data/osu/flags/%{_data::3}%.png"
+    draw {_adding} on {_image} at 361, 172
+
+    # Nazwa kraju
+    set {_country} to yaml value {_data::3} from "countries"
+    draw fontGenerate("torus-regular", 50, 3, "%{_country}%") on {_image} at 452, 186
+
+    # PP
+    if {_data::4} is not "-":
+        set {_data::4} to spaceNumbers(round({_data::6} parsed as number))
+    
+    set {_adding} to fontGenerate("torus-bold", 80, 3, {_data::4})
+    set {_width} to width of {_adding}
+    set {_line} to ceil(1170 + (656 - {_width}))
+    draw {_adding} on {_image} at {_line}, 128
+
+    loop {_maps} times:
+        set {_loop} to (loop-number - 1) * 11
+
+        # Mapka - nazwa
+        draw fontGenerate("torus-bold", 55, 3, cutText({_data::%{_loop} + 13%}, 30)) on {_image} at 272, 223 + (loop-number * 143)
+
+        # Mapka - ocena
+        draw image from file "plugins/Skript/data/osu/ranking/%{_data::%{_loop} + 21%}%.png" on {_image} at 272, 282 + (loop-number * 143)
+
+        # Mapka - trudność
+        set {_adding} to fontGenerate("torus-regular", 40, 3, "%round({_data::%{_loop} + 14%} parsed as number * 100) / 100%")
+        set {_width} to width of {_adding}
+        draw {_adding} on {_image} at 340, 284 + (loop-number * 143)
+        draw image from file "plugins/Skript/data/osu/star.png" on {_image} at (342 + {_width}), 278 + (loop-number * 143)
+
+        # Mapka - mody
+        set {_mods::*} to sortMods(decodeMods({_data::%{_loop} + 15%} parsed as integer))
+        if {_mods::1} is not "NM":
+            draw generareImageMods({_mods::*}) on {_image} at 500, 282 + (loop-number * 143)
+
+        # Mapka - PP
+        set {_pp} to "- "
+        set {_pp} to spaceNumbers(round({_data::%{_loop} + 16%} parsed as number)) if {_data::%{_loop} + 16%} parsed as number is set
+        set {_adding-pp-%loop-number%} to fontGenerate("torus-bold", 80, 3, {_pp})
+        set {_width} to width of {_adding-pp-%loop-number%}
+        set {_pp-best} to {_width} if {_width} > ({_pp-best} ? 0)
+    
+    loop {_maps} times:
+        set {_loop} to (loop-number - 1) * 11
+
+        # Mapka - PP cz. 2
+        set {_width} to width of {_adding-pp-%loop-number%}
+        draw {_adding-pp-%loop-number%} on {_image} at (1800 - {_pp-best}), 234 + (loop-number * 143)
+        set {_adding} to fontGenerate("torus-regular", 50, 3, "pp")
+        draw {_adding} on {_image} at (1806 - {_pp-best} + {_width}), 254 + (loop-number * 143)
+
+        # Mapka - ACC
+        set {_acc} to accuracyCalculate({_data::%{_loop} + 17%} parsed as integer, {_data::%{_loop} + 18%} parsed as integer, {_data::%{_loop} + 19%} parsed as integer, {_data::%{_loop} + 20%} parsed as integer)
+        set {_adding} to fontGenerate("torus-regular", 60, 3, "%{_acc}%%%")
+        set {_width} to width of {_adding}
+        set {_line} to ceil(1606 + (182 - {_width}))
+        draw {_adding} on {_image} at {_line} - {_pp-best} - 30, 244 + (loop-number * 143)
+
+    return {_image}

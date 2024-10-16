@@ -1,0 +1,36 @@
+on slash command:
+    event-string is "tekst"
+    
+    defer interaction and wait
+    
+    delete {system::temp::lyrics-json::*} and {system::temp::lyrics-msg}
+
+    set {_e1} to yaml value "emoji_loading" from "config"
+    
+    reply with "<a:%getEmoji({_e1})%> Wyszukiwanie piosenki..." and store it in {system::temp::lyrics-msg}
+    
+    send a request to "https://api.popcat.xyz/lyrics?song=%url safe argument "piosenka" as string%"
+    map json body of last http response to {system::temp::lyrics-json::*}
+    
+    if {system::temp::lyrics-json::error} is set:
+        edit {system::temp::lyrics-msg} to show styleDeny("Nie znaleziono tekstu tego utworu.")
+        stop
+    if {system::temp::lyrics-json::lyrics} is not set:
+        edit {system::temp::lyrics-msg} to show styleDeny("Wystąpił niezidentyfikowany problem podczas szukania piosenki.")
+        stop
+    
+    replace every "\n" with nl in {system::temp::lyrics-json::lyrics}
+    edit {system::temp::lyrics-msg} to show "<a:%getEmoji({_e1})%> Mapowanie tekstu piosenki..."
+
+    set {_file} to yaml value "file_lyrics" from "config"
+    
+    delete file {_file}
+    wait 0.5 seconds
+    create file {_file}
+    write {system::temp::lyrics-json::lyrics} at line 1 to file {_file}
+    wait 0.5 seconds
+    
+    create a new message and store it in {_msg}:
+        set the content of the message to "**%{system::temp::lyrics-json::title}%** autorstwa %{system::temp::lyrics-json::artist}%"
+        add yaml value "file_lyrics" from "config" to the attachments of the message
+    edit {system::temp::lyrics-msg} to show {_msg}

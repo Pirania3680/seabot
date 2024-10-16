@@ -1,0 +1,220 @@
+options:
+    cards: plugins/Skript/data/gacha/cards
+    background: plugins/Skript/data/gacha/wish-background.jpg
+
+
+
+on slash command:
+    event-string is "wish"
+
+    set {_a} to argument "ilość" as string
+    set {_b} to argument "banner" as string
+    set {_id} to discord id of event-user
+
+    # SPRAWDZANIE POPRAWNOŚCI LICZBY WISHY
+    if {_a} is not set:
+        set {_a} to 1
+    if {_a} is "x1":
+        set {_a} to 1
+    if {_a} is "x10":
+        set {_a} to 10
+    if {_a} is not 1 or 10:
+        set {_a} to 1
+    
+    # SPRAWDZANIE POPRAWNOŚCI BANNERU
+    set {_b} to gachaBannerFromName({_b})
+
+    if {_b} is not set:
+        set {_b} to "1"
+
+    loop gachaGetAllBanners():
+        if "%{_b}%" is loop-value:
+            set {_active} to true
+    if {_active} is not true:
+        reply with hidden styleDeny("Podany banner nie istnieje lub wygasł.")
+        stop
+    # ============================
+
+    if gachaCurrency("?", {_id}, "primo", 0) < 0:
+        reply with hidden styleDeny("Posiadasz dług. Nie możesz wykonać żadncyh wydatków, dopóki nie uregulujesz należności.")
+        stop
+    
+    if gachaBothPrimo({_id}, {_a}) is not true:
+        set {_e1} to yaml value "emoji_primogem" from "config"
+        set {_e2} to yaml value "emoji_wish" from "config"
+        set {_required} to yaml value "wish_cost" from "config"
+
+        reply with hidden styleDeny("Nie posiadasz 1 <:%getEmoji({_e2})%> lub %{_required}% <:%getEmoji({_e1})%>!")
+        stop
+    
+    defer the interaction and wait
+    
+    ecoEvent({_id}, "wish", {_a})
+    
+    if {_a} is 1:
+        set {_drop::*} to gachaGetDrop({_id}, {_b})
+        
+        set {_img} to yaml value "wish_animation_%{_drop::2}%" from "config"
+        reply with "%{_img}%" and store it in {_reply}
+
+        wait 5 seconds and 8 ticks
+
+        add 1 to {eco::%{_id}%::count}
+        if {_drop::2} is 3 or 4 or 5:
+            set {_type} to gachaGetValue({_drop::1}, "type")
+            set {_multiple} to "constelation" if {_type} is "character"
+            set {_multiple} to "refinement" if {_type} is "weapon"
+            set {_add} to 1 if {_type} is "character"
+
+            add 1 to {eco::%{_id}%::obtained::%{_drop::1}%}
+
+            set {_const} to {eco::%{_id}%::obtained::%{_drop::1}%}
+            if {_const} is between 2 and (6 + {_add}):
+                ecoEvent({_id}, "%{_multiple}%-obtained-%{_drop::2}%", (({_const} - {_add}), {_drop::1}))
+            else:
+                ecoEvent({_id}, "%{_type}%-obtained-%{_drop::2}%", ({_drop::3}, {_drop::1}))
+
+        set {_img} to yaml value "%{_drop::1}%.splash" from "data"
+
+        create a new message and store it in {_msg}:
+            add "plugins/Skript/data/gacha/splash/%{_drop::1}%.jpg" to the attachments of the message
+        
+        edit {_reply} to show {_msg}
+
+        # OBLICZANIE PUNKTÓW
+        gachaCalculatePoints({_id})
+    
+    if {_a} is 10:
+        set {_rarity} to 0
+
+        loop 10 times:
+            set {_drop::%loop-number%::*} to gachaGetDrop({_id}, {_b})
+            set {_list::%loop-number%} to {_drop::%loop-number%::1}
+        
+            if {_drop::%loop-number%::2} > {_rarity}:
+                set {_rarity} to {_drop::%loop-number%::2}
+
+        set {_img} to yaml value "wish_animation_%{_rarity}%" from "config"
+        reply with "%{_img}%" and store it in {_reply}
+        set {_msgid} to "%unix timestamp of now%"
+
+        wait 5 seconds and 8 ticks
+
+        loop {_list::*}:
+            add 1 to {_loop}
+            if {_drop::%{_loop}%::2} is 3 or 4 or 5:
+                set {_type} to gachaGetValue(loop-value, "type")
+                set {_multiple} to "constelation" if {_type} is "character"
+                set {_multiple} to "refinement" if {_type} is "weapon"
+                set {_add} to 1 if {_type} is "character"
+
+                add loop-value to {temp::gacha::%{_msgid}%::list::*}
+                add 1 to {eco::%{_id}%::obtained::%loop-value%}
+
+                set {_const} to {eco::%{_id}%::obtained::%loop-value%}
+                if {_const} is between 2 and 7:
+                    ecoEvent({_id}, "%{_multiple}%-obtained-%{_drop::%{_loop}%::2}%", {_const} - {_add})
+                else:
+                    ecoEvent({_id}, "%{_type}%-obtained-%{_drop::%{_loop}%::2}%", {_drop::%{_loop}%::3})
+
+        add 10 to {eco::%{_id}%::count}
+
+        create a new message and store it in {_msg}:
+            add "plugins/Skript/data/gacha/splash/%{temp::gacha::%{_msgid}%::list::1}%.jpg" to the attachments of the message
+            add rowWish10({_msgid}, 2) to rows of the message
+        edit {_reply} to show {_msg}
+
+        # OBLICZANIE PUNKTÓW
+        gachaCalculatePoints({_id})
+
+        wait 1 minute
+
+        if {temp::gacha::%{_msgid}%::list::1} is set:
+
+            set {_sorted::*} to gachaGetSortedDrops({temp::gacha::%{_msgid}%::list::*})
+
+            create a new message and store it in {_msg}:
+                add imgWish10({_sorted::*}) to the attachments of the message
+            edit {_reply} to show {_msg}
+
+            delete {temp::gacha::%{_msgid}%::*}
+
+on button click:
+    if discord id of event-button starts with "wish::continue::":
+        defer the interaction
+
+        set {_parse::*} to discord id of event-button parsed as "wish::continue::%string%::%number%"
+        set {_size} to size of {temp::gacha::%{_parse::1}%::list::*}
+
+        if {_parse::2} > {_size}:
+            set {_end} to true
+
+        else:
+            create a new message and store it in {_msg}:
+                add "plugins/Skript/data/gacha/splash/%{temp::gacha::%{_parse::1}%::list::%{_parse::2}%}%.jpg" to the attachments of the message
+                add rowWish10({_parse::1}, {_parse::2} + 1) to rows of the message
+            edit event-message to show {_msg}
+    
+    else if discord id of event-button starts with "wish::skip::":
+        defer the interaction
+
+        set {_parse::*} to discord id of event-button parsed as "wish::skip::%string%::%number%"
+        set {_end} to true
+    
+    if {_end} is true:
+        set {_sorted::*} to gachaGetSortedDrops({temp::gacha::%{_parse::1}%::list::*})
+
+        create a new message and store it in {_msg}:
+            add imgWish10({_sorted::*}) to the attachments of the message
+        edit event-message to show {_msg}
+
+        delete {temp::gacha::%{_parse::1}%::*}
+
+
+
+on slash completion:
+    event-string is "wish"
+
+    if argument "ilość" as string is set:
+        add new choice named "x1" with value "x1" to {_list::*}
+        add new choice named "x10" with value "x10" to {_list::*}
+
+        return {_list::*}
+
+    if argument "banner" as string is set:
+        loop gachaGetAllBanners():
+            set {_name} to yaml value "economy_banners.%loop-value%.name" from "eco"
+            add new choice named {_name} with value {_name} to {_list::*}
+        
+        return {_list::*}
+
+
+
+function imgWish10(list: strings) :: image:
+    set {_image} to new image with size 1920, 1080
+    draw image from file "{@background}" on {_image} at 0, 0
+
+    set {_width} to 1392
+    set {_size} to size of {_list::*}
+    set {_none} to 10 - {_size}
+
+    loop {_none} times:
+        draw image from file "{@cards}/none.png" on {_image} at {_width}, 0
+        remove 162 from {_width}
+
+    loop {_size} times:
+        set {_index} to ({_size} - loop-number) + 1
+        draw image from file "{@cards}/%{_list::%{_index}%}%.png" on {_image} at {_width}, 0
+        remove 162 from {_width}
+    
+    return {_image}
+
+function rowWish10(id: string, current: number) :: row:
+    set {_e1} to yaml value "emoji_icon_wish_next" from "config"
+    set {_e2} to yaml value "emoji_icon_wish_skip" from "config"
+
+    make new component row and store it in {_row}:
+        add new secondary button with id "wish::continue::%{_id}%::%{_current}%" named "Dalej" with emoji getEmoji({_e1}) to components of the row builder
+        add new secondary button with id "wish::skip::%{_id}%::%{_current}%" named "Pomiń" with emoji getEmoji({_e2}) to components of the row builder
+
+    return {_row}

@@ -1,0 +1,265 @@
+on load:
+    load yaml "plugins/Skript/data/gacha/banners.yml" as "banners"
+
+every 1 second:
+    yaml value "automatic.enabled" from "eco" is true
+    set {_date} to yaml value "automatic.last-date" from "eco"
+    set {_interval} to yaml value "automatic.interval" from "eco"
+
+    if round(unix timestamp of now) > ({_date} + {_interval}):
+        set yaml value "automatic.last-date" from "eco" to round({_date} + {_interval})
+        save yaml "eco"
+
+        wait 1 tick
+
+        setAutomaticBanner(round({_date} + {_interval}), round({_date} + {_interval} + {_interval} - 60))
+        delete {guessed::*}
+
+
+function setAutomaticBanner(start: integer, end: integer):
+
+    set {_random} to random integer between 1 and getNumberOfStoredBanners()
+    while {_random} is {system::last-banner-id} ? 0:
+        set {_random} to random integer between 1 and getNumberOfStoredBanners()
+    
+    set {system::last-banner-id} to {_random}
+
+    set {_loop-characters} to 1
+    set {_loop-weapons} to 1
+    set {_loop-main} to 1
+
+    # Przetwarzanie dotychczasowych bannerów
+    while {_end-1} is not true:
+        add 1 to {_loop-1}
+        
+        if (yaml value "economy_banners.%{_loop-1}%.id" from "eco") is set:
+
+            if (yaml value "economy_banners.%{_loop-1}%.id" from "eco") is not 1 or 2:
+                add 1 to {_store}
+                set {_data-main-%{_store}%::*} to getBannerData("%{_loop-1}%")
+                set {_data-5p-%{_store}%::*} to getBanner5DropsPromote("%{_loop-1}%")
+                set {_data-5l-%{_store}%::*} to getBanner5DropsLost("%{_loop-1}%")
+                set {_data-4p-%{_store}%::*} to getBanner4DropsPromote("%{_loop-1}%")
+                set {_data-4l-%{_store}%::*} to getBanner4DropsLost("%{_loop-1}%")
+                set {_data-3-%{_store}%::*} to getBanner3Drops("%{_loop-1}%")
+
+            wait 1 tick
+            removeBanner("%{_loop-1}%")
+        
+        else:
+            set {_end-1} to true
+    
+    wait 1 second
+    
+    # Postacie
+    set {_5lost-char::*} to yaml list "automatic.character.5_drops_lost" from "eco"
+
+    while {_end-3} is not true:
+        add 1 to {_loop-3}
+        if yaml value "%{_random}%.banners.character.%{_loop-3}%.name" from "banners" is set:
+
+            delete {_data::*}, {_5drops::*}, {_5lost::*} and {_4drops::*}
+
+            set {_data::*} to createBannerData("%{_random}%", "character", "%{_loop-3}%", {_start}, {_end})
+            set {_5drops::*} to yaml list "%{_random}%.banners.character.%{_loop-3}%.5_drops_promote" from "banners"
+            set {_4drops::*} to yaml list "%{_random}%.banners.character.%{_loop-3}%.4_drops_promote" from "banners"
+            
+            addBanner({_data::*}, {_5drops::*}, {_5lost-char::*}, {_4drops::*}, "all", "all")
+
+            wait 0.5 seconds
+        
+        else:
+            set {_end-3} to true
+    
+    # Bronie
+    set {_5lost-weap::*} to yaml list "automatic.weapon.5_drops_lost" from "eco"
+
+    while {_end-4} is not true:
+        add 1 to {_loop-4}
+        if yaml value "%{_random}%.banners.weapon.%{_loop-4}%.name" from "banners" is set:
+
+            delete {_data::*}, {_5drops::*}, {_5lost::*} and {_4drops::*}
+
+            set {_data::*} to createBannerData("%{_random}%", "weapon", "%{_loop-4}%", {_start}, {_end})
+            set {_5drops::*} to yaml list "%{_random}%.banners.weapon.%{_loop-4}%.5_drops_promote" from "banners"
+            set {_4drops::*} to yaml list "%{_random}%.banners.weapon.%{_loop-4}%.4_drops_promote" from "banners"
+            
+            addBanner({_data::*}, {_5drops::*}, {_5lost-weap::*}, {_4drops::*}, "all", "all")
+
+            wait 0.5 seconds
+        
+        else:
+            set {_end-4} to true
+
+    loop {_store} times:
+
+        addBanner({_data-main-%loop-value%::*}, {_data-5p-%loop-value%::*}, {_data-5l-%loop-value%::*}, {_data-4p-%loop-value%::*}, {_data-4l-%loop-value%::*}, {_data-3-%loop-value%::*})
+
+        wait 0.5 seconds
+                
+
+
+
+function getNumberOfStoredBanners() :: integer:
+
+    while {_end} is not true:
+        add 1 to {_loop}
+        if yaml value "%{_loop}%.banners.character.1.name" from "banners" is not set:
+            set {_end} to true
+    
+    set {_loop} to round({_loop} - 1)
+    return {_loop}
+
+
+function createBannerData(id: string, type: string, nr: string, start: integer, end: integer) :: objects:
+    set {_data::1} to 1 if {_type} is "character"
+    set {_data::1} to 2 if {_type} is "weapon"
+    set {_data::2} to {_start}
+    set {_data::3} to {_end}
+    set {_data::4} to yaml value "%{_id}%.banners.%{_type}%.%{_nr}%.name" from "banners"
+
+    set {_drops::*} to yaml list "%{_id}%.banners.%{_type}%.%{_nr}%.5_drops_promote" from "banners"
+    loop {_drops::*}:
+        set {_drops::%loop-index%} to gachaGetValue(loop-value, "name")
+    set {_drops} to "%{_drops::*}%"
+    replace every "and" with "**i**" in {_drops}
+
+    if {_type} is "character":
+        set {_data::5} to "Zwiększony drop limitowanej 5⭐ postaci: **%{_drops}%** %nl%%nl%Każde wykonane 10 wishy to gwarantowany 4⭐ przedmiot lub wyższy.%nl%%nl%Banner kończy się <t:%{_end}%:R>."
+    if {_type} is "weapon":
+        set {_data::5} to "Zwiększony drop limitowanych 5⭐ broni: **%{_drops}%** %nl%%nl%Każde wykonane 10 wishy to gwarantowany 4⭐ przedmiot lub wyższy.%nl%%nl%Banner kończy się <t:%{_end}%:R>."
+
+    set {_version} to yaml value "%{_id}%.version" from "banners"
+    set {_phase} to yaml value "%{_id}%.phase" from "banners"
+    set {_data::6} to "banner-%{_version}%-%{_phase}%.%{_nr}%-%{_type}%.png"
+
+    if {_type} is "character":
+        set {_data::7} to "Event Wish %{_nr}%"
+    if {_type} is "weapon":
+        set {_data::7} to "Weapon Wish"
+
+    set {_data::8} to yaml value "%{_id}%.banners.%{_type}%.%{_nr}%.emoji" from "banners"
+    set {_data::9} to yaml value "automatic.%{_type}%.4_chance" from "eco"
+    set {_data::10} to yaml value "automatic.%{_type}%.4_soft" from "eco"
+    set {_data::11} to yaml value "automatic.%{_type}%.4_hard" from "eco"
+    set {_data::12} to yaml value "automatic.%{_type}%.5_chance" from "eco"
+    set {_data::13} to yaml value "automatic.%{_type}%.5_soft" from "eco"
+    set {_data::14} to yaml value "automatic.%{_type}%.5_hard" from "eco"
+    set {_data::15} to {_id}
+
+    return {_data::*}
+
+
+# Dynamiczne zarządzanie bannerami
+
+# 1 = id
+# 2 = start
+# 3 = end
+# 4 = name
+# 5 = description
+# 6 = image
+# 7 = short_name
+# 8 = emoji
+# 9 = 4_chance
+# 10 = 4_soft
+# 11 = 4_hard
+# 12 = 5_chance
+# 13 = 5_soft
+# 14 = 5_hard
+# 15 = rolled_number
+
+function addBanner(data: objects, 5_drops_promote: strings, 5_drops_lost: strings, 4_drops_promote: strings, 4_drops_lost: strings, 3_drops: strings):
+
+    while {_end} is not true:
+        add 1 to {_id}
+        if yaml value "economy_banners.%{_id}%.id" from "eco" is not set:
+            set {_end} to true
+
+    set yaml value "economy_banners.%{_id}%.id" from "eco" to "%{_data::1}%"
+    set yaml value "economy_banners.%{_id}%.start" from "eco" to {_data::2}
+    set yaml value "economy_banners.%{_id}%.end" from "eco" to {_data::3}
+    set yaml value "economy_banners.%{_id}%.name" from "eco" to {_data::4}
+    set yaml value "economy_banners.%{_id}%.description" from "eco" to {_data::5}
+    set yaml value "economy_banners.%{_id}%.image" from "eco" to {_data::6}
+    set yaml value "economy_banners.%{_id}%.short_name" from "eco" to {_data::7}
+    set yaml value "economy_banners.%{_id}%.emoji" from "eco" to {_data::8}
+    set yaml value "economy_banners.%{_id}%.4_chance" from "eco" to {_data::9}
+    set yaml value "economy_banners.%{_id}%.4_soft" from "eco" to {_data::10}
+    set yaml value "economy_banners.%{_id}%.4_hard" from "eco" to {_data::11}
+    set yaml value "economy_banners.%{_id}%.5_chance" from "eco" to {_data::12}
+    set yaml value "economy_banners.%{_id}%.5_soft" from "eco" to {_data::13}
+    set yaml value "economy_banners.%{_id}%.5_hard" from "eco" to {_data::14}
+    set yaml value "economy_banners.%{_id}%.rolled_number" from "eco" to {_data::15} if {_data::15} is set
+
+    set yaml list "economy_banners.%{_id}%.5_drops_promote" from "eco" to {_5_drops_promote::*}
+    set yaml list "economy_banners.%{_id}%.5_drops_lost" from "eco" to {_5_drops_lost::*}
+    set yaml list "economy_banners.%{_id}%.4_drops_promote" from "eco" to {_4_drops_promote::*}
+    set yaml list "economy_banners.%{_id}%.4_drops_lost" from "eco" to {_4_drops_lost::*}
+    set yaml list "economy_banners.%{_id}%.3_drops" from "eco" to {_3_drops::*}
+
+    save yaml "eco"
+
+function removeBanner(id: string):
+    delete yaml value "economy_banners.%{_id}%.id" from "eco"
+    delete yaml value "economy_banners.%{_id}%.start" from "eco"
+    delete yaml value "economy_banners.%{_id}%.end" from "eco"
+    delete yaml value "economy_banners.%{_id}%.name" from "eco"
+    delete yaml value "economy_banners.%{_id}%.description" from "eco"
+    delete yaml value "economy_banners.%{_id}%.image" from "eco"
+    delete yaml value "economy_banners.%{_id}%.short_name" from "eco"
+    delete yaml value "economy_banners.%{_id}%.emoji" from "eco"
+    delete yaml value "economy_banners.%{_id}%.4_chance" from "eco"
+    delete yaml value "economy_banners.%{_id}%.4_soft" from "eco"
+    delete yaml value "economy_banners.%{_id}%.4_hard" from "eco"
+    delete yaml value "economy_banners.%{_id}%.5_chance" from "eco"
+    delete yaml value "economy_banners.%{_id}%.5_soft" from "eco"
+    delete yaml value "economy_banners.%{_id}%.5_hard" from "eco"
+
+    delete yaml list "economy_banners.%{_id}%.5_drops_promote" from "eco"
+    delete yaml list "economy_banners.%{_id}%.5_drops_lost" from "eco"
+    delete yaml list "economy_banners.%{_id}%.4_drops_promote" from "eco"
+    delete yaml list "economy_banners.%{_id}%.4_drops_lost" from "eco"
+    delete yaml list "economy_banners.%{_id}%.3_drops" from "eco"
+
+    delete yaml value "economy_banners.%{_id}%" from "eco"
+
+    save yaml "eco"
+
+function getBannerData(id: string) :: objects:
+
+    set {_data::1} to yaml value "economy_banners.%{_id}%.id" from "eco"
+    set {_data::2} to yaml value "economy_banners.%{_id}%.start" from "eco"
+    set {_data::3} to yaml value "economy_banners.%{_id}%.end" from "eco"
+    set {_data::4} to yaml value "economy_banners.%{_id}%.name" from "eco"
+    set {_data::5} to yaml value "economy_banners.%{_id}%.description" from "eco"
+    set {_data::6} to yaml value "economy_banners.%{_id}%.image" from "eco"
+    set {_data::7} to yaml value "economy_banners.%{_id}%.short_name" from "eco"
+    set {_data::8} to yaml value "economy_banners.%{_id}%.emoji" from "eco"
+    set {_data::9} to yaml value "economy_banners.%{_id}%.4_chance" from "eco"
+    set {_data::10} to yaml value "economy_banners.%{_id}%.4_soft" from "eco"
+    set {_data::11} to yaml value "economy_banners.%{_id}%.4_hard" from "eco"
+    set {_data::12} to yaml value "economy_banners.%{_id}%.5_chance" from "eco"
+    set {_data::13} to yaml value "economy_banners.%{_id}%.5_soft" from "eco"
+    set {_data::14} to yaml value "economy_banners.%{_id}%.5_hard" from "eco"
+
+    return {_data::*}
+
+function getBanner5DropsPromote(id: string) :: strings:
+    set {_return::*} to yaml list "economy_banners.%{_id}%.5_drops_promote" from "eco"
+    return {_return::*}
+
+function getBanner5DropsLost(id: string) :: strings:
+    set {_return::*} to yaml list "economy_banners.%{_id}%.5_drops_lost" from "eco"
+    return {_return::*}
+
+function getBanner4DropsPromote(id: string) :: strings:
+    set {_return::*} to yaml list "economy_banners.%{_id}%.4_drops_promote" from "eco"
+    return {_return::*}
+
+function getBanner4DropsLost(id: string) :: strings:
+    set {_return::*} to yaml list "economy_banners.%{_id}%.4_drops_lost" from "eco"
+    return {_return::*}
+
+function getBanner3Drops(id: string) :: strings:
+    set {_return::*} to yaml list "economy_banners.%{_id}%.3_drops" from "eco"
+    return {_return::*}

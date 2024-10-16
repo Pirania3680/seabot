@@ -1,0 +1,85 @@
+3.6.4
+  • Poprawiono komendę /zagraj, obsługuje teraz poprawnie linki
+  • Komenda /zagraj może znowu poprawnie grać playlisty
+  • Dodano opcję "pomieszaj" do komendy /zagraj, która doda playlistę w losowej kolejności do kolejki
+
+3.6.3
+  • Naprawiono działanie komendy /zagraj
+
+3.6.2
+  • Dodano komendy /osu-top oraz /osu-last pokazujące kolejno najlepsze i ostatnie zagrania danego gracza w osu
+  • Dodatkowo powyższe funkcje mogą zostać pokazane za pomocą przycisków w komendzie /osu
+  • Zooptymalizowano przetwarzanie wszystkich komend, bot odpowiada teraz informacją "Bot myśli..."
+
+3.6.1
+  • Naprawiono krytyczny błąd w komendzie /osu który zawieszał bota
+
+3.6
+  • Dodano komendę /osu, która pokazuje profil podanego użytkownika z osu
+  • Naprawiono błąd, przez który bannery postaci i broni miały tą samą historię i pity w ekonomii
+  • Zaaktualizowano dane ekonomii do wersji 4.2
+  • Przerobiono większość grafik ekonomii na nowe
+
+3.5
+  • Dodano funkcję automatycznego losowania następnego banneru
+  • Dodano komendę /zgadnij którą możesz zgadywać z której wersji jest obecny banner za nagrody
+
+3.4.4
+  • Zmieniono działanie komendy /register
+  • Naprawiono błąd przez który po zalogowaniu się gracz otrzymywać nick "<none>"
+
+3.4.3
+  • Zmieniono działanie całego systemu kolejki w module muzycznym
+  • Dodano przyciski odświeżenia i wyczyszczenia kolejki w komendzie /kolejka
+
+3.4.2
+  • Ze względu na poprawę wydajności cała poprzednia historia wishy została zresetowana
+  • Dodano komendę /historia pokazującą twoją historię wishy
+
+3.4.1
+  • Naprawiono błąd niedziałającego pojedynczego wisha
+  • Poprawiono wygląd topki i dodano do niej bronie
+
+3.4
+  • Aktualizacja ekonomii: dodanie wszystkich bronii, nowego banneru z brońmi
+  • Nowy system liczenia punktów w ekonomii obejmujący bronie
+
+3.3.3
+  • Dodano komendę /unmute
+  • Dodano kilka poprawek błędów w komendach /mute i /ban
+  • Cooldown w komendach /praca i /okradnij pokazuje teraz rzeczywisty czas do odczekania
+
+3.3.2
+  • Dodano kilka sprawdzeń w komendach /warn, /mute, /kick, /ban
+  • Zmieniono licznik warnów oraz go zresetowano
+  • Zmieniono argument "powód" na obowiązkowy w komendach /warn, /mute, /kick, /ban
+  • Dodano nagrody za spędzanie czasu na kanałach głosowych
+
+3.3.1
+  • Naprawiono błąd z muzyką (bot dołączał i wychodził)
+  • Naprawiono błąd z powtarzaniem się tych samych osiągnięć
+  • Zmieniono algorytm komendy /kasyno oraz dodano limit jej użycia
+  • Zmieniono limit użycia komendy /pracy na 3 na raz
+  • Naprawiono błąd z kopiowaniem komendy /wish ilość:10
+
+3.3
+  • Dodano moduł ekonomii składający się z komend: /ekonomia, /odbierz, /banner, /konto, /wish, /praca, /daily, /kasyno, /okradnij, /przelej, /kup, /pity, /osiągnięcia
+  • Zmieniono warunki działania kasyna
+
+3.2.1
+  • Komenda /zagraj wyszukuje teraz poprawnie filmiki z linków
+  • Komendą /zagraj można teraz dodawać całe playlisty
+  • Naprawienie błędu z komendą /pomiń
+  • Dodano komendę /wersja pokazującą changelog.txt
+
+3.2
+  • Dodano moduł muzyczny składający się z komend: /zagraj, /pauza, /pomiń, /stop, /kolejka, /zapętl
+  • Naprawiono wyświetlanie się czasu w komendach /mute i /ban
+
+3.1
+  • Dodano moduł levela składający się z komend: /level, /topka
+  • Dodawanie expa na podstawie wiadomości, rozmowy na kanale głosowym i używaniu komend
+  • Zmiana języka wszystkich komend na polski
+
+3.0
+  • Pierwsza oficjalna wersja bota, składająca się z komend: /anime, /avatar, /auto, /kot, /pies, /hentai, /losuj, /sugestia, /tłumacz, /archiwum, /nick, /autorole, /clear, /embed, /embed-edit, /wyślij, /slowmode, /warn, /mute, /kick, /ban, /unban

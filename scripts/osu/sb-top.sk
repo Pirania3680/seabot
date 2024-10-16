@@ -1,0 +1,55 @@
+on slash command:
+    event-string is "osu-top" or "osu-last"
+
+    set {_user} to argument "użytkownik" as string
+    set {_mode} to (argument "tryb" as string) ? "0"
+
+    set {_mode} to "0" if {_mode} is "osu!"
+    set {_mode} to "1" if {_mode} is "osu!taiko"
+    set {_mode} to "2" if {_mode} is "osu!ctb"
+    set {_mode} to "3" if {_mode} is "osu!mania"
+
+    # --------- Wysyłanie zapytań ---------
+    set {_pid} to (unix timestamp of now) * 1000
+    osuApiGetUser("%{_pid}%", {_user}, {_mode}, "string")
+
+    loop 40 times:
+        exit loop if {temp::osu-api::%{_pid}%-ready} is set
+        wait 1 tick
+    
+    add {temp::osu-api::%{_pid}%::*} to {_data::*}
+    # -------------------------------------
+
+    # ------ Sprawdzenie użytkownika ------
+    if {_data::2} is "-":
+        reply with hidden styleDeny("Podany użytkownik nie został znaleziony.")
+        stop
+    # -------------------------------------
+
+    defer interaction and wait
+
+    # -------- Rozpoznanie komend ---------
+    if event-string is "xdd":
+        set {_type} to "recent"
+    else:
+        set {_type} to "best"
+    # -------------------------------------
+    
+    # --------- Wysyłanie zapytań ---------
+    set {_pid} to (unix timestamp of now) * 1000
+    osuApiGetMaps("%{_pid}%", "%{_data::2}%", {_mode}, {_type}, 5)
+
+    loop 50 times:
+        exit loop if {temp::osu-api::%{_pid}%-ready} is set
+        wait 1 tick
+    
+    add {temp::osu-api::%{_pid}%::*} to {_data::*}
+    # -------------------------------------
+    
+    # ------- Tworzenie wiadomości --------
+    create a new message and store it in {_msg}:
+        add imgOsuMaps({_data::*}, {_type}) to the attachments of the message
+        add rowOsuMode({_type}, {_data::2}, {_mode}) to rows of the message
+        add rowOsuSelect({_type}, {_data::2}, {_mode}) to rows of the message
+    reply with {_msg}
+    # -------------------------------------

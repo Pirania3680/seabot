@@ -1,0 +1,39 @@
+on slash command:
+    event-string is "zgadnij"
+
+    set {_odp} to argument "wersja" as string
+    set {_id} to discord id of event-user
+    set {_end} to yaml value "economy_banners.1.end" from "eco"
+
+    if {guessed::%{_id}%} is not set:
+
+        defer the interaction and wait silently
+
+        set {_banner} to yaml value "economy_banners.1.rolled_number" from "eco"
+        set {_version} to yaml value "%{_banner}%.version" from "banners"
+        # set {_phase} to yaml value "%{_banner}%.phase" from "banners"
+
+        if {_odp} is {_version}:
+
+            set {guessed::%{_id}%} to true
+            set {_e1} to yaml value "emoji_wish" from "config"
+            gachaCurrency("+", {_id}, "wish", 10)
+
+            reply with hidden styleReady("Brawo! Poprawnie odgadłeś wersję banneru, otrzymujesz 10 <:%getEmoji({_e1})%>.")
+        
+        else:
+            reply with hidden styleDeny("Niestety! Ten banner nie jest z wersji **%{_odp}%**.")
+        
+    else:
+        reply with hidden styleDeny("Na tym bannerze już zgadłeś wersję. Kolejny banner jest <t:%{_end}%:R>.")
+
+on slash completion:
+    event-string is "zgadnij"
+
+    set {_arg} to argument "wersja" as string
+    
+    loop ceil(getNumberOfStoredBanners() / 2) times:
+        set {_current} to (loop-value * 2 - 1)
+        add (yaml value "%{_current}%.version" from "banners") to {_list::*}
+    
+    return slashComplete({_list::*}, {_arg})

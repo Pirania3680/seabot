@@ -1,0 +1,15 @@
+on slash command:
+    event-string is "avatar"
+    
+    defer interaction and wait
+
+    set {_user} to argument "użytkownik" as user ? event-user
+    
+    make embed:
+        set title of embed to "Avatar użytkownika %getNameTag(discord id of {_user})%"
+        set image of embed to "%avatar of {_user}%?size=2048"
+        embedEnd()
+        embedStart(event-guild)
+    reply with last embed
+
+    ecoEvent(discord id of event-user, "command-avatar", 0)

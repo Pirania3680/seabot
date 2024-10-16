@@ -1,0 +1,55 @@
+on slash command:
+    event-string is "kick"
+    
+    set {_user} to argument "użytkownik" as user
+    set {_reason} to argument "powód" as string ? "brak powodu"
+    set {_id} to "%yaml value "bot" from "config"%"
+
+    retrieve member with id discord id of {_user} from event-guild and store it in {_member}
+    
+#   ---  CHECKING BOT PERMISSIONS  -----------------------------------------------------------
+    if (self member of event-bot in event-guild) has discord permission KICK_MEMBERS:
+        set {_xd} to true
+    else:
+        reply with hidden styleError("Bot nie posiada uprawnień do wyrzucania członków.")
+        stop
+#   ---  CHECKING IDIOTYZM  ------------------------------------------------------------------
+    if {_member} is not set:
+        reply with hidden styleDeny("Nie rozpoznano takiego użytkownika na serwerze.")
+        stop
+    
+    if discord id of {_user} is discord id of event-user:
+        reply with hidden styleDeny("Nie możesz wyrzucić siebie.")
+        stop
+    
+    if discord id of {_user} is {_id}:
+        reply with hidden styleDeny("Nie mogę wyrzucić sam siebie.")
+        stop
+    
+    set {_role1::*} to roles of event-member
+    set {_role2::*} to roles of {_member}
+
+    if (role position of {_role2::1}) >= (role position of {_role1::1}):
+        reply with hidden styleDeny("Nie możesz wyrzucić użytkownika z tą samą lub wyższą rolą.")
+        stop
+#   ------------------------------------------------------------------------------------------
+
+    defer interaction and wait
+    
+    kick discord member {_member} due to {_reason}
+    
+    reply with penaltKick(event-guild, {_user}, event-user, {_reason})
+
+function penaltKick(g: guild, u: user, a: user, r: string) :: embedbuilder:
+    add 1 to {penalt::%discord id of {_g}%::kick::number::all}
+    add 1 to {penalt::%discord id of {_g}%::kick::number::%discord id of {_u}%}
+    make embed:
+        set title of embed to "⚠️ Wyrzucono użytkownika!"
+        add inline field named "Użytkownik:" with value "%mention tag of {_u}%%nl%%{_u}%" to fields of embed
+        add inline field named "Administrator:" with value "%mention tag of {_a}%%nl%%{_a}%" to fields of embed
+        add field named "Powód:" with value {_r} to fields of embed
+        set embed color of embed to dark red
+        # set thumbnail of embed to avatar of {_u}
+        embedStart({_g})
+        embedEnd()
+    return last embed

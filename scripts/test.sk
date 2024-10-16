@@ -1,0 +1,87 @@
+command /test32 [<string>]:
+    trigger:
+        save yaml "cards"
+
+command /fix [<string>]:
+    trigger:
+        set {_list::*} to "481072509643653151", "629985403851636738", "630474476676448301", "714752961674477588", "755157805639401473", "775318890485514250", "775318890485514250", "925838883470585876", "932398390174687252"
+        # set {_list::*} to "932398390174687252"
+        set {_codes::*} to "GSIVNAUCNSJFYODG", "GNFIWNFUDSNFUSDA", "GNUOSFDBUNABIDSB", "GNUWDBUDSABKUFSB", "GNCJXNCUWGI8FJW9", "GNFNOWNIOCINMVNS", "GHFWWDF7B7W2F4FD", "GNVUSCUWUBWEGRVD", "GHW9R8HF9W8NWJDF"
+
+        loop {_list::*}:
+            set {eco::%loop-value%::primo} to 0
+            set {eco::%loop-value%::wish} to 0
+
+            set {_code} to {_codes::%loop-index%}
+
+            make embed:
+                set title of embed to "✨ Zmiany na twoim koncie"
+                set description of embed to "W związku z dobrem ekonomii, primogemy i wishe na twoim koncie w ekonomii zostają przywrócone do 0. Twoje postacie, osiągnięcia i reszta zostaną nienaruszone.%nl%%nl%W ramach rekompensaty otrzymujesz kod na `100` %getEmoji("813692704571654144::1092952956783038596")%, zrealizuj go komendą **/odbierz** do <t:1684101599:f>%nl%```%{_code}%```%nl%Miłego wishowania!"
+            
+            directMessage(user with id loop-value, "", last embed)
+
+            wait 1 second
+
+command /fix2 [<string>]:
+    trigger:
+        loop {cache::*}:
+            if {eco::%loop-index%::join} is true:
+                loop {eco::%loop-index%::achv-complete::*}:
+                    set (yaml value "%loop-index-1%.%loop-index-2%" from "completed") to 1
+        save yaml "completed"
+        broadcast "Gotowe"
+
+command /temp1 [<text>]:
+    trigger:
+        set {_id} to "893537427426250812"
+
+        make embed:
+            set title of embed to "Jak używać?"
+            set description of embed to "<:info:988934399515033600> Wystarczy użyć komendy **/zadanie** wraz z poprawnymi argumentami, które Discord sam podpowiada.%nl%%nl%🔖 Przykład:%nl%```/zadanie książka:MATeMAtyka 3 strona:110 zadanie:1```"
+            set image of embed to "https://cdn.discordapp.com/attachments/1174425884359409794/1174426272919724073/image.png"
+        post last embed to channel with id {_id}
+
+        make embed:
+            set title of embed to "Czytelne zdjęcia"
+            set description of embed to "<:info:988934399515033600> Niektóre zadania są bardzo długie, przez co podgląd ich w Discordzie jest niewyraźny. Wystraczy wejść w zdjęcie z przeglądarki. Poniżej screen z Windowsa i Androida."
+            set image of embed to "https://cdn.discordapp.com/attachments/1174425884359409794/1174430516167057560/przegladarka.png"
+        post last embed to channel with id {_id}
+
+command /test69 [<string>]:
+    trigger:
+        create a new message and store it in {_msg}:
+            add imgExpNextRank(69) to the attachments of the message
+        post {_msg} to channel with id "841559830963290122"
+
+command /generate-flags [<string>]:
+    trigger:
+        load yaml "plugins/Skript/data/osu/flags.yml" as "flagi-2"
+
+        set {_values::*} to all yaml nodes of "flagi-2"
+        set {_files::*} to files in dir "plugins/Skript/data/osu/flags"
+
+        loop {_files::*}:
+            set {_name} to name of file loop-value
+
+            loop {_values::*}:
+                set {_value} to (yaml value loop-value-2 from "flagi-2") in lowercase
+
+                if {_value} = {_name}:
+
+                    if file "plugins/Skript/data/osu/flags/%{_name}%.png" exists:
+
+                        rename file "plugins/Skript/data/osu/flags/%{_name}%.png" to "%loop-value-2%.png"
+                        broadcast "&eSkopiowano plik %{_name}%.png -> %loop-value-2%.png"
+                        # wait 1 tick
+                    else:
+                        broadcast "&cWymagany plik (plugins/Skript/data/osu/flags/%{_name}%.png) nie istnieje."
+        
+        broadcast "&aZakończono."
+
+command /test-mods [<integer>]:
+    trigger:
+        set {_mods::*} to sortMods(decodeMods(arg 1))
+
+        create a new message and store it in {_msg}:
+            add generareImageMods({_mods::*}) to the attachments of the message
+        post {_msg} to channel with id "841559830963290122"

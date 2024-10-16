@@ -1,0 +1,68 @@
+on load:
+    load yaml "plugins/Skript/data/gacha/points.yml" as "points"
+
+
+
+function gachaCalculatePoints(id: string):
+
+    loop {eco::%{_id}%::obtained::*}:
+
+        set {_cr} to gachaGetValue(loop-index, "rarity")
+        set {_ct} to gachaGetValue(loop-index, "type")
+            
+        if {_ct} is "character":
+
+            set {_1} to (yaml value "character.%{_cr}%.first" from "points")
+            set {_2} to (yaml value "character.%{_cr}%.constelation" from "points")
+            set {_3} to (yaml value "character.%{_cr}%.more" from "points")
+
+            set {_pkt} to gachaCalculateCharacter(loop-value, {_1}, {_2}, {_3})
+
+            add {_pkt} to {_calculated}
+
+            set {_weapons::*} to (yaml list "%loop-index%.weapons" from "data")
+            loop {_weapons::*}:
+
+                add 1 to {_loop}
+
+                set {_weapon} to {eco::%{_id}%::obtained::%loop-value-2%}
+                {_weapon} is set
+
+                set {_wr} to gachaGetValue(loop-value-2, "rarity")
+
+                set {_1} to (yaml value "weapon.refinement.first" from "points")
+                set {_2} to (yaml value "weapon.refinement.refine" from "points")
+                set {_3} to (yaml value "weapon.refinement.more" from "points")
+
+                set {_pkt} to (yaml value "weapon.char.%{_cr}%.%{_loop}%" from "points")
+                set {_bonus} to (yaml value "weapon.bonus.%{_wr}%" from "points") + 1
+
+                set {_pkt} to ({_pkt} * {_bonus}) * gachaCalculateWeapon({_weapon}, {_1}, {_2}, {_3})
+
+                add {_pkt} to {_calculated}
+
+                exit loop
+    
+    set {eco::%{_id}%::points} to {_calculated}
+        
+    ecoEvent({_id}, "points-change", {_count})
+
+
+
+function gachaCalculateCharacter(amount: number, 1: number, 2: number, 3: number) :: number:
+    if {_amount} > 7:
+        add ({_3} * ({_amount} - 7)) to {_pkt}
+    if {_amount} > 1:
+        add ({_2} * ({_amount} - 1)) to {_pkt}
+    if {_amount} = 1:
+        add {_1} to {_pkt}
+    return {_pkt}
+
+function gachaCalculateWeapon(amount: number, 1: number, 2: number, 3: number) :: number:
+    if {_amount} > 5:
+        add ({_3} * ({_amount} - 5)) to {_pkt}
+    if {_amount} > 1:
+        add ({_2} * ({_amount} - 1)) to {_pkt}
+    if {_amount} = 1:
+        add {_1} to {_pkt}
+    return {_pkt} + 1

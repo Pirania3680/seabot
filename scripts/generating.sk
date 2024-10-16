@@ -1,0 +1,68 @@
+command /generate [<number>]:
+    trigger:
+        if arg 1 is 1:
+            set {_list::*} to files in dir "plugins/Skript/data/gacha/inventory/generate"
+            register text font from "plugins/Skript/data/font/genshin.ttf"
+            set {_text12} to new font style with font name "HYWenHei-85W" and with size 12
+            set {_text11} to new font style with font name "HYWenHei-85W" and with size 11
+            set {_text10} to new font style with font name "HYWenHei-85W" and with size 10
+            set {_text9} to new font style with font name "HYWenHei-85W" and with size 9
+            set {_text8} to new font style with font name "HYWenHei-85W" and with size 8
+            set {_text7} to new font style with font name "HYWenHei-85W" and with size 7
+            set {_text6} to new font style with font name "HYWenHei-85W" and with size 6
+
+            loop {_list::*}:
+                set {_image} to new image with size 112, 136
+
+                set {_name} to name of file loop-value
+
+                set {_rarity} to gachaGetValue({_name}, "rarity")
+                # set {_rarity} to "5A" if {_rarity} = 5
+                set {_adding} to resized image from file "plugins/Skript/data/gacha/gui/%{_rarity}%-star-B.png" to size 112, 136 with algorithm 16
+                draw {_adding} on {_image} at 0, 0
+
+                set {_file} to "plugins/Skript/data/gacha/inventory/generate/%{_name}%.png"
+                set {_char} to resized image from file {_file} to size 104, 107 with algorithm 16
+                draw {_char} on {_image} at 4, 4
+
+                set {_title} to gachaGetValue({_name}, "name")
+                
+                if length of {_title} < 18:
+                    set {_height} to 12
+                else if length of {_title} < 20:
+                    set {_height} to 11
+                else if length of {_title} < 22:
+                    set {_height} to 10
+                else if length of {_title} < 24:
+                    set {_height} to 9
+                else if length of {_title} < 27:
+                    set {_height} to 8
+                else if length of {_title} < 30:
+                    set {_height} to 7
+                else:
+                    set {_height} to 6
+                
+                draw text {_title} with anti-aliases with font style {_text%{_height}%} at 108, 244 with color from rgb 55, 55, 55 on {_image} with align center
+
+                save image {_image} to file "plugins/Skript/data/gacha/inventory/generate/%{_name}%.png"
+
+                broadcast "&ePrzetworzono: &d%{_name}%.png&e."
+
+                wait 1 tick
+
+        else if arg 1 is 2:
+            set {_list::*} to files in dir "plugins/Skript/data/gacha/inventory/generate"
+
+            loop {_list::*}:
+                set {_image} to new image with size 112, 136
+
+                set {_name} to name of file loop-value
+
+                draw image from file "plugins/Skript/data/gacha/inventory/generate/%{_name}%.png" on {_image} at 0, 0
+                set {_image} to darker {_image} with force 1
+
+                save image {_image} to file "plugins/Skript/data/gacha/inventory/generate/%{_name}%.png"
+
+                broadcast "&ePrzetworzono: &d%{_name}%.png&e."
+
+                wait 1 tick

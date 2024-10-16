@@ -1,0 +1,69 @@
+on message receive:
+    (yaml value "messages_reward" from "config") is 1
+    (discord id of event-guild) is "%yaml value "server" from "config"%"
+    set {_id} to discord id of event-user
+    
+    # WYŁĄCZENIA
+    if {_id} is "%yaml value "bot" from "config"%":
+        stop
+    
+    if {eco::%{_id}%::join} is not set:
+        stop
+
+    set {_channels::*} to yaml list "level_channels_exception" from "config"
+    loop {_channels::*}:
+        if (discord id of event-channel) is ("%loop-value%"):
+            stop
+    
+    set {_users::*} to yaml list "level_users_exception" from "config"
+    loop {_users::*}:
+        if (discord id of event-user) is ("%loop-value%"):
+            stop
+    # ==========
+
+    set {_index} to (size of {eco::message-reward::*}) + 1
+
+    set {eco::message-reward::%{_index}%} to {_id}
+
+function ecoVoiceConnected(id: string):
+    set {_index} to (size of {eco::voice-reward::*}) + 1
+    set {eco::voice-reward::%{_index}%} to {_id}
+
+every 1 minute:
+    (yaml value "messages_reward" from "config") is 1
+
+    if "%now%" contains ":00":
+        set {_type} to "message"
+    else if "%now%" contains ":30":
+        set {_type} to "voice"
+    
+    if {_type} is set:
+
+        if {eco::%{_type}%-reward::1} is not set:
+            stop
+
+        set {_channel} to (yaml value "message_reward_channel" from "config")
+        set {_amount} to (yaml value "message_reward_amount" from "config")
+
+        set {_max} to size of {eco::%{_type}%-reward::*}
+        set {_random} to random integer between 1 and {_max}
+
+        set {_win} to {eco::%{_type}%-reward::%{_random}%}
+        delete {eco::%{_type}%-reward::*}
+
+        retrieve user with id {_win} from (bot "main") and store it in {_user}
+        gachaCurrency("+", {_win}, "primo", {_amount})
+
+        post embedMessagesReward({_type}, {_user}, {_amount}) to channel with id "%{_channel}%"
+
+function embedMessagesReward(type: string, user: user, reward: number) :: embedbuilder:
+    set {_e1} to (yaml value "emoji_primogem" from "config")
+
+    make embed:
+        if {_type} is "message":
+            set description of embed to "✨ %mention tag of {_user}% zdobywa `%{_reward}%`<:%getEmoji({_e1})%> za pisanie!"
+        else if {_type} is "voice":
+            set description of embed to "✨ %mention tag of {_user}% zdobywa `%{_reward}%`<:%getEmoji({_e1})%> za głosowy!"
+
+        set embed color of embed to hex "fcba03"
+    return last embed

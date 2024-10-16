@@ -1,0 +1,35 @@
+command /necro-save:
+    trigger:
+        retrieve member with id "925838883470585876" from guild with id "893534861527236670" and store it in {_member}
+        set {_roles::*} to all roles of {_member}
+        loop {_roles::*}:
+            set {_name} to role name of loop-value
+            set {dc::necro-roles::%discord id of loop-value%} to {_name}
+            broadcast "%discord id of loop-value% = %{_name}%"
+        broadcast "&aDziałanie zakończone."
+
+on slash command:
+    event-string is "necerek"
+    
+    set {_loop} to "**Najwspanialsze role necerka:**%nl%"
+    loop {dc::necro-roles::*}:
+        add 1 to {_nr}
+        add 1 to {_check}
+        set {_loop} to "%{_loop} ? ""%%nl%`%{_nr}%` - %loop-value%"
+        if {_check} is 15:
+            set {_check} to 0
+
+            if {_reply} is not set:
+                reply with {_loop}
+                set {_reply} to true
+            else:
+                post {_loop} to event-channel
+
+            delete {_loop}
+
+    set {_loop} to "%{_loop} ? ""%%nl%%nl%*Ta lista jest zapisana i w wypadku usunięcia roli zostaną one łatwo przywrócone przez bota B)*"
+
+    if {_reply} is not set:
+        reply with {_loop}
+    else:
+        post {_loop} to event-channel

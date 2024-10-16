@@ -1,0 +1,238 @@
+on slash command:
+    event-string is "praca"
+
+    set {_option::1} to yaml value "works.math" from "config"
+    set {_option::2} to yaml value "works.emoji" from "config"
+    set {_limit} to yaml value "work_limit" from "config"
+
+    set {_id} to discord id of event-user
+
+    if {eco::%{_id}%::work-active} is set:
+        reply with hidden styleDeny("Posiadasz aktywną pracę!")
+        stop
+
+    if {eco-temp::%{_id}%::work-uses} >= {_limit}:
+        set {_wait} to ({eco::%{_id}%::work-last} + 600)
+        
+        reply with hidden styleDeny("Kolejną pracę będziesz mógł wykonać <t:%{_wait}%:R>.")
+        stop
+    
+    defer the interaction and wait
+
+    while {_ready} is not true:
+        set {_random} to random integer between 1 and size of {_option::*}
+        if {_option::%{_random}%} is 1:
+            set {_ready} to true
+
+    set {_index} to random integer between 1000 and 9999
+    set {eco::%{_id}%::work-active} to {_index}
+
+    set {eco::%{_id}%::work-last} to round(unix timestamp of now)
+
+    add 1 to {eco-temp::%{_id}%::work-uses}
+    gachaWorkCounting({_id})
+
+    if {_random} is 1:
+        set {_objects::*} to gachaWorkAlgoritm1()
+        set {_buttons::*} to sorted {_objects::3}, {_objects::4}, {_objects::5}
+
+        set {eco::%{_id}%::work-answer::1} to {_objects::3}
+
+        create a new message and store it in {_msg}:
+            add embedWork1({_objects::2}) to the embeds of the message
+            add rowWork1({_id}, {_buttons::*}) to rows of the message
+
+        reply with {_msg} and store it in {_reply}
+
+    else if {_random} is 2:
+        set {_objects::*} to gachaWorkAlgoritm2()
+
+        set {eco::%{_id}%::work-answer::*} to {_objects::2}, {_objects::3}, {_objects::4}, {_objects::5}, {_objects::6}
+
+        create a new message and store it in {_msg}:
+            add embedWork2({_objects::1}) to the embeds of the message
+            add rowWork2({_id}) to rows of the message
+
+        reply with {_msg} and store it in {_reply}
+
+    wait 3 minutes
+    if {eco::%{_id}%::work-active} is {_index}:
+        gachaWorkReset({_id})
+        edit {_reply} to show embedWorkFail(1)
+
+        ecoEvent({_id}, "work-failed", 0)
+
+on button click:
+    if discord id of event-button starts with "work::answer":
+        set {_id} to discord id of event-user
+        set {_reward} to yaml value "reward_work" from "config"
+
+        defer the interaction
+
+        set {_parse::*} to discord id of event-button parsed as "work::answer::%string%::%number%::%string%"
+
+        if {_id} is not {_parse::3}:
+            reply with hidden styleDeny("To nie jest twoja praca!")
+            stop
+
+        if {eco::%{_id}%::work-active} is not set:
+            reply with hidden styleDeny("Nie posiadasz aktywnej pracy.")
+            stop
+
+        if {_parse::1} starts with "1-":
+
+            if {eco::%{_id}%::work-answer::1} is {_parse::2}:
+                gachaWorkReset({_id})
+                gachaCurrency("+", {_id}, "primo", {_reward})
+                edit event-message to show embedWorkSuccess({_reward})
+
+                dailyAdd(discord id of event-user, 4)
+                ecoEvent({_id}, "work-success", 0)
+
+            else:
+                gachaWorkReset({_id})
+                edit event-message to show embedWorkFail(2)
+
+                ecoEvent({_id}, "work-failed", 0)
+        
+        else if {_parse::1} starts with "2-":
+
+            add 1 to {eco::%{_id}%::work-count}
+            set {_count} to {eco::%{_id}%::work-count}
+
+            if {eco::%{_id}%::work-answer::%{_count}%} is {_parse::2}:
+
+                if {_count} >= size of {eco::%{_id}%::work-answer::*}:
+                    gachaWorkReset({_id})
+                    gachaCurrency("+", {_id}, "primo", {_reward})
+                    edit event-message to show embedWorkSuccess({_reward})
+
+                    dailyAdd(discord id of event-user, 4)
+                    ecoEvent({_id}, "work-success", 0)
+            
+            else:
+                gachaWorkReset({_id})
+                edit event-message to show embedWorkFail(2)
+
+                ecoEvent({_id}, "work-failed", 0)
+
+
+
+function gachaWorkCounting(id: string):
+    {temp::work-counting::%{_id}%} is not set
+    set {temp::work-counting::%{_id}%} to true
+
+    while {eco-temp::%{_id}%::work-uses} > 0:
+        if {eco-temp::%{_id}%::work-uses} is not set:
+            set {eco-temp::%{_id}%::work-uses} to 0
+        
+        else:
+            wait 10 minutes
+            remove 1 from {eco-temp::%{_id}%::work-uses}
+    
+    delete {temp::work-counting::%{_id}%}
+
+
+
+function embedWork1(d: string) :: embedbuilder:
+    make embed:
+        set title of embed to "❓ Wykonaj działanie"
+        set description of embed to "`%{_d}%`%nl%%nl%*Praca jest aktywna 3 minuty.*"
+    return last embed
+
+function embedWork2(d: string) :: embedbuilder:
+    make embed:
+        set title of embed to "❓ Przepisz kod z emotek"
+        set description of embed to "%{_d}%%nl%%nl%*Praca jest aktywna 3 minuty.*"
+    return last embed
+
+function embedWorkSuccess(reward: number) :: embedbuilder:
+    set {_e1} to yaml value "emoji_primogem" from "config"
+    set {_e2} to (yaml value "emoji_zezwolenie" from "config") ? ""
+
+    make embed:
+        set title of embed to "<:%getEmoji({_e2})%> Gratulacje!"
+        set description of embed to "Otrzymujesz `%{_reward}%` <:%getEmoji({_e1})%> za wykonaną pracę."
+        set embed color of embed to green
+    return last embed
+
+function embedWorkFail(type: number) :: embedbuilder:
+    set {_e1} to (yaml value "emoji_odmowa" from "config") ? ""
+
+    make embed:
+        set title of embed to "<:%getEmoji({_e1})%> Praca nieudana!"
+        if {_type} = 1:
+            set description of embed to "Czas na wykonanie zadania dobiegł końca! Nie otrzymałeś wypłaty."
+        else if {_type} = 2:
+            set description of embed to "Podano błędny wynik! Nie otrzymałeś wypłaty."
+        set embed color of embed to red
+    return last embed
+
+function rowWork1(id: string, num: numbers) :: row:
+    make new component row and store it in {_row}:
+        loop {_num::*}:
+            add new secondary button with id "work::answer::1-%loop-index%::%loop-value%::%{_id}%" named "%loop-value%" to components of the row builder
+    return {_row}
+
+function rowWork2(id: string) :: row:
+    set {_e1} to yaml value "emoji_primogem" from "config"
+    set {_e2} to yaml value "emoji_wish" from "config"
+    set {_e3} to yaml value "emoji_point" from "config"
+
+    make new component row and store it in {_row}:
+        add new secondary button with id "work::answer::2-1::1::%{_id}%" named "" with emoji getEmoji({_e1}) to components of the row builder
+        add new secondary button with id "work::answer::2-2::2::%{_id}%" named "" with emoji getEmoji({_e2}) to components of the row builder
+        add new secondary button with id "work::answer::2-3::3::%{_id}%" named "" with emoji getEmoji({_e3}) to components of the row builder
+    return {_row}
+
+function gachaWorkAlgoritm1() :: objects:
+    set {_type} to random integer between 1 and 4
+    loop 2 times:
+        set {_r1::%loop-number%} to random integer between 16 and 116
+    loop 2 times:
+        set {_r2::%loop-number%} to random integer between 2 and 20
+    loop 2 times:
+        set {_d1::%loop-number%} to random integer between 8 and 96
+    loop 2 times:
+        set {_d2::%loop-number%} to random integer between 4 and 12
+    
+    if {_type} is 1:
+        set {_string} to "%{_d1::1}% + %{_d1::2}% = ?"
+        set {_result} to round({_d1::1} + {_d1::2})
+        set {_r::*} to {_r1::*}
+    
+    else if {_type} is 2:
+        set {_d1::*} to sorted {_d1::*}
+        set {_string} to "%{_d1::2}% - %{_d1::1}% = ?"
+        set {_result} to round({_d1::2} - {_d1::1})
+        set {_r::*} to {_r1::*}
+    
+    else if {_type} is 3:
+        set {_string} to "%{_d2::1}% * %{_d2::2}% = ?"
+        set {_result} to round({_d2::1} * {_d2::2})
+        set {_r::*} to {_r1::*}
+    
+    else if {_type} is 4:
+        set {_temp} to round({_d2::1} * {_d2::2})
+        set {_string} to "%{_temp}% / %{_d2::2}% = ?"
+        set {_result} to {_d2::1}
+        set {_r::*} to {_r2::*}
+    
+    return {_type}, {_string}, {_result}, {_r::1}, {_r::2}
+
+function gachaWorkAlgoritm2() :: objects:
+    set {_e1} to yaml value "emoji_primogem" from "config"
+    set {_e2} to yaml value "emoji_wish" from "config"
+    set {_e3} to yaml value "emoji_point" from "config"
+
+    set {_string} to ""
+    loop 5 times:
+        set {_r::%loop-number%} to random integer between 1 and 3
+        set {_string} to "%{_string}% <:%getEmoji({_e%{_r::%loop-number%}%})%>"
+    
+    return {_string}, {_r::*}
+
+function gachaWorkReset(id: string):
+    delete {eco::%{_id}%::work-answer::*}
+    delete {eco::%{_id}%::work-active}
+    delete {eco::%{_id}%::work-count}

@@ -1,0 +1,38 @@
+function formatDate(s: string) :: date:
+    set {_s} to "`%{_s}%`"
+    
+    if {_s} contains "y":
+        set {_ty::*} to {_s} parsed as "%text%%number%y%text%"
+    set {_ty} to {_ty::2} ? 0
+    
+    if {_s} contains "d":
+        set {_td::*} to {_s} parsed as "%text%%number%d%text%"
+    set {_td} to {_td::2} ? 0
+    
+    if {_s} contains "h":
+        set {_th::*} to {_s} parsed as "%text%%number%h%text%"
+    set {_th} to {_th::2} ? 0
+    
+    if {_s} contains "m":
+        set {_tm::*} to {_s} parsed as "%text%%number%m%text%"
+    set {_tm} to {_tm::2} ? 0
+    
+    if {_s} contains "s":
+        set {_ts::*} to {_s} parsed as "%text%%number%s%text%"
+    set {_ts} to {_ts::2} ? 0
+    
+    set {_time} to 1 second after {_time}
+    
+    set {_time} to now
+    loop {_ty} times:
+        set {_time} to 365 days after {_time}
+    loop {_td} times:
+        set {_time} to 1 day after {_time}
+    loop {_th} times:
+        set {_time} to 1 hour after {_time}
+    loop {_tm} times:
+        set {_time} to 1 minute after {_time}
+    loop {_ts} times:
+        set {_time} to 1 second after {_time}
+    
+    return {_time}

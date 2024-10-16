@@ -1,0 +1,33 @@
+function getEmoji(s: string) :: strings:
+    set {_string} to {_s}
+    set {_temp} to {_s}
+    
+    while {_temp} contains ":":
+        add 1 to {_amount}
+        replace first ":" with "" in {_temp}
+    
+    set {_amount} to {_amount} / 2
+    
+    loop {_amount} times:
+        delete {_par::*}
+        if {_string} starts with ":":
+            set {_par::*} to {_string} parsed as ":%text%:%text%"
+            add {_par::1} to {_emotes::*}
+            replace first ":%{_par::1}%:" with "" in {_string}
+        else:
+            set {_par::*} to {_string} parsed as "%text%:%text%:%text%"
+            add {_par::2} to {_emotes::*}
+            replace first ":%{_par::2}%:" with "" in {_string}
+    
+    set {_json::*} to content of file path yaml value "file_emotes" from "config"
+    loop {_json::*}:
+        set {_json} to "%{_json} ? ""%%loop-value%"
+    map json {_json} to {_map::*}
+    
+    loop {_map::emojis::*}:
+        if {_string} contains {_map::emojis::%loop-index%::unicode}:
+            add {_map::emojis::%loop-index%::shortcodes::1} to {_emotes::*}
+            # add {_map::emojis::%loop-index%::unicode} to {_emotes::*}
+    
+    broadcast "%{_emotes::*}%"
+    return {_emotes::*}

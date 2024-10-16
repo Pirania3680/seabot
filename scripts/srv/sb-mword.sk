@@ -1,0 +1,10 @@
+on message receive:
+    content of event-message contains "małe łapy" or "male lapy"
+
+    destroy event-message
+    post "⚠️ Wykryto M-Worda! Nie tolerujemy takiego zachowania." to event-channel and store it in {_reply}
+    timeout event-member for 15 minutes due to "M-Word"
+
+    wait 5 seconds
+
+    destroy {_reply}

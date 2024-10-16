@@ -1,0 +1,104 @@
+# ZDJĘCIA
+function imgLvlMain(u: user, reward: number) :: image:
+    set {_lvl} to {level::%discord id of {_u}%::lvl}
+    set {_exp} to round({level::%discord id of {_u}%::exp})
+    set {_current} to expGetCurrentExp({_lvl}, {_exp})
+    set {_required} to expGetRequiredExp({_lvl})
+    set {_percent} to expGetPercent({_current}, {_required})
+    set {_max} to yaml value "level_max" from "config"
+
+    
+    if {_reward} > 0:
+        set {_img-type} to "reward"
+        set {_multiper} to 68
+        set {_multiper2} to 15
+    else:
+        set {_img-type} to "flat"
+        set {_multiper} to 0
+        set {_multiper2} to 0
+
+    set {_image} to new image with size 1280, 666
+    if {_lvl} <= 1:
+        draw image from file "plugins/Skript/data/level/main-%{_img-type}%-start.png" on {_image} at 0, 0
+    else if {_lvl} >= {_max}:
+        draw image from file "plugins/Skript/data/level/main-%{_img-type}%-end.png" on {_image} at 0, 0
+    else:
+        draw image from file "plugins/Skript/data/level/main-%{_img-type}%.png" on {_image} at 0, 0
+
+    # OBECNY LEVEL
+    set {_adding} to fontGenerate("genshin", 120, 4, "%{_lvl}%")
+    set {_width} to width of {_adding}
+    set {_line} to ceil(698 + ((264 - {_width}) / 2))
+    draw {_adding} on {_image} at {_line}, (252 - {_multiper} + {_multiper2})
+
+    # LEVEL -1
+    if {_lvl} > 1:
+        set {_adding} to fontGenerate("genshin", 90, 4, "%{_lvl} - 1%")
+        set {_width} to width of {_adding}
+        set {_line} to ceil(456 + ((200 - {_width}) / 2))
+        draw {_adding} on {_image} at {_line}, (265 - {_multiper} + {_multiper2})
+
+    # LEVEL +1
+    if {_lvl} < {_max}:
+        set {_adding} to fontGenerate("genshin", 90, 4, "%{_lvl} + 1%")
+        set {_width} to width of {_adding}
+        set {_line} to ceil(1006 + ((200 - {_width}) / 2))
+        draw {_adding} on {_image} at {_line}, (265 - {_multiper} + {_multiper2})
+
+    # POSIADANY EXP
+    draw fontGenerate("genshin", 18, 1, "%{_current}%") on {_image} at 472, (454 - {_multiper})
+
+    # EXP DO NASTĘPNEGO LEVELU
+    set {_adding} to fontGenerate("genshin", 18, 1, "%{_required}%")
+    set {_width} to width of {_adding}
+    draw {_adding} on {_image} at (1194 - {_width}), (454 - {_multiper})
+
+    # BAR EXPA
+    draw imgExpBar({_percent}) on {_image} at 465, (480 - {_multiper})
+
+    # NAGRODY DO ODEBRANIA
+    if {_reward} > 0:
+        set {_adding} to imgLevelRewards({_reward})
+        set {_width} to width of {_adding}
+        draw {_adding} on {_image} at (1200 - {_width}), 502
+
+    return {_image}
+
+
+
+function imgExpBar(p: number) :: image:
+    set {_width} to 0
+    set {_image} to new image with size 735, 22
+
+    loop round({_p} - 1) times:
+        if loop-number is 1:
+            draw image from file "plugins/Skript/data/level/bar-start.png" on {_image} at {_width}, 0
+            add 7 to {_width}
+            continue
+        if loop-number is 14 or 28 or 42 or 56 or 70 or 84 or 96:
+            draw image from file "plugins/Skript/data/level/bar-5px.png" on {_image} at {_width}, 0
+            add 5 to {_width}
+
+        draw image from file "plugins/Skript/data/level/bar-7px.png" on {_image} at {_width}, 0
+        add 7 to {_width}
+    
+    if round({_p}) >= 1:
+        draw image from file "plugins/Skript/data/level/bar-end.png" on {_image} at {_width}, 0
+
+    return {_image}
+
+function imgExpNextRank(lvl: number) :: image:
+    set {_image} to new image with size 1280, 666
+    draw image from file "plugins/Skript/data/level/main-level-up.png" on {_image} at 0, 0
+
+    set {_adding} to fontGenerate("genshin", 120, 5, "%{_lvl} - 1%")
+    set {_width} to width of {_adding}
+    set {_line} to ceil(441 + ((295 - {_width}) / 2))
+    draw {_adding} on {_image} at {_line}, 354
+
+    set {_adding} to fontGenerate("genshin", 164, 6, "%{_lvl}%")
+    set {_width} to width of {_adding}
+    set {_line} to ceil(844 + ((360 - {_width}) / 2))
+    draw {_adding} on {_image} at {_line}, 336
+
+    return {_image}

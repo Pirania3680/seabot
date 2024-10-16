@@ -1,0 +1,12 @@
+on slash command:
+    event-string is "losuj"
+    
+    defer interaction and wait
+
+    set {_max} to argument "max" as number ? 100
+    set {_min} to argument "min" as number ? 1
+    if {_min} > {_max}:
+        reply with styleDeny("Liczba minimalna nie może być większa od maksymalnej!")
+        stop
+    set {_r} to random integer between {_min} and {_max}
+    reply with styleReady("Wylosowana liczba: **%{_r}%**")

@@ -1,0 +1,131 @@
+on slash command:
+    event-string is "zagraj"
+
+    delete {temp::music::*}
+
+    set {_id} to discord id of event-user
+    set {temp::music::channel} to voice channel of event-member
+    set {_bot-channel} to voice channel of (self member of event-bot in event-guild)
+    set {_search} to argument "wyszukiwanie" as string
+    set {_file} to argument "plik" as attachment
+    set {_mix} to argument "pomieszaj" as boolean
+
+    if {temp::music::channel} is not set:
+        reply with hidden styleDeny("Nie jesteś na kanale głosowym.")
+        stop
+
+    if {_bot-channel} is set:
+        if {_bot-channel} is not {temp::music::channel}:
+            reply with hidden styleDeny("Bot jest już połączony z innym kanałem.")
+            stop
+        else:
+            set {temp::music::already-connected} to true
+    
+    defer the interaction and wait
+
+    if {_file} is not set:
+        
+        if {_search} starts with "https://":
+            load items from url "%{_search}%":
+
+                on single load:
+                    set {_track::1} to loaded track
+            
+                on playlist load:
+                    set {_track::*} to tracks of loaded playlist
+                
+                on no matches:
+                    reply with styleDeny("Nie znaleziono żadnych dopasowań.")
+                    stop
+                
+                on load error:
+                    reply with styleDeny("Wystąpił problem podczas wyszukiwania.%nl%`%the exception%`")
+                    stop
+
+        else:
+            search items with input "%{_search}%":
+
+                on playlist load:
+                    set {_track::1} to first element of tracks of loaded playlist
+                
+                on no matches:
+                    reply with hidden styleDeny("Nie znaleziono żadnych dopasowań.")
+                    stop
+                
+                on load error:
+                    reply with hidden styleDeny("Wystąpił problem podczas wyszukiwania.%nl%`%the exception%`")
+                    stop
+        
+        set {_song} to "%{_track::1}%"
+
+    else:
+
+        if "%{_file}%" don't end with ".mp3" or ".wav" or ".ogg" or ".mp4" or ".m4a" or ".acc" or ".webm":
+            reply with styleDeny("Podany plik nie jest plikiem audio.")
+            stop
+        
+        set {_name} to discord file name of {_file}
+        download {_file} in folder "plugins/Skript/temp/usermusic"
+        load local track from the file "plugins/Skript/temp/usermusic/%{_name}%" and store it in {_track::1}
+
+        set {_song} to {_name}
+
+    if {_track::1} is not set:
+        reply with styleDeny("Wystąpił niezidentyfikowany problem podczas wyszukiwania.")
+        stop
+
+    if size of queue of event-guild is bigger than 0:
+        set {_playing} to true
+    if playing track of event-guild is set:
+        set {_playing} to true
+    
+    set {_size} to size of {music::queue::*}
+    set {_founded} to size of {_track::*}
+
+    # Funkcja mieszania kolejności playlist
+    if {_founded} > 1:
+        if {_mix} is true:
+
+            loop {_founded} times:
+                add loop-number to {_temp::*}
+            
+            loop {_founded} times:
+                set {_number} to random object out of {_temp::*}
+                delete {_temp::%{_number}%}
+                add {_track::%{_number}%} to {_new::*}
+            
+            delete {_track::*}
+            set {_track::*} to {_new::*}
+
+    
+    if {_playing} is true:
+        musicQueueAdd({_track::*}, {_id})
+        reply with embedPlay(false, {_song}, {_size} + 1)
+
+    else:
+        force play {_track::1} in event-guild
+        reply with embedPlay(true, {_song}, {_size} + 1)
+
+        set {_amount} to size of {_track::*}
+        if {_amount} > 1:
+            delete {_track::1}
+            musicQueueAdd({_track::*}, {_id})
+    
+    if {temp::music::already-connected} is not true:
+        connect event-bot to {temp::music::channel}
+        musicStarted(event-guild, discord id of {temp::music::channel})
+
+function embedPlay(first: boolean, song: string, size: number) :: embedbuilder:
+    set {_e1} to yaml value "emoji_zezwolenie" from "config"
+
+    make embed:
+        if {_first} is true:
+            set title of embed to "<:%getEmoji({_e1})%> Rozpoczęto granie"
+            set description of embed to "Utwór: `%{_song}%`"
+        else:
+            set title of embed to "<:%getEmoji({_e1})%> Dodano do kolejki"
+            set description of embed to "Utwór: `%{_song}%`%nl%%nl%Miejsce w kolejce: `%{_size}%`"
+    
+        set embed color of embed to green
+    
+    return last embed

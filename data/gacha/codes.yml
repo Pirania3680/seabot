@@ -1,0 +1,26 @@
+# Opcje w kodach:
+# type: one = kod po użyciu przez jedną osobę wygasa dla wszystkich; multiple = kod po użyciu wygasa tylko dla tego użytkownika
+# expire: unix timestamp czasu w którym kod wygaśnie
+# reward: ID przedmiotu, który zostanie nadany (tylko 1 lub 2; 1 = primo, 2 = wish)
+# amount: ilość przedmiotów z reward
+
+'START':
+  type: multiple
+  expire: 16841015990
+  reward: 1
+  amount: 600
+'BANNERY':
+  type: multiple
+  expire: 16841015990
+  reward: 2
+  amount: 10
+'3.5':
+  type: multiple
+  expire: 16841015990
+  reward: 1
+  amount: 600
+'SWIETA23':
+  type: multiple
+  expire: 1703458799
+  reward: 2
+  amount: 10

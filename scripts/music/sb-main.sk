@@ -1,0 +1,40 @@
+function musicStarted(g: guild, channel: string):
+    delete {music::%discord id of {_g}%::waiting}
+    set {music::%discord id of {_g}%::active} to true
+    set {music::%discord id of {_g}%::paused} to false
+    set {music::%discord id of {_g}%::channel} to {_channel}
+
+function musicEnded(g: guild):
+    set {music::%discord id of {_g}%::waiting} to true
+    wait 60 seconds
+
+    if {music::%discord id of {_g}%::waiting} is true:
+        delete {music::%discord id of {_g}%::*}
+
+        if (voice channel of (self member of (bot "main") in {_g})) is set:
+            disconnect (bot "main") from {_g}
+        
+        musicQueueReset()
+
+on track end:
+    {music::%discord id of {_g}%::waiting} is not true
+
+    set {_track} to musicQueueGet()
+    if {_track} is set:
+        force play {_track} in event-guild
+
+
+on voice channel leave:
+    (discord id of event-voicechannel) is {music::%discord id of event-guild%::channel}
+
+    wait 1 second
+
+    set {_members::*} to voice members list of event-voicechannel
+
+    if size of {_members::*} <= 1:
+        musicEnded(event-guild)
+
+on voice channel join:
+    (discord id of event-voicechannel) is {music::%discord id of event-guild%::channel}
+
+    musicStarted(event-guild, discord id of event-voicechannel)

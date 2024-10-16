@@ -1,0 +1,42 @@
+function cache(id: string):
+    if (discord name of user with id {_id}) is set:
+        set {_user} to user with id {_id}
+        set {cache::%{_id}%::nick} to discord name of {_user}
+        set {cache::%{_id}%::tag} to discriminator of {_user}
+        if {cache::%{_id}%} is not set:
+            set {cache::%{_id}%} to true
+
+function getName(id: string) :: string:
+    if (discord name of user with id {_id}) is set:
+        return discord name of user with id {_id}
+        cache({_id})
+    else:
+        return {cache::%{_id}%::nick}
+
+function getTag(id: string) :: string:
+    set {_user} to user with id {_id}
+    if (discriminator of {_user}) is set:
+        return discriminator of {_user}
+        cache({_id})
+    else:
+        return {cache::%{_id}%::tag}
+
+function getNameTag(id: string) :: string:
+    set {_tag} to getTag({_id})
+    set {_name} to getName({_id})
+
+    if {_tag} is "0000":
+        return {_name}
+    else:
+        return "%{_name}%##%{_tag}%"
+            
+
+
+on slash command:
+    cache(discord id of event-user)
+
+on button click:
+    cache(discord id of event-user)
+
+on message receive:
+    cache(discord id of event-user)

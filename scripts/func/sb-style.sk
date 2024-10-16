@@ -1,0 +1,89 @@
+function console(t: string):
+    send "%{system::prefix} ? ""% %{_t}%" to console
+
+function styleFlat(t: string) :: embedbuilder:
+    make embed:
+        set description of embed to "%{_t}%"
+    return last embed
+
+function styleInfo(t: string) :: embedbuilder:
+    set {_e1} to yaml value "emoji_info" from "config"
+    make embed:
+        set description of embed to "<:%getEmoji({_e1})%> %{_t}%"
+    return last embed
+
+function styleReady(t: string) :: embedbuilder:
+    set {_e1} to yaml value "emoji_zezwolenie" from "config"
+    make embed:
+        set description of embed to "<:%getEmoji({_e1})%> %{_t}%"
+        set embed color of embed to green
+    return last embed
+
+function styleDeny(t: string) :: embedbuilder:
+    set {_e1} to yaml value "emoji_odmowa" from "config"
+    make embed:
+        if {_t} is "perms" or "permission":
+            set description of embed to "<:%getEmoji({_e1})%> Nie masz uprawnień do tej komendy."
+        else:
+            set description of embed to "<:%getEmoji({_e1})%> %{_t}%"
+        set embed color of embed to red
+    return last embed
+
+function styleError(t: string) :: embedbuilder:
+    set {_e1} to yaml value "emoji_odmowa" from "config"
+    make embed:
+        set description of embed to "<:%getEmoji({_e1})%> Wystąpił błąd!%nl%`%{_t}%`"
+        set embed color of embed to yellow
+    return last embed
+
+function styleImportant(t: string) :: embedbuilder:
+    make embed:
+        set description of embed to "%{_t}%"
+        set embed color of embed to pink
+    return last embed
+
+function embedStart(g: guild):
+    set author of last embed to discord name of {_g}
+    set author icon of last embed to avatar of {_g}
+
+function embedEnd():
+    set {_id} to yaml value "owner" from "config"
+    set {_id} to "%{_id}%"
+    set {_user} to user with id {_id}
+    set footer of last embed to "Bot powered by %getNameTag({_id})%"
+    set footer icon of last embed to avatar of {_user}
+    set timestamp of last embed to now
+
+function embedField():
+    add field named "" with value "" to fields of last embed
+
+function spaceNumbers(number: integer) :: string:
+    set {_chars::*} to "%{_number}%" split at ""
+    set {_size} to size of {_chars::*}
+    set {_return} to ""
+
+    loop {_size} times:
+        set {_loop} to {_size} - loop-number + 1
+
+        if loop-number = 1:
+            set {_return} to "%{_chars::%{_loop}%}%%{_return}%"
+        else if loop-number = {_size}:
+            set {_return} to "%{_chars::%{_loop}%}%%{_return}%"
+        else if mod(loop-number, 3) = 1:
+            set {_return} to " %{_chars::%{_loop}%}%%{_return}%"
+        else:
+            set {_return} to "%{_chars::%{_loop}%}%%{_return}%"
+
+    return {_return}
+
+function cutText(string: string, max: integer) :: string:
+    if length of {_string} > {_max} + 2:
+        set {_chars::*} to "%{_string}%" split at ""
+        set {_return} to ""
+
+        loop {_max} times:
+            set {_return} to "%{_return}%%{_chars::%loop-number%}%"
+        
+        return "%{_return}%..."
+    else:
+        return {_string}

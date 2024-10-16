@@ -1,0 +1,337 @@
+# Aktualnie istniejące eventy:
+# • primo-add (ilość)
+# • primo-remove (ilość)
+# • points-change (ilość)
+#
+# • wish (1, 10)
+#
+# • character-obtained-4 (pity, nazwa)
+# • character-obtained-5 (pity, nazwa)
+# • weapon-obtained-3 (pity, nazwa)
+# • weapon-obtained-4 (pity, nazwa)
+# • weapon-obtained-5 (pity, nazwa)
+#
+# • constelation-obtained-4 (numer)
+# • constelation-obtained-5 (numer)
+# • refinement-obtained-3 (numer)
+# • refinement-obtained-4 (numer)
+# • refinement-obtained-5 (numer)
+#
+# • 50-50-win (0)
+# • 50-50-lost (0)
+#
+# • daily-all (0)
+# • daily (1-4)
+#
+# • work-success (0)
+# • work-failed (0)
+# 
+# • buy (ilość)
+# • pay (ilość)
+#
+# • rob-success (ilość)
+# • rob-failed (0)
+#
+# • casino-win (ilość, szansa)
+# • casino-lost (ilość, szansa)
+#
+# • level-reward (level)
+#
+# • command-pity (0)
+# • command-avatar (0)
+
+options:
+    image: https://cdn.discordapp.com/attachments/1104142464228528350/1104163957335412756/achievement.webp
+
+on load:
+    load yaml "plugins/Skript/data/gacha/achievements.yml" as "achv"
+    load yaml "plugins/Skript/data/gacha/completed.yml" as "completed"
+
+    set {work::achievement-banner} to first element of gachaGetAllBanners()
+    set {work::achievement-list::*} to getAllAchievements()
+    set {work::achievement-amount} to size of {work::achievement-list::*}
+    set {work::achievement-3-stars} to size of (gachaGetAllWeapons() where [gachaGetValue(input, "rarity") = 3])
+
+on slash command:
+    event-string is "osiągnięcia"
+
+    set {_user} to argument "użytkownik" as user ? event-user
+    set {_id} to discord id of {_user}
+
+    # SPRAWDZANIE CZY DOŁĄCZONO
+    if {eco::%{_id}%::join} is not set:
+        reply with hidden styleDeny("Ten użytkownik nie dołączył do ekonomii.")
+        stop
+
+    defer the interaction and wait
+
+    set {_e1} to yaml value "emoji_achievement" from "config"
+
+    set {_completed::*} to getUnlockedAchievements({_id})
+    set {_amount} to size of {_completed::*}
+    
+    make embed:
+        set title of embed to "Zdobyte osiągnięcia (%{_amount}%/%{work::achievement-amount}%)"
+
+        if {_amount} <= 0:
+            set description of embed to "Ten użytkownik nie zdobył żadnego osiągnięcia."
+
+        loop {_completed::*}:
+            set {_title} to yaml value "%loop-value%.title" from "achv"
+            set {_desc} to yaml value "%loop-value%.desc" from "achv"
+            add inline field named "<:%getEmoji({_e1})%> %{_title}%" with value {_desc} to fields of embed
+    
+    reply with last embed
+
+
+
+function ecoEvent(id: string, type: string, value: objects):
+    # 001
+    if {_type} is "character-obtained-4" or "character-obtained-5":
+        add 1 to {eco::%{_id}%::achv-progress::001}
+        ecoAchvPart({_id}, "001", {eco::%{_id}%::achv-progress::001})
+    # 002
+    if {_type} is "constelation-obtained-4" or "constelation-obtained-5":
+        ecoAchvPart({_id}, "002", {_value::1})
+    # 003
+    if {_type} is "constelation-obtained-4" or "constelation-obtained-5":
+        if {_value::1} >= 6:
+            add 1 to {eco::%{_id}%::achv-progress::003}
+            ecoAchvPart({_id}, "003", {eco::%{_id}%::achv-progress::003})
+    # 004
+    if {_type} is "character-obtained-5":
+        add 1 to {eco::%{_id}%::achv-progress::004}
+        ecoAchvPart({_id}, "004", {eco::%{_id}%::achv-progress::004})
+    # 005
+    if {_type} is "50-50-win":
+        delete {eco::%{_id}%::achv-progress::006}
+        add 1 to {eco::%{_id}%::achv-progress::005}
+        ecoAchvPart({_id}, "005", {eco::%{_id}%::achv-progress::005})
+    # 006
+    if {_type} is "50-50-lost":
+        delete {eco::%{_id}%::achv-progress::005}
+        add 1 to {eco::%{_id}%::achv-progress::006}
+        ecoAchvPart({_id}, "006", {eco::%{_id}%::achv-progress::006})
+    # 007
+    if {_type} is "daily-all":
+        add 1 to {eco::%{_id}%::achv-progress::007}
+        ecoAchvPart({_id}, "007", {eco::%{_id}%::achv-progress::007})
+    # 008
+    if {_type} is "work-success":
+        delete {eco::%{_id}%::achv-progress::009}
+        add 1 to {eco::%{_id}%::achv-progress::008}
+        ecoAchvPart({_id}, "008", {eco::%{_id}%::achv-progress::008})
+    # 009
+    if {_type} is "work-failed":
+        add 1 to {eco::%{_id}%::achv-progress::009}
+        ecoAchvPart({_id}, "009", {eco::%{_id}%::achv-progress::009})
+    # 010
+    if {_type} is "pay":
+        ecoAchvPart({_id}, "010", {_value::1})
+    # 011
+    if {_type} is "rob-success":
+        delete {eco::%{_id}%::achv-progress::012}
+        add 1 to {eco::%{_id}%::achv-progress::011}
+        ecoAchvPart({_id}, "011", {eco::%{_id}%::achv-progress::011})
+    # 012
+    if {_type} is "rob-failed":
+        add 1 to {eco::%{_id}%::achv-progress::012}
+        ecoAchvPart({_id}, "012", {eco::%{_id}%::achv-progress::012})
+    # 013
+    if {_type} is "casino-win":
+        ecoAchvPart({_id}, "013", {_value::1})
+    # 014
+    if {_type} is "casino-win":
+        if {_value::2} >= 1:
+            ecoAchvPart({_id}, "014", 1)
+    # 015
+    if {_type} is "casino-win":
+        if {_value::2} <= 0.1:
+            ecoAchvPart({_id}, "015", 1)
+    # 016
+    if {_type} is "casino-lost":
+        ecoAchvPart({_id}, "016", {_value::1})
+    # 017
+    if {_type} is "level-reward":
+        ecoAchvPart({_id}, "017", {_value::1})
+    # 018
+    if {_type} is "constelation-obtained-5":
+        if {_value::1} >= 6:
+            add 1 to {eco::%{_id}%::achv-progress::018}
+            ecoAchvPart({_id}, "018", {eco::%{_id}%::achv-progress::003})
+    # 019
+    if {_type} is "command-avatar":
+        ecoAchvPart({_id}, "019", 1)
+    # 020
+    if {_type} is "points-change":
+        ecoAchvPart({_id}, "020", {_value::1})
+    # 021
+    if {_type} is "command-pity":
+        add 1 to {eco::%{_id}%::achv-progress::021}
+        ecoAchvPart({_id}, "021", {eco::%{_id}%::achv-progress::021})
+    # 022
+    if {_type} is "wish":
+        wait 0.5 second
+        ecoAchvPart({_id}, "022", {eco::%{_id}%::count} + 1)
+    # 023 & 024
+    if {_type} is "primo-add":
+        set {_wish} to gachaCurrency("?", {_id}, "wish", 0)
+        set {_primo} to gachaCurrency("?", {_id}, "primo", 0)
+        if {gacha::%{_id}%::%{work::achievement-banner}%::guarantee-4} is true:
+            if (({_wish} * 160) + {_primo}) >= 14400:
+                ecoAchvPart({_id}, "023", 1)
+        else:
+            if (({_wish} * 160) + {_primo}) >= 28800:
+                ecoAchvPart({_id}, "024", 1)
+    # 025
+    if {_type} is "character-obtained-5":
+        add 1 to {eco::%{_id}%::achv-progress::025}
+        if {eco::%{_id}%::achv-progress::025} >= 2:
+            ecoAchvPart({_id}, "025", {eco::%{_id}%::achv-progress::025})
+        wait 1 second
+        delete {eco::%{_id}%::achv-progress::025}
+    # 026
+    if {_type} is "character-obtained-4" or "character-obtained-5":
+        if {_value::1} = 1:
+            add 1 to {eco::%{_id}%::achv-progress::026}
+            ecoAchvPart({_id}, "026", {eco::%{_id}%::achv-progress::026})
+    # 027
+    if {_type} is "character-obtained-4":
+        if {_value::1} = 10:
+            add 1 to {eco::%{_id}%::achv-progress::027}
+            ecoAchvPart({_id}, "027", {eco::%{_id}%::achv-progress::027})
+        else:
+            delete {eco::%{_id}%::achv-progress::027}
+    # 028
+    if {_type} is "weapon-obtained-4" or "weapon-obtained-5":
+        add 1 to {eco::%{_id}%::achv-progress::028}
+        ecoAchvPart({_id}, "028", {eco::%{_id}%::achv-progress::028})
+    # 029
+    if {_type} is "weapon-obtained-3":
+        (yaml value "%{_id}%.029-1" from "completed") is not set
+
+        set {_max} to {work::achievement-3-stars}
+        set {_amounts::*} to gachaGetOwnedAmount({_id})
+
+        if {_amounts::5} >= {_max}:
+            ecoAchvPart({_id}, "029", 1)
+    # 030
+    if {_type} is "refinement-obtained-3":
+        if {_value::1} >= 5:
+            ecoAchvPart({_id}, "030", 3)
+    if {_type} is "refinement-obtained-4":
+        if {_value::1} >= 5:
+            ecoAchvPart({_id}, "030", 4)
+    if {_type} is "refinement-obtained-5":
+        if {_value::1} >= 5:
+            ecoAchvPart({_id}, "030", 5)
+    # 031 & 032
+    if {_type} is "wish":
+        wait 6 seconds
+
+        loop {eco::%{_id}%::obtained::*}:
+            gachaGetValue(loop-index, "type") is "character"
+            
+            set {_weapons::*} to yaml list "%loop-index%.weapons" from "data"
+
+            if {eco::%{_id}%::obtained::%{_weapons::1}%} >= 1:
+                add 1 to {_bis}
+            
+            if gachaGetValue(loop-index, "rarity") = 5:
+                if gachaGetValue({_weapons::1}, "rarity") = 5:
+                    add 1 to {_bis5}
+        
+        ecoAchvPart({_id}, "031", {_bis})
+        ecoAchvPart({_id}, "032", {_bis5})
+    # 033
+    if {_type} is "character-obtained-5" or "character-obtained-4" or "weapon-obtained-5" or "weapon-obtained-4":
+        set {_item} to gachaGetValue({_value::2}, "type")
+        if {eco::%{_id}%::achv-progress::033} is set:
+            if {eco::%{_id}%::achv-progress::033} is not {_item}:
+                ecoAchvPart({_id}, "033", {eco::%{_id}%::achv-progress::033})
+            
+        set {eco::%{_id}%::achv-progress::033} to {_item}
+        wait 1 second
+        delete {eco::%{_id}%::achv-progress::033}
+
+
+
+function ecoAchvPart(id: string, type: string, value: number):
+    set {_amount} to getAmountAchievemnts({_type})
+    loop {_amount} times:
+        set {_need} to yaml value "%{_type}%.%loop-number%.value" from "achv"
+
+        if {_value} >= {_need}:
+            ecoAchvComplete({_id}, {_type}, loop-number)
+
+function ecoAchvComplete(id: string, type: string, part: number):
+    (yaml value "%{_id}%.%{_type}%-%{_part}%" from "completed") is not set
+    set (yaml value "%{_id}%.%{_type}%-%{_part}%" from "completed") to 1
+    save yaml "completed"
+
+    while {temp::achievement-locked} is true:
+        wait 0.5 second
+    set {temp::achievement-locked} to true
+
+    set {_title} to yaml value "%{_type}%.%{_part}%.title" from "achv"
+    set {_desc} to yaml value "%{_type}%.%{_part}%.desc" from "achv"
+    set {_reward} to yaml value "%{_type}%.%{_part}%.reward" from "achv"
+
+    set {_e1} to yaml value "emoji_achievement" from "config"
+    set {_e2} to yaml value "emoji_primogem" from "config"
+
+    gachaCurrency("+", {_id}, "primo", {_reward})
+
+    wait 0.5 second
+
+    make embed:
+        set title of embed to "<:%getEmoji({_e1})%> %{_title}%"
+        set description of embed to "%{_desc}%.%nl%%nl% • Nagroda: `%{_reward}%` <:%getEmoji({_e2})%>"
+        set thumbnail of embed to "{@image}"
+    
+    retrieve user with id {_id} from bot "main" and store it in {_user}
+
+    directMessage({_user}, "", last embed)
+
+    delete {temp::achievement-locked}
+
+
+
+function getUnlockedAchievements(id: string) :: strings:
+    while {_end} is not true:
+        add 1 to {_loop}
+        set {_type} to "%{_loop}%" if {_loop} < 1000
+        set {_type} to "0%{_loop}%" if {_loop} < 100
+        set {_type} to "00%{_loop}%" if {_loop} < 10
+
+        if yaml value "%{_type}%.1.value" from "achv" is set:
+            loop getAmountAchievemnts({_type}) times:
+                add 1 to {_all}
+                if (yaml value "%{_id}%.%{_type}%-%loop-number%" from "completed") is set:
+                    add "%{_type}%.%loop-number%" to {_completed::*}
+        else:
+            set {_end} to true
+    
+    return {_completed::*}
+
+function getAllAchievements() :: strings:
+    while {_end} is not true:
+        add 1 to {_loop}
+        set {_type} to "%{_loop}%" if {_loop} < 1000
+        set {_type} to "0%{_loop}%" if {_loop} < 100
+        set {_type} to "00%{_loop}%" if {_loop} < 10
+
+        if yaml value "%{_type}%.1.value" from "achv" is set:
+            loop getAmountAchievemnts({_type}) times:
+                add "%{_type}%.%loop-number%" to {_completed::*}
+        else:
+            set {_end} to true
+    
+    return {_completed::*}
+
+function getAmountAchievemnts(type: string) :: number:
+    while {_end} is not true:
+        add 1 to {_loop}
+        if yaml value "%{_type}%.%{_loop}%.value" from "achv" is not set:
+            return {_loop} - 1
+            set {_end} to true

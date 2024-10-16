@@ -1,0 +1,6 @@
+function directMessage(u: user, m: string, e: embedbuilder):
+    open private channel of {_u} and store it in {_pv}
+    if {_e} is not set:
+        post {_m} to {_pv}
+    else:
+        post {_e} to {_pv}

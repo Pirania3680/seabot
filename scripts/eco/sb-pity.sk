@@ -1,0 +1,34 @@
+on slash command:
+    event-string is "pity"
+
+    defer the interaction and wait
+
+    set {_list::*} to gachaGetAllBanners()
+    set {_id} to discord id of event-user
+
+    make embed:
+        set title of embed to "Pity na bannerach:"
+
+        loop {_list::*}:
+            set {_bid} to loop-value
+            set {_gid} to yaml value "economy_banners.%{_bid}%.id" from "eco"
+            set {_emoji} to yaml value "economy_banners.%{_bid}%.emoji" from "eco"
+            set {_name} to yaml value "economy_banners.%{_bid}%.name" from "eco"
+
+            set {_pity5} to {gacha::%{_id}%::%{_gid}%::pity-5} ? 0
+            set {_pity4} to {gacha::%{_id}%::%{_gid}%::pity-4} ? 0
+            set {_pity5max} to yaml value "economy_banners.%{_bid}%.5_hard" from "eco"
+            set {_pity4max} to yaml value "economy_banners.%{_bid}%.4_hard" from "eco"
+            set {_guarantee} to {gacha::%{_id}%::%{_gid}%::guarantee-5}
+            set {_chance::*} to gachaGetChance({_pity5}, {_pity4}, {_bid})
+
+            if {_guarantee} is true:
+                set {_guarantee} to "`tak` ✨"
+            else:
+                set {_guarantee} to "`nie`"
+
+            add inline field named "<:%getEmoji({_emoji})%> %{_name}%" with value " • Pity 5⭐: `%{_pity5}%` / `%{_pity5max}%` (`%{_chance::2}%%%` szans) %nl% • Pity 4⭐: `%{_pity4}%` / `%{_pity4max}%` (`%{_chance::1}%%%` szans) %nl% • Gwarant: %{_guarantee}%" to fields of embed
+
+    reply with last embed
+
+    ecoEvent({_id}, "command-pity", 0)

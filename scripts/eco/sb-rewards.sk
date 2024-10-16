@@ -1,0 +1,26 @@
+on slash command:
+    event-string is "konto" or "wish" or "banner" or "daily" or "praca" or "okradnij" or "kasyno" or "kup" or "zgadnij"
+
+    set {_id} to discord id of event-user
+
+    if {eco::%{_id}%::join} is not true:
+
+        set {eco::%{_id}%::join} to true
+
+        gachaRewardJoin(event-user, event-guild)
+
+
+
+function gachaRewardJoin(u: user, g: guild):
+    gachaCurrency("+", discord id of {_u}, "wish", 10)
+
+    set {_e1} to yaml value "emoji_wish" from "config"
+
+    make embed:
+        set title of embed to "✨ Witaj w ekonomii!"
+        set description of embed to "Mamy nadzieję, że miło spędzisz czas zdobywając coraz więcej postaci i podbijając topkę!%nl%%nl%Jeśli nie wiesz co i jak, użyj komendy /ekonomia - nieco rozjaśni Ci działanie tego modułu.%nl%%nl%A oto nasz mały prezent powitalny - `10` <:%getEmoji({_e1})%>. Życzymy szczęścia!"
+
+        embedStart({_g})
+        embedEnd()
+
+    directMessage({_u}, "", last embed)

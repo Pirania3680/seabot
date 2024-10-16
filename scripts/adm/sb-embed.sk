@@ -1,0 +1,245 @@
+function regenerateEmbed(u: user, n: text) :: embedbuilder:
+    if {_n} is not "temp":
+        set {_n} to "saved::%{_n}%"
+
+    make embed:
+        if {embed::%discord id of {_u}%::%{_n}%::title} is set:
+            set title of embed to {embed::%discord id of {_u}%::%{_n}%::title}
+            add 1 to {_check}
+        if {embed::%discord id of {_u}%::%{_n}%::desc} is set:
+            set description of embed to {embed::%discord id of {_u}%::%{_n}%::desc}
+            add 1 to {_check}
+        if {embed::%discord id of {_u}%::%{_n}%::author} is set:
+            set author of embed to {embed::%discord id of {_u}%::%{_n}%::author}
+            add 1 to {_check}
+        if {embed::%discord id of {_u}%::%{_n}%::author-avatar} is set:
+            set author icon of embed to {embed::%discord id of {_u}%::%{_n}%::author-avatar}
+            add 1 to {_check}
+        if {embed::%discord id of {_u}%::%{_n}%::footer} is set:
+            set footer of embed to {embed::%discord id of {_u}%::%{_n}%::footer}
+            add 1 to {_check}
+        if {embed::%discord id of {_u}%::%{_n}%::footer-avatar} is set:
+            set footer icon of embed to {embed::%discord id of {_u}%::%{_n}%::footer-avatar}
+            add 1 to {_check}
+        if {embed::%discord id of {_u}%::%{_n}%::image} is set:
+            set image of embed to {embed::%discord id of {_u}%::%{_n}%::image}
+            add 1 to {_check}
+        if {embed::%discord id of {_u}%::%{_n}%::thumbnail} is set:
+            set thumbnail of embed to {embed::%discord id of {_u}%::%{_n}%::thumbnail}
+            add 1 to {_check}
+        if {embed::%discord id of {_u}%::%{_n}%::color} is set:
+            set embed color of embed to hex "##%{embed::%discord id of {_u}%::%{_n}%::color}%"
+
+    if {_check} is not set:
+        set description of embed to "..."
+    return last embed
+
+on slash command:
+    event-string is "embed"
+    
+    if argument "czynność" as string is "zapisz":
+        
+        if {embed::%discord id of event-user%::edit} is set:
+            
+            set {_name} to argument "nazwa" as string
+            replace every " " with "-" in {_name}
+            
+            if {_name} is not set:
+                reply with hidden styleDeny("Musisz podać nazwę, z jaką chcesz zapisać embed.")
+                stop
+            if {_name} is "temp":
+                reply with hidden styleDeny("Przepraszamy, ale nie możesz użyć tej nazwy.")
+                stop
+            if {_name} contains "::":
+                reply with hidden styleDeny("Przepraszamy, ale nie możesz użyć tej nazwy.")
+                stop
+            
+            defer the interaction and wait
+            
+            if {embed::%discord id of event-user%::saved::%{_name}%} is set:
+                set {_e1} to yaml value "emoji_powrot" from "config"
+                set {_e2} to yaml value "emoji_okay" from "config"
+
+                set {_buttons} to new components row
+                add new success button with url "embed::cancel::%discord id of event-user%" named "Anuluj" with emoji getEmoji({_e1}) to components of {_buttons}
+                add new danger button with url "embed::overwrite::%discord id of event-user%::%{_name}%" named "Nadpisz zapis!" with emoji getEmoji({_e2}) to components of {_buttons}
+                
+                create a new message and store it in {_msg}:
+                    add styleInfo("Posiadasz już zapisany embed z taką nazwą. Czy chcesz go nadpisać?") to the embeds of the message
+                    add {_buttons} to rows of the message
+                reply with {_msg}
+                stop
+            
+            loop {embed::%discord id of event-user%::temp::*}:
+                set {embed::%discord id of event-user%::saved::%{_name}%::%loop-index%} to loop-value
+            set {embed::%discord id of event-user%::saved::%{_name}%} to true
+            reply with styleReady("Gotowe! Twój embed zapisany z nazwą **%{_name}%**.")
+            destroy {embed::%discord id of event-user%::edit}
+            delete {embed::%discord id of event-user%::edit} and {embed::%discord id of event-user%::temp::*}
+            stop
+        
+        reply with hidden styleDeny("Nie wykryto aktywnej edycji embedu.")
+        stop
+    
+    if argument "czynność" as string is "usuń":
+        set {_name} to argument "nazwa" as string
+        replace every " " with "-" in {_name}
+
+        if {_name} is not set:
+            reply with hidden styleDeny("Musisz podać nazwę embedu, który chcesz usunąć.")
+            stop
+
+        if {embed::%discord id of event-user%::saved::%{_name}%} is set:
+
+            defer the interaction and wait
+
+            delete {embed::%discord id of event-user%::saved::%{_name}%::*}
+            delete {embed::%discord id of event-user%::saved::%{_name}%}
+            reply with styleReady("Embed z nazwą **%{_name}%** został usunięty.")
+            stop
+        
+        reply with hidden styleDeny("Nie znaleźliśmy zapisanego embedu z tą nazwą.")
+        stop
+    
+    if argument "czynność" as string is "załaduj":
+        set {_name} to argument "nazwa" as string
+        replace every " " with "-" in {_name}
+
+        if {_name} is not set:
+            reply with hidden styleDeny("Musisz podać nazwę embedu, który chcesz załadować.")
+            stop
+
+        if {embed::%discord id of event-user%::saved::%{_name}%} is set:
+
+            defer the interaction and wait
+
+            if {embed::%discord id of event-user%::edit} is set:
+                set {_e1} to yaml value "emoji_powrot" from "config"
+                set {_e2} to yaml value "emoji_okay" from "config"
+
+                set {_buttons} to new components row
+                add new success button with url "embed::cancel::%discord id of event-user%" named "Anuluj" with emoji getEmoji({_e1}) to components of {_buttons}
+                add new danger button with url "embed::abandon-2::%discord id of event-user%::%{_name}%" named "Porzuć zmiany!" with emoji getEmoji({_e2}) to components of {_buttons}
+                
+                create a new message and store it in {_msg}:
+                    add styleInfo("Posiadasz już inny embed w edycji. Czy chcesz go porzucić?") to the embeds of the message
+                    add {_buttons} to rows of the message
+                reply with {_msg}
+                stop
+            else:
+                delete {embed::%discord id of event-user%::temp::*}
+                loop {embed::%discord id of event-user%::saved::%{_name}%::*}:
+                    set {embed::%discord id of event-user%::temp::%loop-index%} to loop-value
+                reply with regenerateEmbed(event-user, "temp") and store it in {embed::%discord id of event-user%::edit}
+                stop
+
+        reply with hidden styleDeny("Nie znaleźliśmy zapisanego embedu z tą nazwą.")
+        stop
+            
+
+    if argument "czynność" as string is "stwórz":
+
+        defer the interaction and wait
+        
+        if size of {embed::%discord id of event-user%::temp::*} is not 0:
+            set {_e1} to yaml value "emoji_powrot" from "config"
+            set {_e2} to yaml value "emoji_okay" from "config"
+
+            set {_buttons} to new components row
+            add new success button with url "embed::cancel::%discord id of event-user%" named "Anuluj" with emoji getEmoji({_e1}) to components of {_buttons}
+            add new danger button with url "embed::load::%discord id of event-user%" named "Wczytaj poprzednią edycje!" with emoji getEmoji({_e2}) to components of {_buttons}
+            add new danger button with url "embed::abandon-1::%discord id of event-user%" named "Porzuć zmiany!" with emoji getEmoji({_e2}) to components of {_buttons}
+            
+            create a new message and store it in {_msg}:
+                add styleInfo("Posiadasz już inny embed w edycji. Czy chcesz go porzucić?") to the embeds of the message
+                add {_buttons} to rows of the message
+            reply with {_msg}
+            stop
+
+        make embed:
+            set description of embed to "Oto embed który edytujesz. Jeśli nie wiesz co i jak, użyj **/help embed**."
+        reply with last embed and store it in {embed::%discord id of event-user%::edit}
+        stop
+
+
+
+on button click:
+    set {_button} to "%event-button%"
+    if {_button} contains "embed::abandon-1::":
+        set {_id::*} to {_button} parsed as "embed::abandon-1::%text%"
+        if {_id::1} is discord id of event-user:
+            destroy {embed::%discord id of event-user%::edit}
+            delete {embed::%discord id of event-user%::edit} and {embed::%discord id of event-user%::temp::*}
+            make embed:
+                set description of embed to "Oto embed który edytujesz. Jeśli nie wiesz co i jak, użyj **/help embed**."
+            edit event-message to show last embed
+            set {embed::%discord id of event-user%::edit} to event-message
+        
+        else:
+            reply with hidden styleDeny("Ten przycisk nie należy do Ciebie.")
+    
+    if {_button} contains "embed::abandon-2::":
+        set {_id::*} to {_button} parsed as "embed::abandon-2::%text%::%text%"
+        if {_id::1} is discord id of event-user:
+            destroy {embed::%discord id of event-user%::edit}
+            delete {embed::%discord id of event-user%::edit} and {embed::%discord id of event-user%::temp::*}
+            loop {embed::%discord id of event-user%::saved::%{_id::2}%::*}:
+                set {embed::%discord id of event-user%::temp::%loop-index%} to loop-value
+            edit event-message to show regenerateEmbed(event-user, "temp")
+            set {embed::%discord id of event-user%::edit} to event-message
+        
+        else:
+            reply with hidden styleDeny("Ten przycisk nie należy do Ciebie.")
+    
+    if {_button} contains "embed::overwrite::":
+        set {_id::*} to {_button} parsed as "embed::overwrite::%text%::%text%"
+        if {_id::1} is discord id of event-user:
+            loop {embed::%discord id of event-user%::temp::*}:
+                set {embed::%discord id of event-user%::saved::%{_id::2}%::%loop-index%} to loop-value
+            set {embed::%discord id of event-user%::saved::%{_id::2}%} to true
+            reply with styleReady("Gotowe! Twój embed zapisany z nazwą **%{_id::2}%**.")
+            destroy {embed::%discord id of event-user%::edit}
+            destroy event-message
+            delete {embed::%discord id of event-user%::edit} and {embed::%discord id of event-user%::temp::*}
+        
+        else:
+            reply with hidden styleDeny("Ten przycisk nie należy do Ciebie.")
+    
+    if {_button} contains "embed::load::":
+        set {_id::*} to {_button} parsed as "embed::load::%text%"
+        if {_id::1} is discord id of event-user:
+            destroy {embed::%discord id of event-user%::edit}
+            edit event-message to show regenerateEmbed(event-user, "temp")
+            set {embed::%discord id of event-user%::edit} to event-message
+        else:
+            reply with hidden styleDeny("Ten przycisk nie należy do Ciebie.")
+    
+    if {_button} contains "embed::cancel::":
+        set {_id::*} to {_button} parsed as "embed::cancel::%text%"
+        if {_id::1} is discord id of event-user:
+            destroy event-message
+        else:
+            reply with hidden styleDeny("Ten przycisk nie należy do Ciebie.")
+
+
+
+on slash completion:
+    event-string is "embed"
+    
+    if argument "nazwa" as string is set:
+        if size of {embed::%discord id of event-user%::saved::*} = 0:
+            return new choice named "brak zapisanych embedów" with value "brak zapisanych embedów"
+            stop
+        loop {embed::%discord id of event-user%::saved::*}:
+            add loop-index to {_list::*}
+        return slashComplete({_list::*}, argument "nazwa" as string)
+    
+    if argument "czynność" as string is set:
+        add new choice named "stwórz" with value "stwórz" to {_list::*}
+        add new choice named "załaduj" with value "załaduj" to {_list::*}
+        add new choice named "zapisz" with value "zapisz" to {_list::*}
+        add new choice named "usuń" with value "usuń" to {_list::*}
+        return {_list::*}
+        stop
+
+    

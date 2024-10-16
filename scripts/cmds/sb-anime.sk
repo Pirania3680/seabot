@@ -1,0 +1,82 @@
+on slash command:
+    event-string is "anime"
+
+    defer interaction and wait
+
+    delete {system::temp::anime-json::*}
+    delete {system::temp::anime-category}
+    
+    set {_api} to random integer between 1 and 4
+    
+    # if {_api} is 1:
+
+    #     set {_random} to random integer between 0 and 99
+    #     if {_random} is between 30 and 69:
+    #         set {system::temp::anime-category} to "neko"
+    #     if {_random} is between 10 and 29:
+    #         set {system::temp::anime-category} to "waifu"
+    #     if {_random} is between 0 and 4:
+    #         set {system::temp::anime-category} to "hug"
+    #     if {_random} is between 5 and 9:
+    #         set {system::temp::anime-category} to "pat"
+    #     if {_random} is between 70 and 74:
+    #         set {system::temp::anime-category} to "kitsune"
+    #     if {_random} is between 75 and 79:
+    #         set {system::temp::anime-category} to "cry"
+    #     if {_random} is between 80 and 84:
+    #         set {system::temp::anime-category} to "kiss"
+    #     if {_random} is between 85 and 89:
+    #         set {system::temp::anime-category} to "slap"
+    #     if {_random} is between 90 and 94:
+    #         set {system::temp::anime-category} to "smug"
+    #     if {_random} is between 95 and 99:
+    #         set {system::temp::anime-category} to "punch"
+
+    #     send a request to "https://neko-love.xyz/api/v1/%{system::temp::anime-category}%"
+    #     map json body of last http response to {system::temp::anime-json::*}
+    
+    if {_api} is 2 or 3:
+        
+        set {_random} to random integer between 0 and 99
+        if {_random} is between 40 and 84:
+            set {system::temp::anime-category} to "waifu"
+        if {_random} is between 5 and 39:
+            set {system::temp::anime-category} to "neko"
+        if {_random} is between 85 and 89:
+            set {system::temp::anime-category} to "hug"
+        if {_random} is between 90 and 94:
+            set {system::temp::anime-category} to "cry"
+        if {_random} is between 95 and 99:
+            set {system::temp::anime-category} to "smug"
+        if {_random} is between 0 and 4:
+            set {system::temp::anime-category} to "pat"
+        
+        send a request to "https://api.waifu.pics/sfw/%{system::temp::anime-category}%"
+        map json body of last http response to {system::temp::anime-json::*}
+    
+    if {_api} is 4 or 1:
+        
+        set {_random} to random integer between 0 and 99
+        if {_random} is between 40 and 84:
+            set {system::temp::anime-category} to "neko"
+        if {_random} is between 0 and 24:
+            set {system::temp::anime-category} to "kiss"
+        if {_random} is between 25 and 39:
+            set {system::temp::anime-category} to "hug"
+        if {_random} is between 85 and 99:
+            set {system::temp::anime-category} to "pat"
+        
+        send a request to "https://nekos.life/api/v2/img/%{system::temp::anime-category}%"
+        map json body of last http response to {system::temp::anime-json::*}
+    
+    if {system::temp::anime-json::url} is not set:
+        reply with styleDeny("Wystąpił problem z odpowiedzią API.")
+        stop
+    
+    make embed:
+    
+        set title of embed to "Oto twoja anime girl:"
+        set image of embed to "%{system::temp::anime-json::url}%"
+        embedStart(event-guild)
+        embedEnd()
+    reply with last embed

@@ -1,0 +1,28 @@
+function expGetLvL(i: number) :: integer:
+    while {_end} is not true:
+        add 1 to {_loop}
+
+        # ZABEZPIECZENIE PRZED LAGIEM
+        if yaml value "level_exp_per_lvl.%{_loop}%" from "config" is not set:
+            stop
+        if {_loop} > 1000:
+            stop
+        # ===========================
+
+        set {_value} to yaml value "level_exp_per_lvl.%{_loop}%" from "config"
+        if {_value} > {_i}:
+            return round({_loop} - 1)
+
+function expGetRequiredExp(i: integer) :: number:
+    set {_this} to yaml value "level_exp_per_lvl.%{_i}%" from "config"
+    set {_next} to yaml value "level_exp_per_lvl.%round({_i} + 1)%" from "config"
+    return round(({_this} - {_next}) * -1)
+
+function expGetCurrentExp(i: integer, this: number) :: number:
+    set {_last} to yaml value "level_exp_per_lvl.%{_i}%" from "config"
+    return round({_this} - {_last})
+
+function expGetPercent(this: number, next: number) :: number:
+    set {_percent} to ({_this} / {_next}) * 1000
+    set {_percent} to round({_percent}) / 10
+    return {_percent}

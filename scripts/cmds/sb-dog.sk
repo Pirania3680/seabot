@@ -1,0 +1,23 @@
+on slash command:
+    event-string is "pies" or "pes"
+    
+    defer interaction and wait
+
+    delete {system::temp::dog-json::*} and {system::tempdogcat-json}
+
+    send a request to "https://api.thedogapi.com/v1/images/search?size=full"
+    set {system::temp::dog-json} to body of last http response
+    replace every "[{" with "{" in {system::temp::dog-json}
+    replace every "}]" with "}" in {system::temp::dog-json}
+    map json {system::temp::dog-json} to {system::temp::dog-json::*}
+
+    if {system::temp::dog-json::url} is not set:
+        reply with styleDeny("Wystąpił problem z odpowiedzią API.")
+        stop
+
+    make embed:
+        set title of embed to "Oto twój pies:"
+        set image of embed to "%{system::temp::dog-json::url}%"
+        embedStart(event-guild)
+        embedEnd()
+    reply with last embed
