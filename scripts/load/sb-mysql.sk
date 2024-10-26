@@ -1,0 +1,45 @@
+on script load:
+    yaml value "mysql_enabled" from "config" is true
+
+    set {_address} to yaml value "mysql_address" from "config"
+    set {_database} to yaml value "mysql_database" from "config"
+    set {_user} to yaml value "mysql_user" from "config"
+    set {_password} to yaml value "mysql_password" from "config"
+    set {_ssl} to yaml value "mysql_use_ssl" from "config"
+
+    set {-sql} to the database "%{_address}%/%{_database}%?user=%{_user}%&password=%{_password}%&useSSL=%{_ssl}%"
+
+    wait 1 second
+
+    execute unsafe "CREATE TABLE IF NOT EXISTS `seabot_users` ( `discord_id` bigint(22) unsigned NOT NULL, `discord_name` varchar(32) DEFAULT NULL, `discord_tag` varchar(4) DEFAULT NULL, `stats_messages` int(10) unsigned DEFAULT NULL, `stats_commands` int(10) unsigned DEFAULT NULL, `stats_voice` int(10) unsigned DEFAULT NULL, `level_current` smallint(5) unsigned DEFAULT NULL, `level_exp_all` int(10) unsigned DEFAULT NULL, `level_exp_current` int(10) unsigned DEFAULT NULL, `eco_primo` int(11) DEFAULT NULL, `eco_wish` int(11) DEFAULT NULL, `eco_points` int(11) DEFAULT NULL, PRIMARY KEY (`discord_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci" in {-sql}
+    broadcast "&cSQL ERROR! &7- &f%last sql error%" if last sql error is set
+
+    mysqlUpdateUsers()
+
+function mysqlUpdateUsers():
+    yaml value "mysql_enabled" from "config" is true
+
+    loop {cache::*}:
+        add 1 to {_loop}
+        if {_loop} is 1:
+            set {_querend} to ""
+        else:
+            set {_querend} to "%{_querend}%, "
+
+        set {_id} to loop-index
+        set {_nick} to getName({_id})
+        set {_tag} to getTag({_id})
+        set {_messages} to {level::%{_id}%::message} ? 0
+        set {_voice} to {level::%{_id}%::voice} ? 0
+        set {_commands} to {level::%{_id}%::command} ? 0
+        set {_level} to {level::%{_id}%::lvl} ? "null"
+        set {_exp-all} to {level::%{_id}%::exp} ? "null"
+        set {_exp-cur} to expGetCurrentExp({_level}, {_exp-all}) ? "null"
+        set {_primo} to {eco::%{_id}%::primo} ? "null"
+        set {_wish} to {eco::%{_id}%::wish} ? "null"
+        set {_point} to {eco::%{_id}%::points} ? "null"
+
+        set {_querend} to "%{_querend}%(%loop-index%, '%{_nick}%', '%{_tag}%', %{_messages}%, %{_commands}%, %{_voice}%, %{_level}%, %{_exp-all}%, %{_exp-cur}%, %{_primo}%, %{_wish}%, %{_point}%)"
+    
+    execute unsafe "INSERT INTO seabot_users VALUES %{_querend}% ON DUPLICATE KEY UPDATE discord_name=VALUES(discord_name), discord_tag=VALUES(discord_tag), stats_messages=VALUES(stats_messages), stats_commands=VALUES(stats_commands), stats_voice=VALUES(stats_voice), level_current=VALUES(level_current), level_exp_all=VALUES(level_exp_all), level_exp_current=VALUES(level_exp_current), eco_primo=VALUES(eco_primo), eco_wish=VALUES(eco_wish), eco_points=VALUES(eco_points)" in {-sql}
+    broadcast "&cSQL ERROR! &7- &f%last sql error%" if last sql error is set
