@@ -1,6 +1,6 @@
 
 define new bot named "main":
-    token: %yaml value "token" from "config"%
+    token: %file contents of yaml value "token" from "config"%
     intents: default intents
     policy: all
     auto reconnect: true

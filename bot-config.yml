@@ -31,8 +31,8 @@ mysql_use_ssl: false
 # GLOBALNE USTAWIENIA BOTA
 # -----------
 
-# Token do bota
-token: ''
+# Plik z tokenem do bota
+token: 'plugins/Skript/token'
 
 # Nazwa bota
 name: SeaBot
