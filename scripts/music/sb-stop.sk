@@ -15,7 +15,7 @@ on slash command:
     
     defer the interaction and wait
     
-    #musicEnded(event-guild)
+    musicEnded(event-guild)
 
     disconnect (bot "main") from event-guild
     stop the track of event-guild

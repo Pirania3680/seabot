@@ -194,6 +194,9 @@ on load:
     add boolean option named "pomieszaj" with description "Wybierz, jeśli chcesz by podana przez Ciebie playlista została pomieszana" to options of {system::cmd-reg-s::zagraj}
     add attachment option named "plik" with description "Możesz wgrać plik muzyczny w formacie mp3, aby zagrać swoją muzykę." to options of {system::cmd-reg-s::zagraj}
 
+    set {system::cmd-reg-s::radio} to newSlash("radio", "Rozpocznij granie podanego radia.")
+    add required auto complete string option named "radio" with description "Wybierz nazwę radia, które chcesz rozpocząć." to options of {system::cmd-reg-s::radio}
+
     set {system::cmd-reg-s::pomiń} to newSlash("pomiń", "Pomiń aktualnie grany utwór.")
 
     set {system::cmd-reg-s::pauza} to newSlash("pauza", "Wstrzymaj lub wznów aktaulnie grany utwór.")

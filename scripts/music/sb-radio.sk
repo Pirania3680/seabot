@@ -1,0 +1,99 @@
+on slash command:
+    event-string is "radio"
+
+    set {_radio} to argument "radio" as string
+
+    set {_bot-channel} to voice channel of (self member of event-bot in event-guild)
+    set {temp::music::channel} to voice channel of event-member
+
+    if size of queue of event-guild is bigger than 0:
+        set {_playing} to true
+    if playing track of event-guild is set:
+        set {_playing} to true
+    
+    if {_bot-channel} is set:
+        if {_bot-channel} is not {temp::music::channel}:
+            reply with hidden styleDeny("Bot jest już połączony z innym kanałem.")
+            stop
+        else:
+            set {temp::music::already-connected} to true
+    
+    defer the interaction and wait
+    
+    if {_radio} is "wyłącz":
+        delete {music::%discord id of event-guild%::radio::enabled}
+        delete {music::%discord id of event-guild%::radio::name}
+
+        set {_e1} to yaml value "emoji_zezwolenie" from "config"
+        make embed:
+            set title of embed to "<:%getEmoji({_e1})%> Radio wyłączone"
+            set description of embed to "Bot będzie grał tylko dodane do kolejki utwory."
+            set embed color of embed to green
+        reply with last embed
+
+        stop
+    else:
+        set {music::%discord id of event-guild%::radio::enabled} to true
+        set {music::%discord id of event-guild%::radio::name} to {_radio}
+    
+    if {_playing} is not true:
+        load local track from the file radioPlay(event-guild, {_radio}) and store it in {_track}
+        force play {_track} in event-guild
+
+    if {temp::music::already-connected} is not true:
+        connect event-bot to {temp::music::channel}
+        musicStarted(event-guild, discord id of {temp::music::channel})
+
+    set {_e1} to yaml value "emoji_zezwolenie" from "config"
+    make embed:
+        set title of embed to "<:%getEmoji({_e1})%> Radio włączone"
+        set description of embed to "Bot będzie grał teraz radio %{_radio}%. Wciąż możliwe jest dodanie własnej muzyki (będzie ona grana w przerwach między muzyką radia)."
+        set embed color of embed to green
+    reply with last embed
+
+on slash completion:
+    event-string is "radio"
+    
+    return slashComplete((radioGetAll(), "wyłącz"), "")
+
+
+
+function radioGetAll() :: strings:
+    set {_all::*} to files in dir "plugins/Skript/data/radio"
+    loop {_all::*}:
+        set {_name} to name of file loop-value
+        add {_name} to {_return::*}
+    return sorted {_return::*}
+
+function radioGetAllTracks(radio: string) :: strings:
+    set {_all::*} to files in dir "plugins/Skript/data/radio/%{_radio}%"
+    loop {_all::*}:
+        set {_name} to name of file loop-value
+        add "%{_name}%.mp3" to {_return::*}
+    return {_return::*}
+
+
+
+function radioPlay(g: guild, radio: string) :: string:
+    set {_music::*} to radioGetAllTracks({_radio})
+    set {_size} to size of {_music::*}
+    
+    while {_end} is not true:
+
+        set {_checked} to random integer between 1 and {_size}
+        loop {music::%discord id of {_g}%::radio::last::*}:
+            if {_checked} is loop-value:
+                set {_again} to true
+        
+        if {_again} is true:
+            delete {_again}
+        else:
+            set {_end} to true
+    
+    delete {music::%discord id of {_g}%::radio::last::5}
+    loop 4 times:
+        set {_loop} to 5 - loop-number
+        set {music::%discord id of {_g}%::radio::last::%{_loop}%} to {music::%discord id of {_g}%::radio::last::%{_loop} + 1%}
+    set {music::%discord id of {_g}%::radio::last::1} to {_checked}
+
+    return "plugins/Skript/data/radio/%{_radio}%/%{_music::%{_checked}%}%"

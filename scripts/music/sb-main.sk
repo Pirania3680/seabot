@@ -17,10 +17,14 @@ function musicEnded(g: guild):
         musicQueueReset()
 
 on track end:
-    {music::%discord id of {_g}%::waiting} is not true
+    {music::%discord id of event-guild%::waiting} is not true
 
     set {_track} to musicQueueGet()
     if {_track} is set:
+        force play {_track} in event-guild
+    
+    else if {music::%discord id of event-guild%::radio::enabled} is true:
+        load local track from the file radioPlay(event-guild, {music::%discord id of event-guild%::radio::name}) and store it in {_track}
         force play {_track} in event-guild
 
 
